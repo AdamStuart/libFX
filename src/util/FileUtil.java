@@ -223,7 +223,7 @@ public class FileUtil
 				output.getColumnNames().add(fld);
 				data.add(FXCollections.observableArrayList());
 				System.out.println("Column Name: " + fld);
-			    table.getColumns().add(TableUtil.createColumn(idx++, fld));
+			    table.getColumns().add(TableUtility.createColumn(idx++, fld));
 			}
 			output.setTypes(StringUtil.inferTypes((isHeader) ? row : (String[]) content.get(1)));
 			
