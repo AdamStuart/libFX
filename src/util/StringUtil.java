@@ -1,5 +1,8 @@
 package util;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -8,9 +11,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 public class StringUtil
 {
@@ -29,9 +29,25 @@ public class StringUtil
 //	{
 //		ObservableList<String> strs = FXCollections.observableArrayList();
 //		return strs;
-//	}
-	
-	
+	// }
+
+	public static String callURL(String urlString)
+	{
+
+		StringBuffer buffer = new StringBuffer();
+		try
+		{
+			URL url = new URL(urlString);
+			BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+			String strTemp = "";
+			while (null != (strTemp = br.readLine()))
+				buffer.append(strTemp);
+		} catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		return buffer.toString();
+	}
 	
 	public enum TYPES { EMPTY, DATE, DOUBLE, STRING };
 
@@ -95,6 +111,18 @@ public class StringUtil
 		catch(NumberFormatException e)
 		{
 			return Double.NaN;
+		}
+	}
+	public static int toInteger (String s) 
+	{
+		if (s == null ) return -1;
+		try
+		{
+			return Integer.parseInt(s);
+		}
+		catch(NumberFormatException e)
+		{
+			return -1;
 		}
 	}
 	private static final Pattern LINE_BREAK_PATTERN = Pattern.compile("\\s*\\n\\s*");

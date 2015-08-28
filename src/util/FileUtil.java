@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.List;
 
 import javafx.beans.property.SimpleStringProperty;
@@ -222,7 +223,7 @@ public class FileUtil
 				output.getColumnNames().add(fld);
 				data.add(FXCollections.observableArrayList());
 				System.out.println("Column Name: " + fld);
-			    table.getColumns().add(TableUtility.createColumn(idx++, fld));
+			    table.getColumns().add(TableUtil.createColumn(idx++, fld));
 			}
 			output.setTypes(StringUtil.inferTypes((isHeader) ? row : (String[]) content.get(1)));
 			
@@ -364,6 +365,27 @@ public class FileUtil
             if(br != null)
                 try {   br.close();   } catch (Exception e) {}
         }
+	}
+
+	static public List<String> readFileIntoStringList(String absolutePath)
+	{
+        BufferedReader br = null;
+        List<String> strs = new ArrayList<String>();
+        try {
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(absolutePath)));
+            String line = null;
+            String nl = System.getProperty("line.separator", "\n");
+
+            while((line = br.readLine()) != null)
+            	strs.add(line);
+
+        } catch (Exception e) {          System.err.println("Error while reading content from selected file");      } 
+        finally
+        {
+            if(br != null)
+                try {   br.close();   } catch (Exception e) {}
+        }
+     return strs;
 	}
 
 	public static File createFileFromByteArray(final byte[] data, final File target) throws IOException
