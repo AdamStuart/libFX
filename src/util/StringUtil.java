@@ -63,6 +63,16 @@ public class StringUtil
 		return TYPES.STRING;
 	}
 	
+	public static String gensym()
+	{
+	
+		return ("" + Math.random()).substring(0,8);
+	}
+	public static String decapitalize(final String s)
+	{
+		return s.substring(0, 1) + s.substring(1).toLowerCase();  
+	}
+
 	static public List<StringUtil.TYPES> inferTypes(String[] s)
 	{
 		List<StringUtil.TYPES> types = new ArrayList<StringUtil.TYPES>();
@@ -133,6 +143,11 @@ public class StringUtil
 	
 	public static boolean hasText(final String s)	{	return s != null && s.trim().length() > 0;	}
 	public static boolean isEmpty(final String s)	{		return !hasText(s);	}
+	public static boolean anyEmpty(final String ... s)	
+	{	for (String a : s) 
+			if (isEmpty(a)) return true; 
+		return false;
+	}
 
 	public static String capitalize(final String s)
 	{
@@ -244,6 +259,11 @@ public class StringUtil
 	public static String randomSequence(final int length, final CharSequence alphabet)
 	{
 		return RandomSequenceGenerator.generate(length, alphabet);
+	}
+
+	public static Object singleQuote(String content)	
+	{	
+		return "'" + content.replaceAll("'", "") + "'";	
 	}
 
 }

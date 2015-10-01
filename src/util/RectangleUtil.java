@@ -1,9 +1,12 @@
 package util;
 
+import gui.Cursors;
 import javafx.event.EventTarget;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
+import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.Cursor;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -239,6 +242,38 @@ public class RectangleUtil
 	
 	
 	
+	public static Pos getPos(MouseEvent ev, Rectangle r)
+	{
+		double x = ev.getX();
+		double y = ev.getY();
+		double left = r.getX();
+		double right = left + r.getWidth();
+		double xCenter = (left + right) / 2;
+		double top = r.getY();
+		double bottom = top + r.getHeight();
+		double yCenter = (top + bottom) / 2;
+		if (Math.abs(x-left) < SLOP)
+		{
+			if ((y-top) < SLOP)			return Pos.TOP_LEFT;
+			if ((y-yCenter) < SLOP)		return Pos.CENTER_LEFT;
+			if ((y-bottom) < SLOP)		return Pos.BOTTOM_LEFT;
+		}
+		if (Math.abs(x-xCenter) < SLOP)
+		{
+			if ((y-top) < SLOP)			return Pos.TOP_CENTER;
+			if ((y-yCenter) < SLOP)		return Pos.CENTER;
+			if ((y-bottom) < SLOP)		return Pos.BOTTOM_CENTER;
+		}
+			
+		if (Math.abs(x-right) < SLOP)
+		{
+			if ((y-top) < SLOP)			return Pos.TOP_RIGHT;
+			if ((y-yCenter) < SLOP)		return Pos.CENTER_RIGHT;
+			if ((y-bottom) < SLOP)		return Pos.BOTTOM_RIGHT;
+		}
+		return Pos.CENTER;
+	}
+
 	
 	
 	static double SLOP = 8;
@@ -255,6 +290,15 @@ public class RectangleUtil
 		
 		return false;	
 	}	
+	
+	static public boolean inCorner(Pos p)
+	{
+		if (p == Pos.TOP_LEFT  || p == Pos.BOTTOM_LEFT) 	return true;
+		if (p == Pos.TOP_RIGHT || p == Pos.BOTTOM_RIGHT) 	return true;
+		return false;
+	}
+	
+
 	static public Point2D oppositeCorner(MouseEvent ev)
 	{
 		if (ev == null) return null;
@@ -326,6 +370,13 @@ public class RectangleUtil
 			if (Math.abs(inY-top) < SLOP || Math.abs(inY-bottom) < SLOP)
 				return true;
 		return false;
+	}
+
+	public static void setupCursors(Rectangle r)
+	{
+		r.setOnMouseEntered(event -> 	{	r.setCursor(Cursors.getResizeCursor(getPos(event, r)));});
+		r.setOnMouseMoved(event -> 		{	r.setCursor(Cursors.getResizeCursor(getPos(event, r)));	});
+		r.setOnMouseExited(event -> 	{	r.setCursor(Cursor.DEFAULT);	});
 	}
 	
 	}

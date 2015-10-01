@@ -67,7 +67,7 @@ public final class UrlParameters
 
 	private static String encodedKeyValueStringOf(final String name, final String value, final Charset charset)
 	{
-		final String encodedValue = (StringUtils.hasText(value)) ? encode(value, charset.name()) : "";
+		final String encodedValue = (StringUtil.hasText(value)) ? encode(value, charset.name()) : "";
 		return new StringBuilder(name).append('=').append(encodedValue).toString();
 	}
 

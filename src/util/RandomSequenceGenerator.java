@@ -17,8 +17,10 @@ package util;
  */
 import java.util.Random;
 
+import javafx.geometry.Point2D;
+
 /** @author Daniel Bechler */
-final class RandomSequenceGenerator
+public class RandomSequenceGenerator
 {
 	public static final String DEFAULT_ALPHABET =
 			"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -42,4 +44,21 @@ final class RandomSequenceGenerator
 		}
 		return sb.toString();
 	}
+	
+	//-----------------------------------------------------------------
+	// Box-Mueller method to generate values in a normal distribution
+	// http://en.wikipedia.org/wiki/Normal_distribution#Generating_values_from_normal_distribution
+	static double TAO = 2.0 * Math.PI;
+
+	public static Point2D randomNormal(double xMean, double xCv, double yMean, double yCV)
+	{
+		double U = Math.random();
+		double V = Math.random();
+		double xStdev = xCv * xMean;
+		double yStdev = yCV * yMean;
+		double x = Math.sqrt(-2.0 * Math.log(U)) * Math.cos(TAO * V);
+		double y = Math.sqrt(-2.0 * Math.log(U)) * Math.sin(TAO * V);
+		return new Point2D(xMean + x * xStdev,yMean + y * yStdev);
+	}
+
 }

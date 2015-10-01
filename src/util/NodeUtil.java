@@ -3,6 +3,9 @@ package util;
 import javafx.beans.binding.Binding;
 import javafx.event.ActionEvent;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SplitPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Region;
 
@@ -39,6 +42,51 @@ public class NodeUtil
         });
  	
     }
-    
+
+    static boolean verbose = true;
+
+	public static String shortClassname(String class1)
+	{
+		return class1.substring(1 + class1.lastIndexOf('.'));
+	}
+
+
+	public static void showKids(Parent parent, String indent)
+	{
+
+		String id = parent.getId();
+		if (verbose)
+			System.out.println(indent + shortClassname(parent.getClass().toString()) + ":  "
+							+ (id == null ? "-" : id));
+		if (parent instanceof SplitPane)
+		{
+			for (Node n : ((SplitPane) parent).getItems())
+				if (n instanceof Parent)
+					showKids((Parent) n, indent + "    ");
+		} else if (parent instanceof ScrollPane)
+		{
+			Node content = ((ScrollPane) parent).getContent();
+			if (content instanceof Parent)
+				showKids((Parent) content, indent + "    ");
+			if (verbose)
+				System.out.println(indent + shortClassname(content.getClass().toString()) + ":  "
+								+ (content.getId() == null ? "-" : content.getId()));
+		} else
+			for (Node n : parent.getChildrenUnmodifiable())
+				if (n instanceof Parent)
+					showKids((Parent) n, indent + "    ");
+
+	}
+	public static void reset(Node... nodes)
+	{
+		for (Node n: nodes)
+		{
+	    	n.setOpacity(1);
+	    	n.setTranslateX(0);        n.setTranslateY(0);        n.setTranslateZ(0);
+	    	n.setRotate(0);            n.setScaleX(1);            n.setScaleY(1);
+		}
+	}
+
+
 
 }

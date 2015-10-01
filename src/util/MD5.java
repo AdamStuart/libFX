@@ -26,7 +26,7 @@ public final class MD5
 
 	public static String forString(final String text)
 	{
-		if (StringUtils.isEmpty(text))
+		if (StringUtil.isEmpty(text))
 		{
 			throw new IllegalArgumentException();
 		}

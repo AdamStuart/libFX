@@ -1,5 +1,6 @@
 package util;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -12,16 +13,20 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TreeItem;
+import javafx.scene.image.Image;
 import javafx.scene.input.Dragboard;
 
+import javax.swing.filechooser.FileSystemView;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -37,11 +42,16 @@ import com.opencsv.CSVReader;
 
 public class FileUtil
 {
-	static public String openXMLfile(File f)
+	static Document openXML(File f)
 	{
 		StringBuffer buff = new StringBuffer();
 		readFileIntoBuffer(f, buff);
-		Document parseddoc = convertStringToDocument(buff.toString());
+		return convertStringToDocument(buff.toString());
+	}
+	
+	static public String openXMLfile(File f)
+	{
+		Document parseddoc = openXML(f);
 		StringBuffer xmlOut = new StringBuffer();
 		if (parseddoc != null)
 		{
@@ -82,18 +92,18 @@ public class FileUtil
 //		return null;
 	}
 	
-	
-	static private Node peek(String[] path, NodeList kids, int idx)
-	{
-		int n1 = kids.getLength();
-		for (int i=0; i<n1; i++)
-		{
-			Node child = kids.item(i);
-			if (path[idx].equals(child.getNodeName()))
-				return peek(path, child.getChildNodes(), idx+1);
-		}
-		return null;
-	}
+//	
+//	static private Node peek(String[] path, NodeList kids, int idx)
+//	{
+//		int n1 = kids.getLength();
+//		for (int i=0; i<n1; i++)
+//		{
+//			Node child = kids.item(i);
+//			if (path[idx].equals(child.getNodeName()))
+//				return peek(path, child.getChildNodes(), idx+1);
+//		}
+//		return null;
+//	}
 	//--------------------------------------------------------------------------------
 	static public ObservableList<String> urlsFromPlist(File f)
 	{
@@ -157,11 +167,19 @@ public class FileUtil
 
 	
 	//-------------------------------------------------------------
+	static public TreeItem<Node> getXMLtree(File f)
+	{
+		StringBuffer buff = new StringBuffer();
+		readFileIntoBuffer(f, buff);
+		return getXMLtree(buff.toString());
+	}
+	//-------------------------------------------------------------
 	static public TreeItem<Node> getXMLtree(String rawtext)
 	{
 		TreeItem<Node> root = new TreeItem<Node>();
 		Document parseddoc = convertStringToDocument(rawtext);
-		addKids(root, parseddoc.getChildNodes());
+		if (parseddoc != null)
+			addKids(root, parseddoc.getChildNodes());
 		return root;
 		
 	}
@@ -223,7 +241,7 @@ public class FileUtil
 				output.getColumnNames().add(fld);
 				data.add(FXCollections.observableArrayList());
 				System.out.println("Column Name: " + fld);
-			    table.getColumns().add(TableUtility.createColumn(idx++, fld));
+			    table.getColumns().add(TableUtil.createColumn(idx++, fld));
 			}
 			output.setTypes(StringUtil.inferTypes((isHeader) ? row : (String[]) content.get(1)));
 			
@@ -436,5 +454,90 @@ public class FileUtil
 		return os.toByteArray();
 	}
 
+	public static String getHTMLDescription(File f)
+	{
+		String name = f.getName();
+		String path = f.getParent();
+		String x = f.isDirectory() ? "DIR/" : "FILE";
+		String y = f.lastModified() + "";
+		String len = f.length() + " bytes";
+		
+		return ("<html> "  + name + " <p> " + path + " <p> " + len +  " <p> " + x + " <p> " + y +" <p> </html>");
+	}
+
+	public static String getTextDescription(File f)
+	{
+		String name = f.getName();
+		String path = f.getParent();
+		String x = f.isDirectory() ? "DIR/" : "FILE";
+		String y = f.lastModified() + "";
+		String len = f.length() + " bytes";
+		
+		return (name + "\n" + path + "\n" + len +  "\n" + x + "\n" + y + "\n");
+	}
+
+	//--------------------------------------------------------------------------------
+	// keep a cache of extensions we've seen
+	static HashMap<String, Image> mapOfFileExtToSmallIcon = new HashMap<String, Image>();
+
+	public static String getFileExt(String fname)
+	{
+		String ext = ".";
+		int p = fname.lastIndexOf('.');
+		if (p >= 0) ext = fname.substring(p);
+		return ext.toLowerCase();
+	}
+
+	public static javax.swing.Icon getJSwingIconFromFileSystem(File file)
+	{
+
+		javax.swing.Icon icon = FileSystemView.getFileSystemView().getSystemIcon(file);
+		if (SystemInfo.isMacOSX())
+		{
+			final javax.swing.JFileChooser fc = new javax.swing.JFileChooser();
+			icon = fc.getUI().getFileView(fc).getIcon(file);
+		}
+		return icon;
+	}
+
+	public static Image getFileIcon(String fname)
+	{
+		final String ext = getFileExt(fname);
+
+		Image fileIcon = mapOfFileExtToSmallIcon.get(ext);
+		if (fileIcon == null)
+		{
+			javax.swing.Icon jswingIcon = null;
+			File file = new File(fname);
+			if (file.exists()) jswingIcon = getJSwingIconFromFileSystem(file);
+			else
+			{
+				File tempFile = null;
+				try
+				{
+					tempFile = File.createTempFile("icon", ext);
+					jswingIcon = getJSwingIconFromFileSystem(tempFile);
+				} catch (IOException ignored)
+				{} // Cannot create temporary file.
+				finally
+				{
+					if (tempFile != null) tempFile.delete();
+				}
+			}
+			if (jswingIcon != null)
+			{
+				fileIcon = jswingIconToImage(jswingIcon);
+				mapOfFileExtToSmallIcon.put(ext, fileIcon);
+			}
+		}
+		return fileIcon;
+	}
+
+	public static Image jswingIconToImage(javax.swing.Icon jswingIcon)
+	{
+		BufferedImage bufferedImage = new BufferedImage(jswingIcon.getIconWidth(), jswingIcon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
+		jswingIcon.paintIcon(null, bufferedImage.getGraphics(), 0, 0);
+		return SwingFXUtils.toFXImage(bufferedImage, null);
+	}
 
 }
