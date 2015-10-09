@@ -333,6 +333,7 @@ public class FileUtil
 	static public boolean isCSV(File f)		{ 		return fileEndsWith(f,".csv");	}
 	static public boolean isCSS(File f)		{ 		return fileEndsWith(f,".css");	}
 	static public boolean isWebloc(File f)	{ 		return fileEndsWith(f,".webloc", ".url");	}
+	static public boolean isFCS(File f)		{ 		return fileEndsWith(f,".fcs", ".lmd");	}
 	
 	static private boolean fileEndsWith(File f, String ...extensions)
 	{

@@ -9,6 +9,7 @@ package model;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.SortedMap;
 
 
@@ -26,10 +27,10 @@ public class FcsDao {
 		return Collections.emptySortedMap();
 	}
 
-	public static void exportFcs(SortedMap<Number, Number> data, String filePath) {
+	public static void exportFcs(HashMap<String, String> text, TableData data, String filePath) {
 		try {
 			writer = new FCSFileWriter(new File(filePath));
-			writer.writeAll(data);    /// dummy
+			writer.writeAll(text, data);  
 			writer.flush();
 			writer.close();
 		} catch (IOException e) {

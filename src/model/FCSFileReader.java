@@ -12,7 +12,11 @@ import java.util.SortedMap;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.control.TableColumn;
 import javafx.scene.input.Dragboard;
+import util.StringUtil;
 
 public class FCSFileReader 
 {
@@ -23,7 +27,22 @@ public class FCSFileReader
 	String name;
 	long date;
 	int id;
-
+	class FCSTableColumn extends TableColumn
+	{
+		FCSTableColumn(String name, int nRows)	
+		{ 
+			super(name);
+			data = new float[nRows];
+			for (int i=0; i< nRows; i++) data[i] = 0;
+		}
+		float[] data;
+		public float[] getData()	{ return data;	}
+		HashMap<String, String> map = new HashMap<String, String>();
+		public String get(String attr)		{ return map.get(attr); }
+		public void put(String attr, String val)		{ map.put(attr,val); }
+	}
+	
+	ObservableList<FCSTableColumn> columns = FXCollections.observableArrayList();
 	public int getId()			{		return id;	}
 	public String getName()		{		return name;	}
 	public long getDate()		{		return date;	}
@@ -35,7 +54,7 @@ public class FCSFileReader
 	static public boolean isFCS(File f)				{		return f.getName().toUpperCase().trim().endsWith(".FCS");	}
 
 	//-----------------------------------------------------------------
-	
+
 	public FCSFileReader(File file) throws FileNotFoundException
 	{
 		try
@@ -67,6 +86,7 @@ public class FCSFileReader
 	int parms;
 	int nBytes;
 	int nRows;
+	int nValues;
 	int bytesPerValue;
 	boolean readFloats, readInts;
 	//-----------------------------------------------------------------
@@ -80,20 +100,23 @@ public class FCSFileReader
 		{
 			nEvents = Integer.parseInt(textSection.get("$TOT"));
 			parms = Integer.parseInt(textSection.get("$PAR"));
+			String type = textSection.get("$DATATYPE");
+			readFloats = "F".equals(type);
+			assert(readFloats);
 
 		} catch (Exception e)
 		{
 			assert(e == null);
 		}
 		bytesPerValue = 4;			// Either Float.SIZE or Integer.SIZE
-		nRows = bytesPerValue / parms;
+		nValues = nBytes / bytesPerValue;
+		nRows = nValues / parms;
 		System.out.println("" +  nEvents * parms * bytesPerValue);
 		if (nBytes != nEvents * parms * bytesPerValue)
 			System.out.println("size calculation failed: " + nBytes + " != " + nEvents + " * 4 * " + parms + " (" + nEvents * 4 * parms + ")") ;
-		String type = textSection.get("$DATATYPE");
-		readFloats = "F".equals(type);
-		readInts = "I".equals(type);
-		assert(readFloats != readInts);
+//		readInts = "I".equals(type);
+		buildColumnList();
+		
 	}
 	//-----------------------------------------------------------------	
 	
@@ -101,39 +124,14 @@ public class FCSFileReader
 	{
 		ByteBuffer byteBuffer = ByteBuffer.wrap(content, 0, content.length);		// bodyStart still has to be used as an offset, given the way we access the bytebuffer
 		
-		int nBytes = bodyEnd-bodyStart+1;			
-		int bytesPerRow = bytesPerValue * parms;
-		int nValues = nBytes / bytesPerValue;
-		int nRows = nBytes / bytesPerRow;
-//		assert(nRows == nEvents);
-		xData =  new float[nRows];
-		yData =  new float[nRows];
+//		int nBytes = content.length;			
 
 		for (int i = 0; i < nValues; i++) 
 		{
-			if (readFloats)
-			{
-				int bytesPerFloat = Float.SIZE / Byte.SIZE;
-				int idx = bodyStart + i * bytesPerFloat;
-				float nextF = byteBuffer.getFloat(idx);
-				if (i % parms == 0)								// we only care about the first two parameters, the rest are ignored
-					xData[i / parms] = nextF;
-				else if (i % parms == 1)
-					yData[i / parms] = nextF;
-
-			} else
-			{
-				int bytesPerInt = Integer.SIZE / Byte.SIZE;
-				int idx = bodyStart + i * bytesPerInt;
-				if (idx > byteBuffer.limit()-4)
-					System.out.println("errror");
-				int nextI = byteBuffer.getInt(idx);
-				if (i % parms == 0)
-					xData[i / parms] = nextI;
-				else if (i % parms == 1)
-					yData[i / parms] = nextI;
-
-			}
+			int idx = bodyStart + i * bytesPerValue;
+			float nextF = byteBuffer.getFloat(idx);
+			FCSTableColumn column = columns.get(i % parms);
+			column.getData()[i / parms] = nextF;							// we only care about the first two parameters, the rest are ignored
 		}
 	}
 	//-----------------------------------------------------------------
@@ -184,12 +182,11 @@ public class FCSFileReader
 		return histo;
 	}
 	//-----------------------------------------------------------------
-	//-----------------------------------------------------------------
-
 	public double[] getStats11()
 	{
 		return new double[] { medianX, medianY, cvX, cvY, varX, varY, metricX, metricY, var, targetX, targetY };		
 	}
+	//-----------------------------------------------------------------
 	
 	public void setTarget(double x, double y)		{ targetX = x;	 targetY = y;	}
 	double targetX, targetY;
@@ -202,6 +199,9 @@ public class FCSFileReader
 	double var = 0;
 	
 	//-----------------------------------------------------------------
+	// this is a slingshot specific calculation to measure how well beads
+	// hit target expectations
+	
 	public void calculate()
 	{	
 		double sumVar = 0;
@@ -249,6 +249,67 @@ public class FCSFileReader
 		double delta = ((targetX - medianX) * (targetX - medianX)) + ((targetY - medianY) * (targetY - medianY));
 		double root = (float) Math.sqrt(delta);
 		var = sumVar / (count * root);
+	}
+	//-----------------------------------------------------------------
+	// this is the beginning of a project to convert FCS files into a normalized
+	// linear transformation between 0 and 1
+	
+	static public File normalizeFCS(File in)
+	{
+		try
+		{
+			String path = in.getAbsolutePath();
+			path = StringUtil.chopExtension(path) + "#.FCS";
+			File out = new File(path);
+			FCSFileReader reader = new FCSFileReader(in);
+//			reader.buildColumnList();
+			String spill = reader.getValue("$SPILLOVER");
+			if (spill != null)
+			{
+				System.out.println("Compensation adds Columns");
+			}
+			reader.addNormalizedColumns();
+			reader.autogate();
+			FCSFileWriter writer = new FCSFileWriter(out);
+			writer.toFile(reader.normalForm());
+			return out;
+		}
+		catch (Exception e)		{	e.printStackTrace();	}
+	
+		return null;
+	}
+	//-----------------------------------------------------------------
+	private void buildColumnList()
+	{
+		System.out.println("buildColumnList");
+
+		if (parms <= 0) return;
+		for (int i=0; i< parms; i++)
+		{
+			String name = textSection.get("$P" + (i+1) + "N");
+			String stain = textSection.get("$P" + (i+1) + "S");
+			if (StringUtil.hasText(stain) && !stain.equals(name))
+				name +=  ": " + stain;
+			FCSTableColumn col = new FCSTableColumn(name, nRows);
+			columns.add(col);
+			System.out.println("added " + name);
+		}
+	}
+
+	
+	private void addNormalizedColumns()
+	{
+		System.out.println("addNormalizedColumns");
+	}
+	private void autogate()
+	{
+		System.out.println("gate out dead, doublets, boundary, startup");
+		
+	}
+	private TableData normalForm()
+	{
+		System.out.println("normalForm");
+		return new TableData();
 	}
 
 }

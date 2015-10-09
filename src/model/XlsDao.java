@@ -1,4 +1,4 @@
-package model;
+//package model;
 ///*
 // * Copyright (C) 2014 TESIS DYNAware GmbH.
 // * All rights reserved. Use is subject to license terms.
@@ -6,8 +6,6 @@ package model;
 // * This file is licensed under the Eclipse Public License v1.0, which accompanies this
 // * distribution and is available at http://www.eclipse.org/legal/epl-v10.html.
 // */
-//package knowble.src.code.fancychart.data.formats;
-//
 //import java.io.File;
 //import java.io.IOException;
 //import java.text.NumberFormat;

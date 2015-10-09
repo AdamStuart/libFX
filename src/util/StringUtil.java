@@ -22,6 +22,7 @@ public class StringUtil
 		return full.substring(0,idx1) + insert + full.substring(idx2);
 	}
 
+	static public String chopExtension(String in)	{	return in.substring(0,in.lastIndexOf("."));	}
 	static public String chopLast(String in)	{	return in.substring(0,in.length()-1);	}
 	static public String chopLast2(String in)	{	return in.substring(0,in.length()-2);	}
 
@@ -40,7 +41,7 @@ public class StringUtil
 			URL url = new URL(urlString);
 			BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
 			String strTemp = "";
-			while (null != (strTemp = br.readLine()))
+			while (null != (strTemp = br.readLine()))			// WARNING: DON"T READ ON MAIN THREAD
 				buffer.append(strTemp);
 		} catch (Exception ex)
 		{

@@ -1,5 +1,6 @@
 package model;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -32,11 +33,19 @@ public class DataItemDao {
 			case CSV:	CsvDao.exportCsv(data, filePath);		break;
 //			case XLS:	XlsDao.exportXls(data, filePath);		break;
 			case HDF5:	Hdf5Dao.exportHdf5(data, filePath);		break;
-			case FCS: 	FcsDao.exportFcs(data, filePath);		break;	
+			case FCS: 	FcsDao.exportFcs(makeFCSText(), makeTableData(dataItems), filePath);		break;	
 			}
 		}
 	}
-
+	static TableData makeTableData (List<DataItem> list)
+	{
+		return new TableData();
+	}
+	static HashMap<String, String> makeFCSText()
+	{
+		HashMap<String, String> map = new HashMap<String, String>();
+		return map;
+	}
 	private static SortedMap<Number, Number> createEntries(List<DataItem> dataItems) 
 	{
 		SortedMap<Number, Number> data = new TreeMap<>();
