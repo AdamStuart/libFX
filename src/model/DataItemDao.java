@@ -67,7 +67,7 @@ public class DataItemDao {
 	}
 
 	public enum FileFormat {
-		CSV("csv"), XLS("xls"), HDF5("h5"), FCS("fcs");
+		CSV("csv"), XLS("xls"), HDF5("h5"), FCS("fcs"), FXML("fxml");
 
 		private final String extension;
 		FileFormat(String ex) 				{	extension = ex;		}
