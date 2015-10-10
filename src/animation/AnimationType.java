@@ -19,6 +19,7 @@ public enum AnimationType {
     // Attention seekers
     FLASH,
     BOUNCE,
+    
     SHAKE,
     TADA,
     SWING,

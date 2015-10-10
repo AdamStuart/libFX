@@ -32,9 +32,10 @@ public static void useGlyphToo(Button b, FontAwesomeIcons def)
 //	b.setText("");
 }
 
-public static File findFileInClassPath(String string, FileFormat fmt)
+public static File findFileInClassPath(String string, FileFormat fmt, File initialDir)
 {
 	FileChooser fileChooser = createFileChooser("Find find named: " + string, fmt );
+	fileChooser.setInitialDirectory(initialDir);
 	File file = fileChooser.showOpenDialog(null);
 	if (file != null)
 		System.out.println("The path of the file is " + file.getAbsolutePath());
@@ -60,8 +61,13 @@ public static void exportToFile(List<DataItem> dataItems, FileFormat fileFormat)
 
 public static FileChooser createFileChooser(String title, FileFormat fileFormat)
 {
+	return createFileChooser(title, fileFormat, File.listRoots()[0]);
+}
+
+public static FileChooser createFileChooser(String title, FileFormat fileFormat, File initialDialog)
+{
 	FileChooser fileChooser = new FileChooser();
-	fileChooser.setInitialDirectory(File.listRoots()[0]);
+	fileChooser.setInitialDirectory(initialDialog);
 	fileChooser.setTitle(title);
 	fileChooser.setSelectedExtensionFilter(new ExtensionFilter(fileFormat.name() + " files", "*." + fileFormat.getFileExtension()));
 	return fileChooser;
