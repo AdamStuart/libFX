@@ -37,10 +37,7 @@ public class NodeUtil
     static public void invalOnActionOrFocusLost(Node n, Binding b)
     {
     	n.addEventHandler(ActionEvent.ACTION, evt -> b.invalidate());
-        n.focusedProperty().addListener((obs, wasFocused, isFocused)-> {
-            if (! isFocused) {	b.invalidate(); }
-        });
- 	
+        n.focusedProperty().addListener((obs, old, isFocused)-> {   if (! isFocused) {	b.invalidate(); }  });
     }
 
     static boolean verbose = true;
