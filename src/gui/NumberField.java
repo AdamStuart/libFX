@@ -10,6 +10,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.TextField;
+import util.StringUtil;
 
 
 /**
@@ -44,6 +45,13 @@ public class NumberField extends TextField
             focusedProperty().addListener((obs, old, nVal) ->{ if (!nVal.booleanValue())  parseAndFormatInput();        });
 // Set text in field if BigDecimal property is changed from outside.
             numberProperty().addListener((obs, old, nVal) ->{   setText(nf.format(nVal));      });
+ // watch out for bad key input
+            setOnKeyTyped(event ->
+            {
+            	char c = event.getCharacter().charAt(0);
+            	if (!Character.isDigit(c))
+            		event.consume();
+            });
         }
 
 /**
