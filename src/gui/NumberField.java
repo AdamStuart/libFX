@@ -49,7 +49,7 @@ public class NumberField extends TextField
             setOnKeyTyped(event ->
             {
             	char c = event.getCharacter().charAt(0);
-            	if (!(Character.isDigit(c) || c == Character.DECIMAL_DIGIT_NUMBER)
+            	if (!(Character.isDigit(c) || c == Character.DECIMAL_DIGIT_NUMBER))
             		event.consume();
             });
         }
