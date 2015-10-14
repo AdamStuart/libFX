@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javafx.scene.paint.Color;
+
 public class StringUtil
 {
 
@@ -50,25 +52,27 @@ public class StringUtil
 		return buffer.toString();
 	}
 	
-	public enum TYPES { EMPTY, DATE, DOUBLE, STRING };
+	public enum TYPES { EMPTY, DATE, DOUBLE, STRING, COLOR };
 
 	public static boolean isEmpty(TYPES t)  { return t == TYPES.EMPTY; }
 	public static boolean isString(TYPES t)  { return t == TYPES.STRING; }
 	public static boolean isNumber(TYPES t)  { return t == TYPES.DOUBLE; }
+	public static boolean iColor(TYPES t)  { return t == TYPES.COLOR; }
 	
 	static public TYPES inferType(String s)
 	{
 		if (s.isEmpty()) return TYPES.EMPTY;
+		if (isColor(s)) return TYPES.COLOR;
 		if (isDate(s)) return TYPES.DATE;
 		if (isNumber(s)) return TYPES.DOUBLE;
 		return TYPES.STRING;
 	}
-	
+	private static int counter = 0;
 	public static String gensym()
 	{
-	
-		return ("" + Math.random()).substring(0,8);
+		return (counter++ + "." + Math.random()).substring(0,8);
 	}
+	
 	public static String decapitalize(final String s)
 	{
 		return s.substring(0, 1) + s.substring(1).toLowerCase();  
@@ -84,20 +88,27 @@ public class StringUtil
 	
 	List<StringUtil.TYPES> types = new ArrayList<StringUtil.TYPES>();
 
-	public static boolean isDate (String s) 
+	public static boolean isColor(String s)
+	{
+		if (s == null) return false;
+		try
+		{
+			Color c = Color.web(s);
+		} 
+		catch (IllegalArgumentException e)		{		return false;		}
+		return true;
+	}
+
+	public static boolean isDate(String s)
 	{
 		try
 		{
 			DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
 			LocalDate.parse(s, formatter);
 			return true;
-		}
-		catch(DateTimeParseException e)
-		{
-			return false;
-		}
+		} 
+		catch (DateTimeParseException e)		{		return false;		}
 	}
-
 	
 	public static boolean isNumber (String s) 
 	{
@@ -106,10 +117,7 @@ public class StringUtil
 			Double.parseDouble(s);
 			return true;
 		}
-		catch(NumberFormatException e)
-		{
-			return false;
-		}
+		catch(NumberFormatException e)		{			return false;		}
 	}
 	
 	public static double toDouble (String s) 
@@ -119,10 +127,7 @@ public class StringUtil
 		{
 			return Double.parseDouble(s);
 		}
-		catch(NumberFormatException e)
-		{
-			return Double.NaN;
-		}
+		catch(NumberFormatException e)		{		return Double.NaN;		}
 	}
 	public static int toInteger (String s) 
 	{
@@ -131,10 +136,7 @@ public class StringUtil
 		{
 			return Integer.parseInt(s);
 		}
-		catch(NumberFormatException e)
-		{
-			return -1;
-		}
+		catch(NumberFormatException e)		{			return -1;		}
 	}
 	private static final Pattern LINE_BREAK_PATTERN = Pattern.compile("\\s*\\n\\s*");
 

@@ -58,4 +58,5 @@ public class FCSFileWriter extends FileWriter
 			buffer.append(delim).append(key).append(delim).append(map.get(key));
 		return buffer.toString();
 	}
+
 }
