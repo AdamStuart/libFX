@@ -168,7 +168,7 @@ public class FCSFileReader
 	public Histogram1D getHistogram1D(int col, int size)
 	{
 		float min = Float.MAX_VALUE, max = 0;
-		float[] data = col == 0 ? xData : yData;
+		float[] data = columns.get(col).getData();   //col == 0 ? xData : yData;
 		for (float f : data)
 		{
 			min = Math.min(min, f);
@@ -313,22 +313,3 @@ public class FCSFileReader
 	}
 
 }
-
-//-----------------------------------------------------------------
-
-//String test1 = "/name/adam/height/tall/gender/male/tired/true";
-//String test2 = "#color#red#shape#round";
-//		private void testAttributeParsing()
-//	{
-//		HashMap<String, String> map = parseAttributes(test1);
-//		map.putAll(parseAttributes(test2));
-//		System.out.println(streamAttributes(map, '?'));
-//	}
-//public String streamAttributes( HashMap<String, String> map, char delim)
-//{
-//	StringBuffer buffer = new StringBuffer();
-//	Set<String> keys = map.keySet();
-//	for (String key : keys)
-//		buffer.append(delim).append(key).append(delim).append(map.get(key));
-//	return buffer.toString();
-
