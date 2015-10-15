@@ -1,3 +1,5 @@
+
+
 This is my set of utility functions for Java 8 and JavaFX development<p>
 They break down into <ul>
 <li>animation</li> 
@@ -10,7 +12,7 @@ They break down into <ul>
 
 animation has a variety of transitions and node animations that come from JideFX<p>
 
-gui has predefined Borders, Efects, Backgrounds, Cursors and classes to make borderpanes use drawers, visibility animators<p>
+gui has predefined Borders, Effects, Backgrounds, Cursors and classes to make borderpanes use drawers, visibility animators<p>
 
 utils are generally public static functions to facilitate file io, urls, parsing, hashing, node traversal<p>
 
