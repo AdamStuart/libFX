@@ -1,6 +1,7 @@
 package util;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -15,6 +16,22 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import javax.swing.filechooser.FileSystemView;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+
+import com.opencsv.CSVReader;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -25,20 +42,9 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TreeItem;
 import javafx.scene.image.Image;
 import javafx.scene.input.Dragboard;
-
-import javax.swing.filechooser.FileSystemView;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
+import javafx.stage.FileChooser;
 import model.AttributeValue;
 import model.CSVTableData;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-
-import com.opencsv.CSVReader;
 
 public class FileUtil
 {
@@ -275,7 +281,81 @@ public class FileUtil
 		return output;
 	}
 	
+		//--------------------------------------------------------------------------------------
+	static public File compress(File fileSrc)
+	{
+       String source = fileSrc.getPath();
+       String targetZipPath = source + ".gz";
+      int bufferSize = 10000;
+         
+       try {
+                    //Compress file
+           FileOutputStream fileOutputStream =  new FileOutputStream(targetZipPath);
+           GZIPOutputStream gZIPOutputStream = new GZIPOutputStream(fileOutputStream);
+                    
+           byte[] buffer = new byte[bufferSize];
+           try (FileInputStream fileInputStream = new FileInputStream(source)) 
+           {
+              int numberOfByte;
+              while((numberOfByte = fileInputStream.read(buffer, 0, bufferSize)) != -1)
+                    gZIPOutputStream.write(buffer, 0, numberOfByte);
+            }
+            gZIPOutputStream.close();
+            } 
+       catch (IOException ex) {      Logger.getLogger(null).log(Level.SEVERE, "compress failed");    }
+       return new File(targetZipPath);
+
+   }
+// this creates a sibling folder with the same name as the zip file (without .zip)
 	
+	static public String decompress(File fileSrc)
+	{
+		String source = fileSrc.getPath();
+		File destFolder = new File(StringUtil.chopExtension(fileSrc.getAbsolutePath()));
+		StringBuffer entryList = new StringBuffer();
+		if (destFolder.mkdirs())
+		{
+			String targetUnZipPath = destFolder.getAbsolutePath();
+			int bufferSize = 10000;
+			try
+			{
+				FileInputStream fileInputStream = new FileInputStream(source);
+				BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
+				ZipInputStream zipInputStream = new ZipInputStream(bufferedInputStream);
+
+				ZipEntry zipEntry;
+				while ((zipEntry = zipInputStream.getNextEntry()) != null)
+				{
+					try
+					{
+						byte[] buffer = new byte[(int) zipEntry.getSize()];
+						String unzippedFile = targetUnZipPath + "/" + zipEntry.getName();
+						FileOutputStream fileOutputStream = new FileOutputStream(unzippedFile);
+						int size;
+						while ((size = zipInputStream.read(buffer)) != -1)
+							fileOutputStream.write(buffer, 0, size);
+						fileOutputStream.flush();
+						fileOutputStream.close();
+						entryList.append(unzippedFile + "\n");
+					} catch (Exception ex)	
+					{
+						ex.printStackTrace();		// TODO FileNotFoundExceptions seen here
+					}
+				}
+				zipInputStream.close();
+			} catch (IOException ex)
+			{
+				Logger.getLogger(null).log(Level.SEVERE, null, "decompress failed");
+			}
+		}
+		else
+			System.out.println("Failed to create directory.  Nothing unzipped.");
+		return entryList.toString();
+	}
+//--------------------------------------------------------------------------------------
+
+
+
 	
 	
 	static String LINE_DELIM = "\n";
@@ -334,6 +414,11 @@ public class FileUtil
 	static public boolean isCSS(File f)		{ 		return fileEndsWith(f,".css");	}
 	static public boolean isWebloc(File f)	{ 		return fileEndsWith(f,".webloc", ".url");	}
 	static public boolean isFCS(File f)		{ 		return fileEndsWith(f,".fcs", ".lmd");	}
+	
+	static public FileChooser.ExtensionFilter zipFilter = new FileChooser.ExtensionFilter("Zip files (*.zip)", "*.zip", "*.gz", "*.acs");
+	static public FileChooser.ExtensionFilter fcsFilter = new FileChooser.ExtensionFilter("FCS files", "*.fcs", "*.lmd");
+
+	
 	
 	static private boolean fileEndsWith(File f, String ...extensions)
 	{
@@ -478,7 +563,7 @@ public class FileUtil
 	}
 
 	//--------------------------------------------------------------------------------
-	// keep a cache of extensions we've seen
+	// keep a cache of the images for extensions we've seen
 	static HashMap<String, Image> mapOfFileExtToSmallIcon = new HashMap<String, Image>();
 
 	public static String getFileExt(String fname)
@@ -489,6 +574,7 @@ public class FileUtil
 		return ext.toLowerCase();
 	}
 
+	//--------------------------------------------------------------------------------
 	public static javax.swing.Icon getJSwingIconFromFileSystem(File file)
 	{
 

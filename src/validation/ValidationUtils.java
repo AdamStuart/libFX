@@ -127,39 +127,36 @@ public class ValidationUtils {
     private static <T> boolean setOnFlyValidation(Node targetNode, Validator validator, ObservableValue<T> targetProperty, EventHandler<ValidationEvent> eventFilter) {
         uninstall(targetNode, ValidationMode.ON_FLY);
 
-        ChangeListener<T> listener = new ChangeListener<T>() {
-            @Override public void changed(ObservableValue<? extends T> observable, T oldValue, T newValue) {
-                ValidationObject validationObject = instance.new ValidationObject(targetNode, oldValue, newValue);
-                ValidationEvent event = validator.call(validationObject);
-                targetNode.fireEvent(event);
-            }
+        ChangeListener<T> listner = (obs, old, newval) -> {
+            ValidationObject validationObject = instance.new ValidationObject(targetNode, old, newval);
+            ValidationEvent event = validator.call(validationObject);
+            targetNode.fireEvent(event);
         };
-        targetProperty.addListener(listener);
+        targetProperty.addListener(listner);
         targetNode.addEventFilter(ValidationEvent.ANY, eventFilter);
 
-        targetNode.getProperties().put(PROPERTY_ON_FLY_VALIDATOR, validator);
-        targetNode.getProperties().put(PROPERTY_ON_FLY_OBSERVABLE_VALUE, targetProperty);
-        targetNode.getProperties().put(PROPERTY_ON_FLY_EVENT_FILTER, eventFilter);
-        targetNode.getProperties().put(PROPERTY_ON_FLY_LISTENER, listener);
+        ObservableMap<Object, Object> prop = targetNode.getProperties();
+        prop.put(PROPERTY_ON_FLY_VALIDATOR, validator);
+        prop.put(PROPERTY_ON_FLY_OBSERVABLE_VALUE, targetProperty);
+        prop.put(PROPERTY_ON_FLY_EVENT_FILTER, eventFilter);
+        prop.put(PROPERTY_ON_FLY_LISTENER, listner);
         return true;
     }
 
     private static <T> boolean setOnFocusLostValidation(Node targetNode, Validator validator, ObservableValue<T> targetProperty, EventHandler<ValidationEvent> eventFilter) {
         uninstall(targetNode, ValidationMode.ON_FOCUS_LOST);
 
-        ChangeListener<Boolean> listener = new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                if (newValue) { // focus gained
-                    targetNode.getProperties().put(PROPERTY_ON_FOCUS_LOST_OBJECT, targetProperty.getValue()); // save old value
-                } else { // focus lost
-                    Object oldValidationValue = targetNode.getProperties().get(PROPERTY_ON_FOCUS_LOST_OBJECT);
-                    T newValidationValue = targetProperty.getValue();
-                    if (!CommonUtils.equals(oldValidationValue, newValidationValue)) {
-                        ValidationObject validationObject = instance.new ValidationObject(targetNode, oldValidationValue, newValidationValue);
-                        ValidationEvent event = validator.call(validationObject);
-                        targetNode.fireEvent(event);
-                    }
+        ChangeListener<Boolean> listener =  (obs, old, newval) -> {
+            if (newval) { // focus gained
+                targetNode.getProperties().put(PROPERTY_ON_FOCUS_LOST_OBJECT, targetProperty.getValue()); // save old value
+            } else 
+            { // focus lost
+                Object oldValidationValue = targetNode.getProperties().get(PROPERTY_ON_FOCUS_LOST_OBJECT);
+                T newValidationValue = targetProperty.getValue();
+                if (!CommonUtils.equals(oldValidationValue, newValidationValue)) {
+                    ValidationObject validationObject = instance.new ValidationObject(targetNode, oldValidationValue, newValidationValue);
+                    ValidationEvent event = validator.call(validationObject);
+                    targetNode.fireEvent(event);
                 }
             }
         };
