@@ -32,6 +32,7 @@ public enum  Unit
 	 }
 	 public String getName() { return name;	}
 	 public double getPerInch() { return perInch;	}
+	 public double getPerMeter() { return perInch * M.perInch;	}
 
 	public static ObservableList<Unit> getNames() {
 		ObservableList<Unit> units = FXCollections.observableArrayList();
