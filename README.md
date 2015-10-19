@@ -6,8 +6,5 @@ They break down into <ul>
 <li>model: a database layer with maps and Data Abstraction Objects (DAO)</li> 
 <li>task</li> 
 <li>util: generally public static functions to facilitate file io, urls, parsing, hashing, node traversal<p></li>
-<li>validation</li> 
+<li>validation:  libraries from JideFX to interface with Apache validation tools</li> 
 </ul>
-utils are
-model is mostly the database layer with maps and Data Abstraction Objects (DAO) <p>
-gui contains support for fontAwesome icons, animators to make borderpanes use drawers, visibility animatoars
