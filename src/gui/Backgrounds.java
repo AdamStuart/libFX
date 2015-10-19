@@ -16,10 +16,10 @@ public class Backgrounds
 	public static final String tanStr = "-fx-background-color: tan";
 	public static void set(Node n, String string)	{	n.setStyle("-fx-background-color: " + string + "; ");  }
 	
-	public static Background lightGray = coloredBackground(Color.LIGHTGRAY);
-	public static Background black = coloredBackground(Color.BLACK);
-	public static Background tan = coloredBackground(Color.TAN);
-	public static Background white = coloredBackground(Color.WHITE);
-	public static Background whitesmoke = coloredBackground(Color.WHITESMOKE);
+	public static Background lightGray = colored(Color.LIGHTGRAY);
+	public static Background black = colored(Color.BLACK);
+	public static Background tan = colored(Color.TAN);
+	public static Background white = colored(Color.WHITE);
+	public static Background whitesmoke = colored(Color.WHITESMOKE);
 	public static Background colored(Color c) { return  new Background(new BackgroundFill(c, CornerRadii.EMPTY, Insets.EMPTY));  }
 }
