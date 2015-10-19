@@ -8,8 +8,6 @@ package util;
 
 import java.util.List;
 
-import com.sun.javafx.util.Utils;
-
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
@@ -18,6 +16,8 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.SkinBase;
 import javafx.stage.Screen;
+
+import com.sun.javafx.Utils;
 
 /**
  * Utils that contains methods that depend on JavaFX classes.

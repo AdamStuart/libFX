@@ -3,7 +3,6 @@ package model;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-
 public enum Unit 
 { 
 	 PX("pixels", 100), 
@@ -42,6 +41,7 @@ public enum Unit
 	 public String getName() { return name;	}
 //	 public double getPerInch() { return perInch;	}
 	 public double getPerMeter() { return perMeter;	}
+
 
 	public static ObservableList<Unit> getNames() {
 		ObservableList<Unit> units = FXCollections.observableArrayList();

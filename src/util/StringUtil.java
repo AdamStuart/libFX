@@ -27,7 +27,8 @@ public class StringUtil
 	static public String chopExtension(String in)	{	return in.substring(0,in.lastIndexOf("."));	}
 	static public String chopLast(String in)	{	return in.substring(0,in.length()-1);	}
 	static public String chopLast2(String in)	{	return in.substring(0,in.length()-2);	}
-
+	public static String chopExtension(String absolutePath)
+	{	return absolutePath.substring(0,absolutePath.lastIndexOf("."));	}
 //	static public ObservableList<String> lines(String in)
 //	{
 //		ObservableList<String> strs = FXCollections.observableArrayList();
@@ -268,5 +269,7 @@ public class StringUtil
 	{	
 		return "'" + content.replaceAll("'", "") + "'";	
 	}
+
+
 
 }

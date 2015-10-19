@@ -42,7 +42,12 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TreeItem;
 import javafx.scene.image.Image;
 import javafx.scene.input.Dragboard;
-import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
+
+import javax.swing.filechooser.FileSystemView;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import model.AttributeValue;
 import model.CSVTableData;
 
@@ -565,6 +570,7 @@ public class FileUtil
 	//--------------------------------------------------------------------------------
 	// keep a cache of the images for extensions we've seen
 	static HashMap<String, Image> mapOfFileExtToSmallIcon = new HashMap<String, Image>();
+	public static ExtensionFilter zipFilter;
 
 	public static String getFileExt(String fname)
 	{
@@ -626,5 +632,6 @@ public class FileUtil
 		jswingIcon.paintIcon(null, bufferedImage.getGraphics(), 0, 0);
 		return SwingFXUtils.toFXImage(bufferedImage, null);
 	}
+
 
 }

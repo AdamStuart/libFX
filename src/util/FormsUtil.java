@@ -21,6 +21,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -162,8 +163,11 @@ public class FormsUtil
         ValidationUtils.forceValidate(field, ValidationMode.ON_FLY);
 		return box;
 	}
-
 	public static HBox makeDateBox(String prefix, boolean editable, int width)
+	{
+		return makeDateBox(prefix, editable, width, "");
+	}
+	public static HBox makeDateBox(String prefix, boolean editable, int width, String tip)
 	{
 		Label label = makePrompt("Date");		label.setPrefWidth(width);
 		DatePicker field = new DatePicker();
@@ -295,11 +299,16 @@ static int DATE_WIDTH = 100;
 
 	public static HBox promptedText(String string, String string2, int i)
 	{
+		return promptedText(string, string2, i, "");
+	}
+	public static HBox promptedText(String string, String string2, int i, String tip)
+	{
 		Label label = makePrompt(string, string2, 200);
 //		label.setTextAlignment(TextAlignment.RIGHT);
 		label.setAlignment(Pos.CENTER_RIGHT);
 		TextField field = new TextField();
 		field.setId(i + "Field");
+		field.setTooltip(new Tooltip(tip));
 //		if (fldWidth > 0) 	field.setPrefWidth(fldWidth);
 		return new HBox(label, field);
 	}

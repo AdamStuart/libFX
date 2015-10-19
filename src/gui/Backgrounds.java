@@ -21,8 +21,5 @@ public class Backgrounds
 	public static Background tan = coloredBackground(Color.TAN);
 	public static Background white = coloredBackground(Color.WHITE);
 	public static Background whitesmoke = coloredBackground(Color.WHITESMOKE);
-	public static Background coloredBackground(Color col)
-	{
-		return new Background(new BackgroundFill(col, CornerRadii.EMPTY, Insets.EMPTY));
-	}
+	public static Background colored(Color c) { return  new Background(new BackgroundFill(c, CornerRadii.EMPTY, Insets.EMPTY));  }
 }
