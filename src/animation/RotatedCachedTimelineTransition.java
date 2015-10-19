@@ -19,7 +19,6 @@ public class RotatedCachedTimelineTransition extends CachedTimelineTransition
         y = startY;
         rotateIn = rollIn;
         clockwise =  rotRight;
-
    }
     
     /**
@@ -29,7 +28,6 @@ public class RotatedCachedTimelineTransition extends CachedTimelineTransition
        super.starting();
        rotate = new Rotate(0, x, y );
        node.getTransforms().add(rotate);
-       
     }
     
     /**
@@ -38,8 +36,5 @@ public class RotatedCachedTimelineTransition extends CachedTimelineTransition
     protected void stopping() {
         super.stopping();
         node.getTransforms().remove(rotate);
-
     }
-
-
 }
