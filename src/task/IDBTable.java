@@ -7,6 +7,7 @@ import javafx.scene.layout.Region;
 public interface IDBTable
 {
 	public Region getForm();
+	public Region makeForm();
 	public String getTableName();
 	public String getSchema();
 	public ObservableList<String> getFieldList();

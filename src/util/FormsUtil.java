@@ -1,18 +1,12 @@
 package util;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.function.Supplier;
 
-import org.apache.commons.validator.routines.DateValidator;
-import org.apache.commons.validator.routines.EmailValidator;
-import org.apache.commons.validator.routines.TimeValidator;
-import org.apache.commons.validator.routines.UrlValidator;
-
+import gui.Borders;
+import icon.GlyphsDude;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -25,18 +19,24 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
 import validation.Decorator;
-import validation.SimpleValidator;
-import validation.ValidationEvent;
-import validation.ValidationObject;
-import validation.ValidationUtils;
-import validation.ValidationUtils.ValidationMode;
-import validation.Validator;
+
+/*
+ * FormsUtil contains a lot of static functions that will make
+ * input boxes for special types of fields.  
+ * Validation is done based on listening to the fields text changes.
+ */
 
 public class FormsUtil
 {
+	public enum ValidationType 		{   NONE, STRING, WHOLE, INT,	DOUBLE,	 DATE,	PERCENT, CURRENCY, URL, EMAIL, 
+										ISBN, DOTTED3, IP4, IP6, CREDITCARD	}		//AST
+
+	public enum ValidationState 	{   OK, WARNING, REQUIRED, ERROR,	LOCKED,	UNKNOWN	}
+
 	public static VBox makeFormContainer()
 	{
 		VBox pane = new VBox();
@@ -77,7 +77,9 @@ public class FormsUtil
 		Label label = makePrompt(prompt, id);
 		label.setTextAlignment(TextAlignment.RIGHT);
 		TextField field = new TextField();
-		field.setId(prefix + id + "Field");
+		String fldId = prefix + id + "Field";
+		field.setId(fldId);
+		field.getStylesheets().add(fldId);
 		field.setStyle(" -fx-alignment: CENTER-RIGHT;");
 		if (fldWidth > 0) 	field.setPrefWidth(fldWidth);
 		return new HBox(label, field);
@@ -89,6 +91,7 @@ public class FormsUtil
 		label.setAlignment(Pos.CENTER_RIGHT);
 		TextField field = new TextField();
 		field.setId(prefix + id + "Field");
+		field.getStylesheets().add(prefix + id + "Field");
 		if (fldWidth > 0) 	field.setPrefWidth(fldWidth);
 		return new HBox(label, field);
 	}
@@ -106,89 +109,124 @@ public class FormsUtil
 		if (fldWidth > 0) 	field.setPrefWidth(fldWidth);
 		return new HBox(label, field);
 	}
-
-	public static HBox makeURLBox()	{ return makeURLBox(""); } 
-	public static HBox makeURLBox(String prefix)
+	//--------------------------------------------------------------------------------------------
+	public static HBox makeFormField(String prompt, String id, int fldWidth, String tooltip)
 	{
-		Label label = makePrompt("URL");
-		TextField field = new TextField();		field.setId(prefix + "url"); field.setPrefWidth(300);
+		Label label = FormsUtil.makePrompt(prompt, id);
+//		label.setTextAlignment(TextAlignment.RIGHT);
+		label.setAlignment(Pos.BOTTOM_RIGHT);
+		TextField field = new TextField();
+		Tooltip.install(field, new Tooltip(tooltip));
+		Tooltip.install(label, new Tooltip(tooltip));
+		field.setId(id);
+		if (fldWidth > 0) 	field.setPrefWidth(fldWidth);
+		return new HBox(label, field);
+	}
+//-----------------------------------------------------------------------------------------------------
+	public static HBox makeURLBox()					{ return makeURLBox("", "URL", 0, 200, "Internet Resource Location"); } 
+	public static HBox makeURLBox(String prefix)	{return makeURLBox(prefix, "URL", 0, 200, null);	}
+	
+	public static HBox makeURLBox(String prefix, String prompt, int labelwidth, int width, String tip )
+	{
+		Label label = makePrompt(prompt, "", labelwidth);
+		label.setAlignment(Pos.BOTTOM_RIGHT);
+		TextField field = new TextField();		
+		field.setId(prefix + "url"); 
+		field.setPrefWidth(width);
+		if (tip!=null)
+		{
+			Tooltip ttip = new Tooltip(tip);
+			Tooltip.install(label, ttip);
+			Tooltip.install(field, ttip);
+		}
 	    Button urlButton = new Button("Open", new ImageView(new Image("/validation/web.png")));				// TODO path
 	    urlButton.setId(prefix + "urlButton");
-	    urlButton.setOnAction(new EventHandler<ActionEvent>() {
-	            @Override  public void handle(ActionEvent event) {
-	                try 
-	                {
-	                    java.awt.Desktop.getDesktop().browse(new URI(field.getText()));
-	                }
-	                catch (Exception e) {}  // ignore
-	            }
-	        });
-	        urlButton.setDisable(true);
-		
-	        field.addEventHandler(ValidationEvent.ANY, new EventHandler<ValidationEvent>() {
-	            @Override
-	            public void handle(ValidationEvent event) {
-	            	urlButton.setDisable(event.getEventType() != ValidationEvent.VALIDATION_OK);
-	            }
-	        });
-
-//	        ValidationUtils.install(field, new SimpleValidator(UrlValidator.getInstance()), ValidationMode.ON_FLY);
+	    urlButton.setOnAction(event-> { StringUtil.launchURL(field.getText()); });
+	    urlButton.setDisable(true);
 		return new HBox(label, field, urlButton);
 	}
-	public static HBox makeEmailBox()	{  return makeEmailBox("");	}
 
-	public static HBox makeEmailBox(String prefix)
+	//-----------------------------------------------------------------------------------------------------
+	private static final String AMAZON_SERVICE = "http://www.amazon.com/s/ref=nb_sb_noss?url=search-alias%3Dstripbooks&field-keywords=";
+
+	public static Node makeISBNBox(String prefix)
 	{
-		Label label = makePrompt("Email");
+        Label ISBNLabel = makePrompt("ISBN", "isbnLabel", 200);
+        ISBNLabel.setAlignment(Pos.BOTTOM_RIGHT);
+       ISBNLabel.setId(prefix + "ISBNLabel");
+        TextField ISBNField = new TextField("");
+        ISBNField.setId(prefix + "ISBNField");
+		Label decoration = new Label("");
+        Button amazonButton = new Button("Amazon", new ImageView(new Image("validation/Amazon.png")));
+        amazonButton.setId(prefix + "amazonButton");
+        amazonButton.setOnAction(event ->{ StringUtil.launchURL(AMAZON_SERVICE +  ISBNField.getText());   });
+        amazonButton.setDisable(true);
+        ISBNField.textProperty().addListener((obs, old, newval) -> {
+			if (newval == null || newval.equals(old)) return;
+			ValidationState validationState = StringUtil.validate(newval, ValidationType.ISBN, true );
+			ISBNField.setBorder(Borders.getValidationBorder(validationState));  
+			decoration.setGraphic(GlyphsDude.createValidationIcon(validationState));  
+		});
+       return new HBox(ISBNLabel,ISBNField, decoration, amazonButton);
+	}	
+	
+	//-----------------------------------------------------------------------------------------------------
+	public static HBox makeEmailBox()	{  return makeEmailBox("", "", 0);	}
+	public static HBox makeEmailBox(String prefix, String id, int promptWidth)
+	{
+		Label label = makePrompt("Email", "", promptWidth);
+		label.setAlignment(Pos.BOTTOM_RIGHT);
+		Label decoration = new Label("");
 		TextField field = new TextField();
 		field.setId(prefix + "email");
-//		ValidationUtils.install(field, new SimpleValidator(EmailValidator.getInstance()), ValidationMode.ON_FLY);
-//        ValidationUtils.install(field, new Validator() {
-//            @Override
-//            public ValidationEvent call(ValidationUtils.ValidationObject param) 
-//            {
-//                if (field.getText().trim().length() == 0) 
-//                    return new ValidationEvent(ValidationEvent.VALIDATION_ERROR, 0, "The email cannot be empty!");
-//                 
-//                return new SimpleValidator(EmailValidator.getInstance()).call(param);
-//            }
-//        }, ValidationMode.ON_DEMAND);
-        Supplier<Decorator> requiredFactory = new Supplier<Decorator>() {
-            @Override public Decorator get() {
-            	Image i = new Image("/validation/overlay_required.png");
-                return new Decorator<>(new ImageView(i));
-            }
-        };
-        HBox box = new HBox(label, field);
-        ValidationUtils.forceValidate(field, ValidationMode.ON_FLY);
+
+		field.textProperty().addListener((obs, old, newval) -> {
+			if (newval == null || newval.equals(old)) return;
+			ValidationState validationState = StringUtil.validate(newval, ValidationType.EMAIL, true );
+			field.setBorder(Borders.getValidationBorder(validationState));  
+			decoration.setGraphic(GlyphsDude.createValidationIcon(validationState));  
+		});
+        HBox box = new HBox(label, field, decoration);
+//        ValidationUtils.forceValidate(field, ValidationMode.ON_FLY);
 		return box;
 	}
+	//-----------------------------------------------------------------------------------------------------
+	public static HBox makeDateBox( boolean editable, String toolTip)
+	{
+		return makeDateBox("Date", editable, 0, toolTip);
+	}
+	
 	public static HBox makeDateBox(String prefix, boolean editable, int width)
 	{
 		return makeDateBox(prefix, editable, width, "");
 	}
+	
 	public static HBox makeDateBox(String prefix, boolean editable, int width, String tip)
 	{
 		Label label = makePrompt("Date");		label.setPrefWidth(width);
+		label.setAlignment(Pos.BOTTOM_RIGHT);
 		DatePicker field = new DatePicker();
 		field.setId(prefix + "date");
 		field.setDisable(!editable);
 //		ValidationUtils.install(field, new SimpleValidator(DateValidator.getInstance()), ValidationMode.ON_FLY);
 		return new HBox(label, field);
 	}
-static int DATE_WIDTH = 100;
+	
+	static int DATE_WIDTH = 100;
 	public static HBox makeDateBox(String prefix, boolean editable)
 	{
 		Label label = makePrompt("Date");	
+		label.setAlignment(Pos.BOTTOM_RIGHT);
 		DatePicker field = new DatePicker();
 		field.setId(prefix + "date");
 		field.setPrefWidth(DATE_WIDTH);
 		field.setDisable(!editable);
-		SimpleValidator checker =  new SimpleValidator(DateValidator.getInstance());
+//		SimpleValidator checker =  new SimpleValidator(DateValidator.getInstance());
 //		ValidationUtils.install(field,checker, ValidationMode.ON_FLY);
 		return new HBox(label, field);
 	}
 
+	//-----------------------------------------------------------------------------------------------------
 	public static HBox makeTimeBox(String prefix, boolean editable)
 	{
 		Label label = makePrompt("Time");
@@ -200,6 +238,7 @@ static int DATE_WIDTH = 100;
 		return new HBox(label, field);
 	}
 
+	//-----------------------------------------------------------------------------------------------------
 	public static HBox makeDurationBox(String prefix, boolean editable)
 	{
 		Label label = makePrompt("For");
@@ -213,8 +252,6 @@ static int DATE_WIDTH = 100;
 		field.setDisable(!editable);
 		return new HBox(label, field, choice);
 	}
-
-	
 	
 	public static HBox makeTimeDateDurationBox(String prefix, String prompt, boolean showTime, boolean showDate, boolean showDuration)
 	{
@@ -228,6 +265,7 @@ static int DATE_WIDTH = 100;
 		h.getChildren().addAll(kids);
 		return h;
 	}
+	//-----------------------------------------------------------------------------------------------------
 	public static HBox makeNameHBox()	{ return makeNameHBox(""); } 
 
 	public static HBox makeNameHBox(String prefix)
@@ -269,6 +307,7 @@ static int DATE_WIDTH = 100;
 		return v;
 	}
 
+	//-----------------------------------------------------------------------------------------------------
 	public static boolean addColon = true;
 
 	public static Label makePrompt(String s, String id, int width)
@@ -297,6 +336,7 @@ static int DATE_WIDTH = 100;
 
 	public static HBox formbox(String string, String id, int i)	{	return new HBox(makePrompt(string, id, i));	}
 
+	//-----------------------------------------------------------------------------------------------------
 	public static HBox promptedText(String string, String string2, int i)
 	{
 		return promptedText(string, string2, i, "");
@@ -313,5 +353,100 @@ static int DATE_WIDTH = 100;
 		return new HBox(label, field);
 	}
 
+	//--------------------------------------------------------------------------------------------
+	public static HBox makeValidatedBox(String prompt, String id, ValidationType validationType, boolean required)
+	{
+		Label label = makePrompt(prompt, id, 200);
+		Label decoration = new Label("");
+		decoration.setId(id + "ValidationIcon");
+		label.setAlignment(Pos.BOTTOM_RIGHT);
+		TextField field = new TextField();
+		String tip = getTooltipText(validationType);
+		Tooltip.install(field, new Tooltip(tip));
+		Tooltip.install(label, new Tooltip(tip));
+		field.setId(id );
+		if (validationType != ValidationType.NONE)
+		{
+			field.setOnKeyTyped(ev -> {		if (!StringUtil.isKeyLegal(ev, field, validationType))	ev.consume();	});		
+			field.textProperty().addListener((obs, old, newval) -> {
+				if (newval == null || newval.equals(old)) return;
+				ValidationState validationState = StringUtil.validate(newval, validationType, required );
+				field.setBorder(Borders.getValidationBorder(validationState));  
+				decoration.setGraphic(GlyphsDude.createValidationIcon(validationState));  
+				
+			});
+		}
+		decoration.setGraphic(required ? GlyphsDude.createValidationIcon(ValidationState.REQUIRED) : null);  
+		field.setBorder(Borders.getValidationBorder(required ? ValidationState.REQUIRED : ValidationState.OK));
+		return new HBox(label, field, decoration);
+	}
+
+
+	public static String getTooltipText(ValidationType validationType)
+	{
+		if (validationType == ValidationType.DOUBLE)	return "Must be a decimal number";
+		if (validationType == ValidationType.DATE)		return "Must be a valid date";
+		if (validationType == ValidationType.INT)		return "Must be an integer";
+		if (validationType == ValidationType.CURRENCY)	return "Must be a valid currency";
+		if (validationType == ValidationType.PERCENT)	return "Must be a percentage between 0-100%";
+		if (validationType == ValidationType.ISBN)		return "Must be a valid ISBN";
+		return "";
+	}
+	//--------------------------------------------------------------------------------------------
+	public static HBox makeRegulatoryStatusChoiceBox(boolean editable, String toolTip)
+	{
+		Label label = makePrompt("Regulatory Status", "reg", 200);
+		label.setAlignment(Pos.BOTTOM_RIGHT);
+		ObservableList<String> list = FXCollections.observableArrayList();
+		list.addAll("Under Development", "For Discussion Only", "Alpha Test", "Beta Test", "Research Use Only", "In Clinical Trial", "In Medical Use");
+		ChoiceBox<String> choice = new ChoiceBox<String>(list);
+		choice.setId("regStatus");
+		return new HBox(4, label, choice);
+	}
+
+	//--------------------------------------------------------------------------------------------
+	public static HBox makeSchemaStatusBox(String string, String toolTip) {
+		Label label = makePrompt("Schema Status", "schema", 200);
+		label.setAlignment(Pos.BOTTOM_RIGHT);
+		ObservableList<String> list = FXCollections.observableArrayList();
+		list.addAll("Draft", "Official", "Alpha Test", "Copy of Official", "Modified");
+		ChoiceBox<String> choice = new ChoiceBox<String>(list);
+		choice.setId("status");
+		return new HBox(4, label, choice);
+	}
+
+	// ----------------------------------------------------
+	 public static Region createMultipleInstanceForm(String prefix)
+	{
+		 VBox container = FormsUtil.makeFormContainer();
+		 Region desc = FormsUtil.makeMultipleInstanceBox("Description", "1");   // ("Project", "project", 400, tooltip);
+		 Region reasearcher = FormsUtil.makeMultipleInstanceBox("Author", "researcher");
+		 container.getChildren().addAll(desc, reasearcher);
+		 return container;
 	
+	}
+		//--------------------------------------------------------------------------------------------
+		public static VBox makeMultipleInstanceBox(String prompt, String id)
+		{
+			VBox lines = new VBox(4);
+			addInstance(lines, prompt, id);
+			return lines; 
+		}
+		
+		private static int MAX_OCCURS= 4;
+		public static void addInstance(VBox lines, String prompt, String id)
+		{
+			HBox line = makeLabelFieldHBox(prompt, id);
+			Button plusButton = new Button("+");
+			plusButton.setOnAction( event -> { 
+			    	addInstance(lines, prompt, id+"+"); 
+			    	plusButton.setVisible(false);
+			});				
+			if (lines.getChildren().size() < MAX_OCCURS-1)
+				line.getChildren().add(plusButton);
+			lines.getChildren().add(line);		
+		}
+	//	
+ 
+
 }

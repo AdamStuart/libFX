@@ -2,6 +2,7 @@ package util;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -12,7 +13,14 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.validator.routines.EmailValidator;
+import org.apache.commons.validator.routines.UrlValidator;
+
+import javafx.scene.control.TextField;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
+import util.FormsUtil.ValidationState;
+import util.FormsUtil.ValidationType;
 
 public class StringUtil
 {
@@ -25,17 +33,23 @@ public class StringUtil
 	}
 
 	static public String chopExtension(String in)	{	return in.substring(0,in.lastIndexOf("."));	}
-	static public String chopLast(String in)	{	return in.substring(0,in.length()-1);	}
-	static public String chopLast2(String in)	{	return in.substring(0,in.length()-2);	}
+	static public String chopLast(String in)		{	return in.substring(0,in.length()-1);	}
+	static public String chopLast2(String in)		{	return in.substring(0,in.length()-2);	}
 //	static public ObservableList<String> lines(String in)
 //	{
 //		ObservableList<String> strs = FXCollections.observableArrayList();
 //		return strs;
 	// }
 
+	public static void launchURL(String urlString)
+	{
+        try {
+            java.awt.Desktop.getDesktop().browse(new URI(urlString));
+        }   catch (Exception e) {}  // ignore
+	}
+	
 	public static String callURL(String urlString)
 	{
-
 		StringBuffer buffer = new StringBuffer();
 		try
 		{
@@ -87,6 +101,7 @@ public class StringUtil
 	
 	List<StringUtil.TYPES> types = new ArrayList<StringUtil.TYPES>();
 
+	//-----------------------------------------------------------------------------------
 	public static boolean isColor(String s)
 	{
 		if (s == null) return false;
@@ -102,13 +117,51 @@ public class StringUtil
 	{
 		try
 		{
-			DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+			DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
 			LocalDate.parse(s, formatter);
 			return true;
 		} 
-		catch (DateTimeParseException e)		{		return false;		}
+		catch (DateTimeParseException e)		{			}
+		
+		String[] sections = s.split("/");
+		if (sections.length == 3)
+		{
+			int mon = toInteger(sections[0]);			if (!inclRange(mon, 1, 12))  return false;	
+			int day = toInteger(sections[1]);			if (!inclRange(day, 1, 31))  return false;	
+			int yr = toInteger(sections[2]);
+			if (inclRange(yr, 0, 50) || inclRange(yr, 2000, 2050))  return true;	
+		}
+		return false;	
 	}
-	
+	//-----------------------------------------------------------------------------------
+	static UrlValidator urlValidator = UrlValidator.getInstance(); 
+	static EmailValidator emailValidator = EmailValidator.getInstance(); 
+
+	public static boolean isValidUrl (String s) 	{		return urlValidator.isValid(s);	}	
+	public static boolean isValidEmail (String s) 	{		return emailValidator.isValid(s);	}	
+
+	//-----------------------------------------------------------------------------------
+	public static boolean isValidIPAddress (String s) 	
+	{
+		String[] sections = s.split("\\.");
+		int len = sections.length;
+		if (len == 4 || len == 6)
+		{
+			for (String section : sections)
+				if (isNumber(section))
+				{
+					int num = toInteger(section);
+					if (!inclRange(num,0,255)) return false;
+				}
+				else return false;
+			return true;
+		}
+		return false;
+	}	
+	//-----------------------------------------------------------------------------------
+	private static boolean inclRange(int num, int i, int j)	{		return num >= i && num <= j;	}
+
+	public static boolean isInteger (String s) 		{		return isNumber(s) && s.indexOf(".") < 0;	}
 	public static boolean isNumber (String s) 
 	{
 		try
@@ -118,7 +171,7 @@ public class StringUtil
 		}
 		catch(NumberFormatException e)		{			return false;		}
 	}
-	
+	//-----------------------------------------------------------------------------------
 	public static double toDouble (String s) 
 	{
 		if (s == null ) return Double.NaN;
@@ -137,8 +190,87 @@ public class StringUtil
 		}
 		catch(NumberFormatException e)		{			return -1;		}
 	}
+	//-----------------------------------------------------------------------------------
 	private static final Pattern LINE_BREAK_PATTERN = Pattern.compile("\\s*\\n\\s*");
 
+	static char DEC_PT = '.';			// TODO -- locale dependent !!
+	
+	static boolean isKeyLegal(KeyEvent ev, TextField fld, ValidationType valType)
+	{
+		char c = getChar(ev);
+		if (valType == ValidationType.WHOLE)		return Character.isDigit(c);
+		if (valType == ValidationType.INT)	
+		{
+			if (Character.isDigit(c)) return true;
+			if (c == '-') return fld.getCaretPosition() == 0;
+			return false;
+		}
+		if (valType == ValidationType.DOUBLE)	
+		{
+			if (Character.isDigit(c)) return true;
+			if (c == '-') return fld.getCaretPosition() == 0;
+			if (c == DEC_PT) return fld.getText().indexOf(DEC_PT) < 0;	
+			return false;
+		}
+		if (valType == ValidationType.STRING)	
+		{
+			if (Character.isLetterOrDigit(c)) return true;
+			if (Character.isSpaceChar(c)) return true;
+			if (c == DEC_PT) return true;	
+			return false;
+		}
+		if (valType == ValidationType.ISBN)			// either 10 or 13 digits
+		{
+			if (Character.isDigit(c)) return true;
+			if (c == '-') return true;
+			return false;
+		}
+		if (valType == ValidationType.DATE)			// digits or slashes
+		{
+			if (Character.isDigit(c)) return true;
+			if (c == '-') return true;		// for ISO dates
+			if (c == '/') return true;		// for MM/DD/YY or MM/DD/YYYY
+			return false;
+		}
+		if (valType == ValidationType.IP4 || valType == ValidationType.IP6)			// digits or decimals
+		{
+			if (Character.isDigit(c)) return true;
+			if (c == DEC_PT) return true;
+			return false;
+		}
+		return true;
+	
+	}
+	static char getChar(KeyEvent ev) 
+	{ 
+		String s = ev.getCharacter();
+		if (s.isEmpty()) return Character.CURRENCY_SYMBOL;
+		return s.charAt(0); 
+	}
+	//-------------------------------------------------------
+
+	static ValidationState validate(String s, ValidationType valType, boolean required)
+	{
+		if (s.trim().isEmpty() && required ) 		return ValidationState.REQUIRED;		// if empty and not required return true
+		if (isStateLegal(s, valType, required)) 	return ValidationState.OK;
+		 
+		return ValidationState.ERROR;
+	}
+//-------------------------------------------------------
+	static boolean isStateLegal(String s, ValidationType valType, boolean required)
+	{
+		if (s.trim().isEmpty()) return !required;		// if empty and not required return true
+		
+		if (valType == ValidationType.WHOLE)		return isInteger(s);
+		if (valType == ValidationType.INT)			return isInteger(s);
+		if (valType == ValidationType.DOUBLE)		return isNumber(s);
+		if (valType == ValidationType.DATE)			return isDate(s);
+		if (valType == ValidationType.URL)			return isValidUrl(s);
+		if (valType == ValidationType.EMAIL)		return isValidEmail(s);
+		if (valType == ValidationType.IP4)			return isValidIPAddress(s);
+		if (valType == ValidationType.IP6)			return isValidIPAddress(s);
+		return true;
+	}
 //-------------------------------------------------------
 	/** @author Daniel Bechler */
 
@@ -162,7 +294,7 @@ public class StringUtil
 		return s;
 	}
 
-	public static String toPropertyExpression(final String s)
+	public static String toPropertyExpression(final String s)		// JSON property, not FX model property
 	{
 		final char[] chars = s.toCharArray();
 		final StringBuilder sb = new StringBuilder();

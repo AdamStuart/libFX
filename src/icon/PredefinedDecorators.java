@@ -1,4 +1,4 @@
-package validation;
+package icon;
 
 import java.util.function.Supplier;
 
@@ -8,6 +8,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import validation.Decorator;
 
 /**
  * {@code PredefinedDecorators} defines several decorator supplier that can be used in the UI. We used them inside

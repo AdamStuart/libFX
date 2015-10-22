@@ -21,6 +21,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.TreeItem;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import util.FormsUtil.ValidationState;
 
 /**
  *
@@ -36,6 +37,19 @@ public class GlyphsDude {
     public static Text createIcon(GlyphIcons icon) {
         return GlyphsDude.createIcon(icon, GlyphIcon.DEFAULT_ICON_SIZE);
     }
+    
+    public static Text createValidationIcon(ValidationState valState)
+    {
+    	switch (valState)
+    	{
+    		case LOCKED:  	return createIcon(FontAwesomeIcons.LOCK,"16"  );
+    		case ERROR:  	return createIcon(FontAwesomeIcons.TIMES_CIRCLE_ALT,"16"  );
+    		case REQUIRED:  return createIcon(FontAwesomeIcons.ASTERISK,"16"  );
+    		case WARNING:  	return createIcon(FontAwesomeIcons.EXCLAMATION_TRIANGLE,"16"  );
+    		default:     	return null;
+
+    	}
+     }
 
     public static Text createIcon(GlyphIcons icon, String iconSize) {
         Text text = new Text(icon.characterToString());
@@ -86,7 +100,7 @@ public class GlyphsDude {
         return button;
     }
 
-
+    
     /*
      * 
      * 

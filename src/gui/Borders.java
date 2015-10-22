@@ -6,11 +6,15 @@ import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
+import util.FormsUtil.ValidationState;
 
 public class Borders
 {
 	static public Border redBorder = new Border(new BorderStroke(Color.RED, 
 					BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(5))	);
+
+	static public Border thinRedBorder = new Border(new BorderStroke(Color.FIREBRICK, 
+					BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(2))	);
 
 	static public Border blueBorder = new Border(new BorderStroke(Color.BLUE, 
 					BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(5))	);
@@ -26,6 +30,8 @@ public class Borders
 
 	static public Border yellowBorder = new Border(new BorderStroke(Color.YELLOW, 
 					BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(5))	);
+	static public Border thinGold = new Border(new BorderStroke(Color.GOLD, 
+					BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(2))	);
 
 	static public Border etchedBorder = new Border(
 					new BorderStroke(Color.GRAY, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(5)),
@@ -38,5 +44,13 @@ public class Borders
 
 	static public Border dashedBorder = new Border(new BorderStroke(Color.DARKGRAY, 
 					BorderStrokeStyle.DASHED, CornerRadii.EMPTY, new BorderWidths(2))	);
+
+	public static Border getValidationBorder(ValidationState validationState)
+	{
+		if (validationState == ValidationState.ERROR)		return redBorder;
+		if (validationState == ValidationState.REQUIRED)	return thinRedBorder;
+		if (validationState == ValidationState.WARNING)		return thinGold;
+		return null;
+	}
 
 }

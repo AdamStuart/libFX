@@ -26,7 +26,7 @@ import javafx.scene.layout.StackPane;
  * With the code above, if you ever call {@link DecorationUtils} install methods to any of the children nodes in the
  * pane above, the decorator will be displayed as defined.
  */
-@SuppressWarnings({"Convert2Lambda", "Anonymous2MethodRef"})
+@SuppressWarnings({"Anonymous2MethodRef"})
 public class DecorationPane extends StackPane implements DecorationSupport {
     private Parent _content;
     private DecorationDelegate _decorationDelegate;
@@ -41,9 +41,7 @@ public class DecorationPane extends StackPane implements DecorationSupport {
         registerListeners();
     }
 
-    protected void initializeStyle() {
-        getStyleClass().setAll(STYLE_CLASS_DECORATION_SUPPORT);
-    }
+    protected void initializeStyle() {        getStyleClass().setAll(STYLE_CLASS_DECORATION_SUPPORT);    }
 
     protected void initializeChildren() {
     }
@@ -61,12 +59,7 @@ public class DecorationPane extends StackPane implements DecorationSupport {
         }
         _decorationDelegate.prepareDecorations();
         super.layoutChildren();
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                _decorationDelegate.layoutDecorations();
-            }
-        });
+        Platform.runLater(() ->{  _decorationDelegate.layoutDecorations();  });
     }
 
     @Override
