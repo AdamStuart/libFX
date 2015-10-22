@@ -1,4 +1,4 @@
-package util;
+package animation;
 
 import javafx.animation.Interpolator;
 

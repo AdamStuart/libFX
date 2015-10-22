@@ -1,4 +1,6 @@
-package util;
+package services;
+
+import util.StringUtil;
 
 /*
  * Copyright 2012 Daniel Bechler
@@ -18,15 +20,23 @@ package util;
 
 
 /** @author Daniel Bechler */
-public final class ObjectUtils
+public final class MD5
 {
-	private ObjectUtils()
+	private MD5()
 	{
 	}
 
-	public static boolean isEqual(final Object a, final Object b)
+	public static String forString(final String text)
 	{
-		if (a == null)		return (b == null);
-		return a.equals(b);
+		if (StringUtil.isEmpty(text))
+		{
+			throw new IllegalArgumentException();
+		}
+		return HashCodeBuilder.md5(text);
+	}
+
+	public static String forBytes(final byte[] bytes)
+	{
+		return HashCodeBuilder.md5(bytes);
 	}
 }

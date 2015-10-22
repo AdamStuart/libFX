@@ -1,8 +1,7 @@
-package util;
+package gui;
 
 import java.util.ArrayList;
 
-import gui.Borders;
 import icon.FontAwesomeIcons;
 import icon.GlyphsDude;
 import javafx.collections.FXCollections;
@@ -16,12 +15,11 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
+import util.StringUtil;
 
 /*
  * FormsUtil contains a lot of static functions that will make
@@ -29,7 +27,7 @@ import javafx.scene.text.TextAlignment;
  * Validation is done based on listening to the fields text changes.
  */
 
-public class FormsUtil
+public class Forms
 {
 	public enum ValidationType 		{   NONE, STRING, WHOLE, INT,	DOUBLE,	 DATE,	PERCENT, CURRENCY, URL, EMAIL, 
 										ISBN, DOTTED3, IP4, IP6, CREDITCARD, ZIP, PHONE	}		//AST
@@ -111,7 +109,7 @@ public class FormsUtil
 	//--------------------------------------------------------------------------------------------
 	public static HBox makeFormField(String prompt, String id, int fldWidth, String tooltip)
 	{
-		Label label = FormsUtil.makePrompt(prompt, id);
+		Label label = Forms.makePrompt(prompt, id);
 //		label.setTextAlignment(TextAlignment.RIGHT);
 		label.setAlignment(Pos.BOTTOM_RIGHT);
 		TextField field = new TextField();
@@ -127,23 +125,34 @@ public class FormsUtil
 	
 	public static HBox makeURLBox(String prefix, String prompt, int labelwidth, int width, String tip )
 	{
-		Label label = makePrompt(prompt, "", labelwidth);
+		HBox box = new HBox();
+	    Button urlButton = new Button("Open");				// TODO path  , new ImageView(new Image("/validation/web.png")
+	    urlButton.setGraphic((GlyphsDude.createIcon(FontAwesomeIcons.GLOBE)));
+	    urlButton.setId(prefix + "urlButton");
+	    urlButton.setDisable(true);
+
+	    Label label = makePrompt(prompt, "", labelwidth);
 		label.setAlignment(Pos.BOTTOM_RIGHT);
 		TextField field = new TextField();		
 		field.setId(prefix + "url"); 
-		field.setPrefWidth(width);
-		if (tip!=null)
+		if (width > 0) field.setPrefWidth(width);
+	    urlButton.setOnAction(event-> { StringUtil.launchURL(field.getText()); });
+		field.textProperty().addListener((obs, old, newval) -> {
+			if (newval == null || newval.equals(old)) return;
+//			Button btn = (Button) box.lookup("" + prefix + "urlButton");
+			boolean okay = StringUtil.isValidUrl(newval);
+			urlButton.setDisable(!okay);	
+		});
+
+        if (tip!=null)
 		{
 			Tooltip ttip = new Tooltip(tip);
 			Tooltip.install(label, ttip);
 			Tooltip.install(field, ttip);
 		}
-	    Button urlButton = new Button("Open");				// TODO path  , new ImageView(new Image("/validation/web.png")
-	    urlButton.setGraphic((GlyphsDude.createIcon(FontAwesomeIcons.GLOBE)));
-	    urlButton.setId(prefix + "urlButton");
-	    urlButton.setOnAction(event-> { StringUtil.launchURL(field.getText()); });
-	    urlButton.setDisable(true);
-		return new HBox(label, field, urlButton);
+
+	    box.getChildren().addAll(label, field, urlButton);
+		return box;
 	}
 
 	//-----------------------------------------------------------------------------------------------------
@@ -172,8 +181,8 @@ public class FormsUtil
 	}	
 	
 	//-----------------------------------------------------------------------------------------------------
-	public static HBox makeEmailBox()	{  return makeEmailBox("", "", 0);	}
-	public static HBox makeEmailBox(String prefix, String id, int promptWidth)
+	public static HBox makeEmailBox()	{  return makeEmailBox("", "", 0, false);	}
+	public static HBox makeEmailBox(String prefix, String id, int promptWidth, boolean required)
 	{
 		Label label = makePrompt("Email", "", promptWidth);
 		label.setAlignment(Pos.BOTTOM_RIGHT);
@@ -183,10 +192,13 @@ public class FormsUtil
 
 		field.textProperty().addListener((obs, old, newval) -> {
 			if (newval == null || newval.equals(old)) return;
-			ValidationState validationState = StringUtil.validate(newval, ValidationType.EMAIL, true );
+			ValidationState validationState = StringUtil.validate(newval, ValidationType.EMAIL, required );
 			field.setBorder(Borders.getValidationBorder(validationState));  
 			decoration.setGraphic(GlyphsDude.createValidationIcon(validationState));  
 		});
+		ValidationState initState = required ? ValidationState.REQUIRED : ValidationState.OK;
+		field.setBorder(Borders.getValidationBorder( initState));  
+		decoration.setGraphic(GlyphsDude.createValidationIcon(initState));  
         HBox box = new HBox(label, field, decoration);
 //        ValidationUtils.forceValidate(field, ValidationMode.ON_FLY);
 		return box;
@@ -243,7 +255,7 @@ public class FormsUtil
 	public static HBox makeDurationBox(String prefix, boolean editable)
 	{
 		Label label = makePrompt("For");
-		ObservableList list = FXCollections.observableArrayList();
+		ObservableList<String> list = FXCollections.observableArrayList();
 		list.addAll("Minutes", "Hours", "Days");
 		ChoiceBox<String> choice = new ChoiceBox<String>(list);
 		choice.setId(prefix + "units");
@@ -313,7 +325,7 @@ public class FormsUtil
 
 	public static Label makePrompt(String s, String id, int width)
 	{
-		String S = lookup(s);
+		String S = translate(s);
 		if (addColon)
 			S += ": ";
 		Label la = new Label(S);  
@@ -324,7 +336,7 @@ public class FormsUtil
 
 	public static Label makePrompt(String s, String id)
 	{
-		String S = lookup(s);
+		String S = translate(s);
 		if (addColon)			S += ": ";
 		Label la = new Label(S);
 		if (id != null)
@@ -333,7 +345,7 @@ public class FormsUtil
 	}
 
 	public static Label makePrompt(String s)	{		return makePrompt(s, null);	}
-	public static String lookup(String s)	{		return s;	} // dummy lookup function supports later localization
+	public static String translate(String s)	{		return s;	} // dummy lookup function supports later localization
 
 	public static HBox formbox(String string, String id, int i)	{	return new HBox(makePrompt(string, id, i));	}
 
@@ -357,11 +369,18 @@ public class FormsUtil
 	//--------------------------------------------------------------------------------------------
 	public static HBox makeValidatedBox(String prompt, String id, ValidationType validationType, boolean required)
 	{
-		Label label = makePrompt(prompt, id, 200);
+		return makeValidatedBox(prompt, id, validationType, required, 0, 0);
+	}
+	
+	public static HBox makeValidatedBox(String prompt, String id, ValidationType validationType, boolean required, int labelWidth, int fldWidth)
+	{
+		Label label = makePrompt(prompt, id, labelWidth);
 		Label decoration = new Label("");
 		decoration.setId(id + "ValidationIcon");
 		label.setAlignment(Pos.BOTTOM_RIGHT);
 		TextField field = new TextField();
+		if (fldWidth > 0)
+			field.setPrefWidth(fldWidth);
 		String tip = getTooltipText(validationType);
 		Tooltip.install(field, new Tooltip(tip));
 		Tooltip.install(label, new Tooltip(tip));
@@ -374,7 +393,6 @@ public class FormsUtil
 				ValidationState validationState = StringUtil.validate(newval, validationType, required );
 				field.setBorder(Borders.getValidationBorder(validationState));  
 				decoration.setGraphic(GlyphsDude.createValidationIcon(validationState));  
-				
 			});
 		}
 		decoration.setGraphic(required ? GlyphsDude.createValidationIcon(ValidationState.REQUIRED) : null);  
@@ -392,6 +410,7 @@ public class FormsUtil
 		if (validationType == ValidationType.PERCENT)	return "Must be a percentage between 0-100%";
 		if (validationType == ValidationType.ISBN)		return "Must be a valid ISBN";
 		if (validationType == ValidationType.ZIP)		return "Must be a valid 5 or 9 digit zipcode";
+		if (validationType == ValidationType.PHONE)		return "Must be a ten digit phone number";
 		return "";
 	}
 	//--------------------------------------------------------------------------------------------
@@ -420,9 +439,9 @@ public class FormsUtil
 	// ----------------------------------------------------
 	 public static Region createMultipleInstanceForm(String prefix)
 	{
-		 VBox container = FormsUtil.makeFormContainer();
-		 Region desc = FormsUtil.makeMultipleInstanceBox("Description", "1");   // ("Project", "project", 400, tooltip);
-		 Region reasearcher = FormsUtil.makeMultipleInstanceBox("Author", "researcher");
+		 VBox container = Forms.makeFormContainer();
+		 Region desc = Forms.makeMultipleInstanceBox("Description", "1");   // ("Project", "project", 400, tooltip);
+		 Region reasearcher = Forms.makeMultipleInstanceBox("Author", "researcher");
 		 container.getChildren().addAll(desc, reasearcher);
 		 return container;
 	}

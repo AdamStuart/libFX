@@ -4,7 +4,7 @@
  * Copyright 2002 - 2013 JIDE Software Inc. All rights reserved.
  */
 
-package util;
+package services;
 
 import java.security.AccessControlException;
 import java.util.Locale;

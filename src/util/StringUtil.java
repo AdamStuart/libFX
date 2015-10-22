@@ -16,11 +16,12 @@ import java.util.regex.Pattern;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.commons.validator.routines.UrlValidator;
 
+import gui.Forms.ValidationState;
+import gui.Forms.ValidationType;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
-import util.FormsUtil.ValidationState;
-import util.FormsUtil.ValidationType;
+import services.RandomSequenceGenerator;
 
 public class StringUtil
 {
@@ -202,7 +203,7 @@ public class StringUtil
 
 	static char DEC_PT = '.';			// TODO -- locale dependent !!
 	
-	static boolean isKeyLegal(KeyEvent ev, TextField fld, ValidationType valType)
+	public static boolean isKeyLegal(KeyEvent ev, TextField fld, ValidationType valType)
 	{
 		char c = getChar(ev);
 		if (valType == ValidationType.WHOLE)		return Character.isDigit(c);
@@ -262,15 +263,14 @@ public class StringUtil
 	}
 	//-------------------------------------------------------
 
-	static ValidationState validate(String s, ValidationType valType, boolean required)
+	public static ValidationState validate(String s, ValidationType valType, boolean required)
 	{
 		if (s.trim().isEmpty() && required ) 		return ValidationState.REQUIRED;		// if empty and not required return true
 		if (isStateLegal(s, valType, required)) 	return ValidationState.OK;
-		 
 		return ValidationState.ERROR;
 	}
-//-------------------------------------------------------
-	static boolean isStateLegal(String s, ValidationType valType, boolean required)
+
+	private static boolean isStateLegal(String s, ValidationType valType, boolean required)
 	{
 		if (s.trim().isEmpty()) return !required;		// if empty and not required return true
 		

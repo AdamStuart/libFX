@@ -11,6 +11,7 @@
  */
 package icon;
 
+import gui.Forms.ValidationState;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
@@ -21,7 +22,6 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.TreeItem;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import util.FormsUtil.ValidationState;
 
 /**
  *

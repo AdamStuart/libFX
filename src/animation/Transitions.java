@@ -1,4 +1,4 @@
-package util;
+package animation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +23,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 import javafx.util.Duration;
+import util.NodeUtil;
 
 /**
  * original by hansolo  Date: 18.06.13
@@ -30,7 +31,7 @@ import javafx.util.Duration;
  * most of these break the image into tiles and make multiple time lines to animate tiles independently
  * Simpler node transitions are in animation.AnimationUtils
  */
-public class UtilTransitions  {
+public class Transitions  {
 
 	public static enum Transition {
 	    VERTICAL_AROUND_X,  		VERTICAL_AROUND_Y,	    	VERTICAL_AROUND_X_AND_Y,
@@ -59,7 +60,7 @@ public class UtilTransitions  {
 
     public List<StackPane> getTiles()	{ return tiles;	}
     // ******************** Initialization ************************************
-    public UtilTransitions(Image front, Image back) {
+    public Transitions(Image front, Image back) {
         A         			= front; 
         B          			= back; 
 
