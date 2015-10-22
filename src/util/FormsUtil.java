@@ -1,9 +1,9 @@
 package util;
 
 import java.util.ArrayList;
-import java.util.function.Supplier;
 
 import gui.Borders;
+import icon.FontAwesomeIcons;
 import icon.GlyphsDude;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -22,7 +22,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
-import validation.Decorator;
 
 /*
  * FormsUtil contains a lot of static functions that will make
@@ -33,7 +32,7 @@ import validation.Decorator;
 public class FormsUtil
 {
 	public enum ValidationType 		{   NONE, STRING, WHOLE, INT,	DOUBLE,	 DATE,	PERCENT, CURRENCY, URL, EMAIL, 
-										ISBN, DOTTED3, IP4, IP6, CREDITCARD	}		//AST
+										ISBN, DOTTED3, IP4, IP6, CREDITCARD, ZIP, PHONE	}		//AST
 
 	public enum ValidationState 	{   OK, WARNING, REQUIRED, ERROR,	LOCKED,	UNKNOWN	}
 
@@ -139,7 +138,8 @@ public class FormsUtil
 			Tooltip.install(label, ttip);
 			Tooltip.install(field, ttip);
 		}
-	    Button urlButton = new Button("Open", new ImageView(new Image("/validation/web.png")));				// TODO path
+	    Button urlButton = new Button("Open");				// TODO path  , new ImageView(new Image("/validation/web.png")
+	    urlButton.setGraphic((GlyphsDude.createIcon(FontAwesomeIcons.GLOBE)));
 	    urlButton.setId(prefix + "urlButton");
 	    urlButton.setOnAction(event-> { StringUtil.launchURL(field.getText()); });
 	    urlButton.setDisable(true);
@@ -157,7 +157,8 @@ public class FormsUtil
         TextField ISBNField = new TextField("");
         ISBNField.setId(prefix + "ISBNField");
 		Label decoration = new Label("");
-        Button amazonButton = new Button("Amazon", new ImageView(new Image("validation/Amazon.png")));
+        Button amazonButton = new Button("Amazon");
+        amazonButton.setGraphic((GlyphsDude.createIcon(FontAwesomeIcons.AMAZON)));
         amazonButton.setId(prefix + "amazonButton");
         amazonButton.setOnAction(event ->{ StringUtil.launchURL(AMAZON_SERVICE +  ISBNField.getText());   });
         amazonButton.setDisable(true);
@@ -390,6 +391,7 @@ public class FormsUtil
 		if (validationType == ValidationType.CURRENCY)	return "Must be a valid currency";
 		if (validationType == ValidationType.PERCENT)	return "Must be a percentage between 0-100%";
 		if (validationType == ValidationType.ISBN)		return "Must be a valid ISBN";
+		if (validationType == ValidationType.ZIP)		return "Must be a valid 5 or 9 digit zipcode";
 		return "";
 	}
 	//--------------------------------------------------------------------------------------------
@@ -423,30 +425,26 @@ public class FormsUtil
 		 Region reasearcher = FormsUtil.makeMultipleInstanceBox("Author", "researcher");
 		 container.getChildren().addAll(desc, reasearcher);
 		 return container;
-	
 	}
-		//--------------------------------------------------------------------------------------------
-		public static VBox makeMultipleInstanceBox(String prompt, String id)
-		{
-			VBox lines = new VBox(4);
-			addInstance(lines, prompt, id);
-			return lines; 
-		}
-		
-		private static int MAX_OCCURS= 4;
-		public static void addInstance(VBox lines, String prompt, String id)
-		{
-			HBox line = makeLabelFieldHBox(prompt, id);
-			Button plusButton = new Button("+");
-			plusButton.setOnAction( event -> { 
-			    	addInstance(lines, prompt, id+"+"); 
-			    	plusButton.setVisible(false);
-			});				
-			if (lines.getChildren().size() < MAX_OCCURS-1)
-				line.getChildren().add(plusButton);
-			lines.getChildren().add(line);		
-		}
-	//	
+	//--------------------------------------------------------------------------------------------
+	public static VBox makeMultipleInstanceBox(String prompt, String id)
+	{
+		VBox lines = new VBox(4);
+		addInstance(lines, prompt, id);
+		return lines; 
+	}
+	
+	private static int MAX_OCCURS= 4;
+	public static void addInstance(VBox lines, String prompt, String id)
+	{
+		HBox line = makeLabelFieldHBox(prompt, id);
+		Button plusButton = new Button("+");
+		plusButton.setOnAction( event -> {     	addInstance(lines, prompt, id+"+"); 	plusButton.setVisible(false);	});				
+		if (lines.getChildren().size() < MAX_OCCURS-1)
+			line.getChildren().add(plusButton);
+		lines.getChildren().add(line);		
+	}
+//	
  
 
 }

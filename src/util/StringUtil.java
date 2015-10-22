@@ -139,6 +139,13 @@ public class StringUtil
 
 	public static boolean isValidUrl (String s) 	{		return urlValidator.isValid(s);	}	
 	public static boolean isValidEmail (String s) 	{		return emailValidator.isValid(s);	}	
+	public static boolean isValidZipCode (String s) 
+	{		
+		if (isInteger(s) && s.length() == 5) 			return true;
+		if (s.length() == 10 && s.charAt(5) == '-' &&			// of the form 11111-2222
+			isInteger(s.substring(0,5)) && isInteger(s.substring(6,10))) 			return true;
+		return false;	
+	}	
 
 	//-----------------------------------------------------------------------------------
 	public static boolean isValidIPAddress (String s) 	
@@ -205,6 +212,12 @@ public class StringUtil
 			if (c == '-') return fld.getCaretPosition() == 0;
 			return false;
 		}
+		if (valType == ValidationType.ZIP)	
+		{
+			if (Character.isDigit(c)) return true;
+			if (c == '-') return fld.getCaretPosition() == 5;
+			return false;
+		}
 		if (valType == ValidationType.DOUBLE)	
 		{
 			if (Character.isDigit(c)) return true;
@@ -269,6 +282,7 @@ public class StringUtil
 		if (valType == ValidationType.EMAIL)		return isValidEmail(s);
 		if (valType == ValidationType.IP4)			return isValidIPAddress(s);
 		if (valType == ValidationType.IP6)			return isValidIPAddress(s);
+		if (valType == ValidationType.ZIP)			return isValidZipCode(s);
 		return true;
 	}
 //-------------------------------------------------------

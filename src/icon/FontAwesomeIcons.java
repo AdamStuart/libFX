@@ -33,6 +33,7 @@ public enum FontAwesomeIcons implements GlyphIcons {
     AMBULANCE('\uf0F9'),
     ANCHOR('\uf13D'),
     ANDROID('\uf17B'),
+    AMAZON('\uf270'),
     ANGELLIST('\uf209'),
     ANGLE_DOUBLE_DOWN('\uf103'),
     ANGLE_DOUBLE_LEFT('\uf100'),

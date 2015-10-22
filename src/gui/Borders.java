@@ -13,7 +13,7 @@ public class Borders
 	static public Border redBorder = new Border(new BorderStroke(Color.RED, 
 					BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(5))	);
 
-	static public Border thinRedBorder = new Border(new BorderStroke(Color.FIREBRICK, 
+	static public Border thinRedBorder = new Border(new BorderStroke(Color.RED, 
 					BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(2))	);
 
 	static public Border blueBorder = new Border(new BorderStroke(Color.BLUE, 
@@ -45,12 +45,16 @@ public class Borders
 	static public Border dashedBorder = new Border(new BorderStroke(Color.DARKGRAY, 
 					BorderStrokeStyle.DASHED, CornerRadii.EMPTY, new BorderWidths(2))	);
 
+	static public Border emptyBorder = new Border(new BorderStroke(null, 
+					BorderStrokeStyle.NONE, CornerRadii.EMPTY, new BorderWidths(2))	);
+
+
 	public static Border getValidationBorder(ValidationState validationState)
 	{
-		if (validationState == ValidationState.ERROR)		return redBorder;
+		if (validationState == ValidationState.ERROR)		return thinRedBorder;
 		if (validationState == ValidationState.REQUIRED)	return thinRedBorder;
 		if (validationState == ValidationState.WARNING)		return thinGold;
-		return null;
+		return emptyBorder;
 	}
 
 }
