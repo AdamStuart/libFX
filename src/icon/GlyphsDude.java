@@ -11,7 +11,12 @@
  */
 package icon;
 
+import gui.Borders;
 import gui.Forms.ValidationState;
+import javafx.scene.Cursor;
+import javafx.scene.Group;
+import javafx.scene.ImageCursor;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
@@ -20,8 +25,14 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.TreeItem;
+import javafx.scene.image.Image;
+import javafx.scene.image.WritableImage;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
+import util.ImageUtil;
+import util.NodeUtil;
 
 /**
  *
@@ -56,6 +67,41 @@ public class GlyphsDude {
         text.getStyleClass().add("glyph-icon");
         text.setStyle(String.format("-fx-font-family: %s; -fx-font-size: %s;", icon.getFontFamily(), iconSize));
         return text;
+    }
+    
+    
+    public static Cursor getTextCursor(String txt)
+    {
+    	int W = 50;
+    	Label label = new Label(txt);
+    	NodeUtil.forceSize(label, W, W);
+	    label.setStyle("-fx-background-color: white; -fx-text-fill:green; -fx-font-size: 42; -fx-text-alignment: CENTER; ");
+	    label.setWrapText(true);
+	    label.setBorder(Borders.blueBorder1);
+	    label.setTextAlignment(TextAlignment.CENTER);
+	    Scene scene = new Scene(new Group(label));
+	    WritableImage img = new WritableImage(W, W) ;
+	    scene.snapshot(img);
+    	return new ImageCursor(img); 
+    }
+
+//http://stackoverflow.com/questions/32635311/how-to-write-custom-text-on-javafx-2-2-cursor
+    public static Cursor createCursor(GlyphIcons icon, String iconSize) {
+    	int offset = 0;
+    	int padding = 2;
+        Text text = new Text(icon.characterToString());
+        text.getStyleClass().add("glyph-icon");
+        text.setStyle(String.format("-fx-font-family: %s; -fx-font-size: %s;", icon.getFontFamily(), iconSize));
+        Image textImage = text.snapshot(null, null);
+        int width = (int)textImage.getWidth();
+        int height = (int)textImage.getHeight();
+        WritableImage cursorImage = new WritableImage(width + offset, height + offset);
+        cursorImage.getPixelWriter().setPixels(offset, offset, width, height, textImage.getPixelReader(), 0, 0);
+        for (int i = 0; i < padding; i++) {
+            cursorImage.getPixelWriter().setColor(i, padding/2, Color.BLACK);
+            cursorImage.getPixelWriter().setColor(padding/2, i, Color.BLACK);
+        }
+       return new ImageCursor(cursorImage);
     }
 
     public static Label createIconLabel(GlyphIcons icon, String text, String iconSize, String fontSize, ContentDisplay contentDisplay) {
