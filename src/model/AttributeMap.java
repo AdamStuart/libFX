@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Scanner;
 
-import javafx.scene.Node;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;

@@ -3,9 +3,8 @@ package model;
 import java.util.ArrayList;
 import java.util.List;
 
-import util.StringUtil;
-import util.StringUtil.TYPES;
 import javafx.collections.ObservableList;
+import util.StringUtil;
 
 public class CSVTableData
 {
