@@ -1,5 +1,7 @@
 package gui;
 
+import java.util.HashMap;
+
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.ImageCursor;
@@ -8,7 +10,6 @@ import javafx.scene.control.Label;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.text.TextAlignment;
 import util.NodeUtil;
 
 public class Cursors
@@ -31,18 +32,22 @@ public class Cursors
 		return Cursor.HAND;
 	}
 	
-	// TODO -- this doesnt center the text properly, imbed it to center
     public static Cursor getTextCursor(String txt)
     {
     	return  getTextCursor(txt, Color.GREEN); 
     }
-	// TODO -- this doesnt center the text properly, imbed it to center
-    public static Cursor getTextCursor(String txt, Color col)
+    
+    static HashMap<String, Cursor> cursorCache = new HashMap<String, Cursor>();
+    static String STYLE = "-fx-background-color: whitesmoke; -fx-font-size: 36; ";
+    static int W = 50;		// the width (and height) of the cursor
+
+	public static Cursor getTextCursor(String txt, Color col)
     {
-	    String STYLE = "-fx-background-color: whitesmoke; -fx-font-size: 36; ";
-    	int W = 50;
+    	Cursor curs = cursorCache.get(txt);
+    	if (curs != null) return curs;
+    	
     	Label label = new Label(txt);
-		label.setStyle(STYLE );
+		label.setStyle(STYLE);
 	    label.setWrapText(true);
 	    label.setTextFill(col);
 	    StackPane pane = new StackPane(label);
@@ -51,7 +56,10 @@ public class Cursors
 	    Scene scene = new Scene(pane);
 	    WritableImage img = new WritableImage(W, W) ;
 	    scene.snapshot(img);
-    	return new ImageCursor(img); 
+	    curs = new ImageCursor(img, W/2, W/2); 
+	    cursorCache.put(txt, curs);
+	    System.out.println("cursorCache: " + txt);
+	    return curs; 
     }
 }
 
