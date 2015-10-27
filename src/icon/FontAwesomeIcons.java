@@ -24,6 +24,16 @@ package icon;
  */
 public enum FontAwesomeIcons implements GlyphIcons {
 
+	DINGBAT1('\u2776'),
+	DINGBAT2('\u2777'),
+	DINGBAT3('\u2778'),
+	DINGBAT4('\u2779'),
+	DINGBAT5('\u2780'),
+	DINGBAT6('\u2781'),
+	DINGBAT7('\u2782'),
+	DINGBAT8('\u2783'),
+	DINGBAT9('\u2785'),
+	
     ADJUST('\uf042'),
     ADN('\uf170'),
     ALIGN_CENTER('\uf037'),

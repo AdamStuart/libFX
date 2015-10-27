@@ -11,19 +11,22 @@ import javafx.scene.paint.Color;
 public class Borders
 {
 	static public Border redBorder = new Border(new BorderStroke(Color.RED, 
-					BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(5))	);
+					BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(3))	);
 
 	static public Border thinRedBorder = new Border(new BorderStroke(Color.RED, 
 					BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(2))	);
 
-	static public Border blueBorder = new Border(new BorderStroke(Color.BLUE, 
+	static public Border blueBorder1 = new Border(new BorderStroke(Color.BLUE, 
+					BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(1))	);
+
+	static public Border blueBorder5 = new Border(new BorderStroke(Color.BLUE, 
 					BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(5))	);
 
 	static public Border greenBorder = new Border(new BorderStroke(Color.GREEN, 
-					BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(5))	);
+					BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(2))	);
 
 	static public Border cyanBorder = new Border(new BorderStroke(Color.CYAN, 
-					BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(5))	);
+					BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(2))	);
 
 	static public Border magentaBorder = new Border(new BorderStroke(Color.MAGENTA, 
 					BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(5))	);

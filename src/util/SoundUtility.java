@@ -2,6 +2,7 @@ package util;
 
 import java.applet.Applet;
 import java.applet.AudioClip;
+import java.awt.Toolkit;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -17,10 +18,15 @@ public class SoundUtility
 	// Soundutility.playSound("click");		should be all you need
     public static void playSound(String soundName)
     {
-        AudioClip audioClip = getClip(soundName);
-        if (audioClip != null)
-             audioClip.play();
-     }
+       if ("BEEP".equals(soundName.toUpperCase()))
+    		Toolkit.getDefaultToolkit().beep();
+       else
+       {
+    	   AudioClip audioClip = getClip(soundName);
+           if (audioClip != null)
+               audioClip.play();
+       }
+    }
     //----------------------------------------------------------------------    
     private static URL codeBase;
     private static HashMap<URL, AudioClip> soundMap = new HashMap<URL, AudioClip>();
