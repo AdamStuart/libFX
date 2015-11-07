@@ -25,7 +25,8 @@ import util.StringUtil;
  * FormsUtil contains a lot of static functions that will make
  * input boxes for special types of fields.  
  * Validation is done based on listening to the fields text changes.
- */
+ *
+ **/
 
 public class Forms
 {
