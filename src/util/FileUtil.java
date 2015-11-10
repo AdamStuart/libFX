@@ -175,33 +175,47 @@ public class FileUtil
 
 	
 	//-------------------------------------------------------------
-	static public TreeItem<Node> getXMLtree(File f)
+	static public TreeItem<Node> getXMLtree(File f, String[] suppressNames)
 	{
 		StringBuffer buff = new StringBuffer();
 		readFileIntoBuffer(f, buff);
-		return getXMLtree(buff.toString());
+		return getXMLtree(buff.toString(), suppressNames);
 	}
 	//-------------------------------------------------------------
-	static public TreeItem<Node> getXMLtree(String rawtext)
+	static public TreeItem<Node> getXMLtree(String rawtext, String[] suppressNames)
 	{
 		TreeItem<Node> root = new TreeItem<Node>();
 		Document parseddoc = convertStringToDocument(rawtext);
 		if (parseddoc != null)
-			addKids(root, parseddoc.getChildNodes());
+			addKids(root, parseddoc.getChildNodes(), suppressNames);
 		return root;
 		
 	}
 	
-	static private void addKids(TreeItem<Node> parent, NodeList kids)
+	static private void addKids(TreeItem<Node> parent, NodeList kids, String[] suppressNames)
 	{
 		int n = kids.getLength();
 		for (int i=0; i<n; i++) 
 		{
 			Node node = kids.item(i);
+			if (node == null)  continue;
+			String nodeName = node.getNodeName();
+			String text = node.getTextContent();
+			if (nodeName == null || nodeName.startsWith("#"))  continue;
+		
+			System.out.println("adding: " + nodeName);
 			TreeItem<Node> kid = new TreeItem<Node>();
 			kid.setValue(node);
+			
+			if (suppressNames != null)
+			{
+				boolean exp = true;
+				for (String s : suppressNames)
+					if (s.equals(nodeName)) exp = false;
+				kid.setExpanded(exp);
+			}
 			parent.getChildren().add(kid);
-			addKids(kid,node.getChildNodes());
+			addKids(kid,node.getChildNodes(), suppressNames);
 		}
 	}
 	//-------------------------------------------------------------
