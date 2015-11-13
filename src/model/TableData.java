@@ -5,6 +5,7 @@ import java.util.List;
 
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import util.StringUtil;
 
 public class TableData

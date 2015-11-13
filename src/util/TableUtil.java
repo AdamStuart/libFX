@@ -2,6 +2,7 @@ package util;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
@@ -57,6 +58,11 @@ public class TableUtil
 			inTable.getItems().removeAll(inTable.getItems());
 			inTable.getColumns().removeAll(inTable.getColumns());
 		}
-	}		
+	}
+
+//	public static void addSelectionListener(TableView table, ChangeListener object)
+//	{
+//		table.getSelectionModel().selectedItemProperty().addListener(object);		
+//	}		
 
 }

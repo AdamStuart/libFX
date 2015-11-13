@@ -8,35 +8,81 @@ public class Histogram1D
 	private int size;
 	private int[] counts;
 	private Range range;
+	boolean isLog = true;
 
+	public String toString() { return range.toString(); }
+	public Range getRange()	{ return range;	}
 	// ----------------------------------------------------------------------------------------------------
 	public Histogram1D(int len, Range inX)
-		{
-			size = len;
-			counts = new int[size];
-			range = inX;
-		}
+	{
+		size = len;
+		counts = new int[size];
+		range = inX;
+		if (range.width() == 0)		{ 	range.min = 0;	range.max = 1; }
+	}
 
+	public Histogram1D(int len, Range inX, boolean log)
+	{
+		this(len, inX);
+		isLog = log;
+	}
+
+	public double getPercentile(int perc)
+	{
+		double val = 0;
+		int area = getArea();
+		int evCount = area * perc / 100;
+		int i;
+		for (i=0; val<evCount; i++)
+			val += counts[i];
+		double out = range.min + (i * range.width() / size);
+		return out;
+	}
+	
+	private int getArea()
+	{
+		int area = 0;
+		for (int i=0; i<size; i++)
+			area += counts[i];
+		return area;
+	}
+	int counter = 0;
 	// ----------------------------------------------------------------------------------------------------
 	public void count(double x)
 	{
-		int bin = (int) (0.5 + ((Math.log(x) - range.min) * range.width()) / size);
+		int bin = -1;
+		if (isLog)
+			bin = (int) (0.5 + ((Math.log(x) - range.min) * range.width()) / size);
+		else
+			bin = (int) (0.5 + ((x - range.min) / range.width()) * size);
+
+		if (bin < 0) bin = 0;
+		if (bin >= size) bin = size-1;
 		counts[bin]++;
+		counter++;
+		System.out.println("incrementing " + counter);
 	}
 
-	public void count(float x)
-	{
-		int bin = (int) (0.5 + ((Math.log(x) - range.min) / range.width()) * size);
-		if (bin >= 0 && bin < size)
-			counts[bin]++;
-	}
+//	public void count(float x)
+//	{
+//		int bin = (int) (0.5 + ((Math.log(x) - range.min) / range.width()) * size);
+//		if (bin >= 0 && bin < size)
+//			counts[bin]++;
+//	}
 
 	// ----------------------------------------------------------------------------------------------------
 	boolean grayscale = true;
 
 	double mode = 0;
-	void setMode(double d)	{		mode = d;	}		// this will be the top of the Y axis
 
+	void setMode(double d)	{		mode = d;	} // this will be the top of the Y axis
+
+	double getMode()	{
+		int max = 0;
+		for (int row = 0; row < size; row++)
+			max = Math.max(max, counts[row]);
+		return max;
+	}
 	// ----------------------------------------------------------------------------------------------------
 	Color colorLookup(int val)
 	{
@@ -48,14 +94,25 @@ public class Histogram1D
 			}
 		return Color.RED;
 	}
+	// ----------------------------------------------------------------------------------------------------
+	public XYChart.Series rawDataSeries()
+	{
+		System.out.println("Mode: " + getMode());
+		double scale = range.width() / size;
+		XYChart.Series series = new XYChart.Series();
+		for (int i = 0; i < size; i++)
+			series.getData().add(new XYChart.Data(i * scale, counts[i]));
+		return series;
+	}
 
 	// ----------------------------------------------------------------------------------------------------
 	public XYChart.Series getDataSeries()
 	{
 		double[] smoothed = smooth();
+		double scale = range.width() / size;
 		XYChart.Series series = new XYChart.Series();
 		for (int i = 0; i < size; i++)
-			series.getData().add(new XYChart.Data(i, smoothed[i]));
+			series.getData().add(new XYChart.Data(i * scale, smoothed[i]));
 		
 //		if (series.nodeProperty() != null)
 //		{

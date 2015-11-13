@@ -33,6 +33,7 @@ import org.xml.sax.InputSource;
 
 import com.opencsv.CSVReader;
 
+import javafx.application.Application;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -49,6 +50,15 @@ import services.SystemInfo;
 
 public class FileUtil
 {
+	static public void openFile(Application app, File f)
+	{
+		try
+		{
+			app.getHostServices().showDocument(f.toURI().toURL().toExternalForm());
+		}
+		catch (Exception e){}
+	}
+
 	static Document openXML(File f)
 	{
 		StringBuffer buff = new StringBuffer();
@@ -239,7 +249,7 @@ public class FileUtil
 	
 	static public CSVTableData openCSVfile(String absPath, TableView<ObservableList<StringProperty>> table)
 	{
-		if (absPath == null || table == null) return null;
+		if (absPath == null) return null;				// || table == null
 		CSVTableData output = new CSVTableData();
 		try
 		{
@@ -263,7 +273,7 @@ public class FileUtil
 				output.getColumnNames().add(fld);
 				data.add(FXCollections.observableArrayList());
 				System.out.println("Column Name: " + fld);
-			    table.getColumns().add(TableUtil.createColumn(idx++, fld));
+			    if (table != null) table.getColumns().add(TableUtil.createColumn(idx++, fld));
 			}
 			output.setTypes(StringUtil.inferTypes((isHeader) ? row : (String[]) content.get(1)));
 			
@@ -285,7 +295,7 @@ public class FileUtil
 //				}
 //				System.out.println();
 			}
-	        table.setItems(list);
+	        if (table != null) table.setItems(list);
 		} 
 		catch (NumberFormatException e)	
 		{		 

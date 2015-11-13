@@ -29,6 +29,7 @@ public class CSVTableData
 	public  List<StringUtil.TYPES> getTypes() { return types; }
 	public  List<String> getColumnNames() { return columnNames; }
 	public  List<ObservableList<String>> getData() { return data; }
+	public  ObservableList<String> getData(int i) { return data.get(i); }
 
 	public  void  setTypes(List<StringUtil.TYPES> t) { types = t; }
 	public  void  setColumnNames(List<String> c) { columnNames =c; }
