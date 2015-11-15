@@ -9,21 +9,29 @@ public class Histogram1D
 	private int[] counts;
 	private Range range;
 	boolean isLog = true;
+	private String name;
 
-	public String toString() { return range.toString(); }
+	public String toString() { return name + "  " + range.toString(); }
 	public Range getRange()	{ return range;	}
+	public String getName() { return name; 	}
 	// ----------------------------------------------------------------------------------------------------
 	public Histogram1D(int len, Range inX)
 	{
+		this("", len, inX);
+	}
+	
+	public Histogram1D(String inName, int len, Range inX)
+	{
+		name = inName;
 		size = len;
 		counts = new int[size];
 		range = inX;
 		if (range.width() == 0)		{ 	range.min = 0;	range.max = 1; }
 	}
 
-	public Histogram1D(int len, Range inX, boolean log)
+	public Histogram1D(String inName,int len, Range inX, boolean log)
 	{
-		this(len, inX);
+		this(inName, len, inX);
 		isLog = log;
 	}
 
@@ -46,7 +54,7 @@ public class Histogram1D
 			area += counts[i];
 		return area;
 	}
-	int counter = 0;
+//	int counter = 0;
 	// ----------------------------------------------------------------------------------------------------
 	public void count(double x)
 	{
@@ -59,8 +67,8 @@ public class Histogram1D
 		if (bin < 0) bin = 0;
 		if (bin >= size) bin = size-1;
 		counts[bin]++;
-		counter++;
-		System.out.println("incrementing " + counter);
+//		counter++;
+//		System.out.println("incrementing " + counter);
 	}
 
 //	public void count(float x)
@@ -111,14 +119,23 @@ public class Histogram1D
 		double[] smoothed = smooth();
 		double scale = range.width() / size;
 		XYChart.Series series = new XYChart.Series();
+		double sum = 0;
+		int ct = 0;
+		double upper = 0;
 		for (int i = 0; i < size; i++)
-			series.getData().add(new XYChart.Data(i * scale, smoothed[i]));
+		{
+			sum += smoothed[i];
+			double x = range.min + (i * scale);
+			series.getData().add(new XYChart.Data(x, smoothed[i]));
+			if (x > 500)  upper += smoothed[i];
+		}
 		
 //		if (series.nodeProperty() != null)
 //		{
 //			ObjectProperty<Node> p = series.nodeProperty();
 //					((Node)(series.nodeProperty().getValue())).setVisible(false);
 //		}
+		System.out.println("Mean: " + (int) (sum / size) + " w/ " + (int) (100 * upper / sum) + "% events > 500");
 		return series;
 	}
 

@@ -59,7 +59,7 @@ public class FileUtil
 		catch (Exception e){}
 	}
 
-	static Document openXML(File f)
+	static public Document openXML(File f)
 	{
 		StringBuffer buff = new StringBuffer();
 		readFileIntoBuffer(f, buff);
@@ -213,7 +213,7 @@ public class FileUtil
 			String text = node.getTextContent();
 			if (nodeName == null || nodeName.startsWith("#"))  continue;
 		
-			System.out.println("adding: " + nodeName);
+//			System.out.println("adding: " + nodeName);
 			TreeItem<Node> kid = new TreeItem<Node>();
 			kid.setValue(node);
 			

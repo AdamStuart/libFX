@@ -60,6 +60,17 @@ public class GlyphsDude {
 
     	}
      }
+    public static Button plusButton()
+    {
+    	return createIconButton(FontAwesomeIcons.PLUS_CIRCLE, "", "16", "16", ContentDisplay.CENTER);
+    }
+    
+    public static Button minusButton()
+    {
+    	return createIconButton(FontAwesomeIcons.MINUS_CIRCLE, "", "16", "16", ContentDisplay.CENTER);
+    }
+    
+    
 
     public static Text createIcon(GlyphIcons icon, String iconSize) {
         Text text = new Text(icon.characterToString());
