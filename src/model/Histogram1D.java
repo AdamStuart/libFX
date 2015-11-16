@@ -1,10 +1,14 @@
 package model;
 
+import javafx.scene.Node;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.paint.Color;
 
 public class Histogram1D
 {
+	private static final int DEFAULT_HISTO_LEN = 100;
 	private int size;
 	private int[] counts;
 	private Range range;
@@ -18,6 +22,11 @@ public class Histogram1D
 	public Histogram1D(int len, Range inX)
 	{
 		this("", len, inX);
+	}
+	
+	public Histogram1D(String inName,Range inX)
+	{
+		this(inName, DEFAULT_HISTO_LEN, inX, false);
 	}
 	
 	public Histogram1D(String inName, int len, Range inX)
@@ -224,5 +233,20 @@ public class Histogram1D
 		return vector;
 	}
 	private double getRadius(int resolution)	{	return 10.0;	}
+	public LineChart<Number, Number> makeChart()
+	{
+//		double roundedMin = ((int) r.min() / 100 ) * 100;
+//		double roundedMax = ((int) r.max() / 100 ) * 100;
+//		double unit = (roundedMax - roundedMin) / 5;
+		NumberAxis  xAxis = new NumberAxis();		//roundedMin, roundedMax, unit
+		NumberAxis  yAxis = new NumberAxis();
+		LineChart<Number, Number>  chart = new LineChart<Number, Number>(xAxis, yAxis);
+		chart.setTitle(getName());
+		chart.setCreateSymbols(false);
+		chart.getData().add( getDataSeries());	
+		chart.setLegendVisible(false);
+		chart.setPrefHeight(100);
+		return chart;
+	}
 
 }
