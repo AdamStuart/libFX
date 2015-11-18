@@ -51,7 +51,8 @@ public class XMLFactory
 			    XMLEvent event = eventFactory.createStartDocument();
 			    writer.add(event);
 			    for (XMLEvent ev : steps)
-			    	writer.add(ev);
+			    	if (ev != null)
+			    		writer.add(ev);
 			    writer.flush();
 			    writer.close();
 			} 

@@ -478,6 +478,13 @@ public class FileUtil
 		readFileIntoBuffer(f.getAbsolutePath(), buff);
 	}
 	
+	
+	static public String readFileIntoString(String absolutePath)
+	{
+		StringBuffer buffer = new StringBuffer();
+		readFileIntoBuffer(absolutePath, buffer);
+		return buffer.toString();
+	}
 	static public void readFileIntoBuffer(String absolutePath, StringBuffer buff)
 	{
         BufferedReader br = null;
