@@ -185,6 +185,8 @@ public class FileUtil
 
 	
 	//-------------------------------------------------------------
+	static public TreeItem<Node> getXMLtree(File f)	{		return getXMLtree(f, null);	}
+	//-------------------------------------------------------------
 	static public TreeItem<Node> getXMLtree(File f, String[] suppressNames)
 	{
 		StringBuffer buff = new StringBuffer();
@@ -243,10 +245,7 @@ public class FileUtil
 		for (int i=0; i<sie; i++)
 			findkeys(kids.item(i), list);
 	}
-	
-	
-	
-	
+		
 	static public CSVTableData openCSVfile(String absPath, TableView<ObservableList<StringProperty>> table)
 	{
 		if (absPath == null) return null;				// || table == null
@@ -379,10 +378,6 @@ public class FileUtil
 		return entryList.toString();
 	}
 //--------------------------------------------------------------------------------------
-
-
-
-	
 	
 	static String LINE_DELIM = "\n";
 	

@@ -33,7 +33,7 @@ public class StringUtil
 		return full.substring(0,idx1) + insert + full.substring(idx2);
 	}
 
-	static public String chopExtension(String in)	{	return in.substring(0,in.lastIndexOf("."));	}
+	static public String chopExtension(String in)	{	int idx = in.lastIndexOf("."); return idx < 0 ? in : in.substring(0,idx);	}
 	static public String chopLast(String in)		{	return in.substring(0,in.length()-1);	}
 	static public String chopLast2(String in)		{	return in.substring(0,in.length()-2);	}
 //	static public ObservableList<String> lines(String in)
