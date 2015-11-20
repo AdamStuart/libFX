@@ -93,9 +93,7 @@ public class FCSFileReader
 	private void readText()
 	{
 		textSection = parseAttributes(new String(content,textStart,textEnd));
-
-		nBytes = bodyEnd - bodyStart +1 ;
-		
+		nBytes = bodyEnd - bodyStart +1 ;		
 		try
 		{
 			nEvents = Integer.parseInt(textSection.get("$TOT"));

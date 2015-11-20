@@ -14,41 +14,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
-// line format is "2012-03-12", "23", "3", "325", "32"
+// line format is "01/15/1959", "23", "3", "325", "32"
 public class FileData {
 	private List<TreeMap<LocalDateTime, Integer>> chartValues;
 	private String fileName;
 	private List<File> files;
 	private AggregationLevel level;
 	
+	public List<TreeMap<LocalDateTime, Integer>> getChartValues() 			{	return chartValues;	}
+	public void setChartValues(List<TreeMap<LocalDateTime, Integer>> values){	chartValues = values;	}
 
-	/*@param
-	 *@return
-	 *@throws
-	 *
-	 * 
-	 */
-	public List<TreeMap<LocalDateTime, Integer>> getChartValues() {
-		return chartValues;
-	}
-
-	/*@param
-	 *@return
-	 *@throws
-	 *
-	 * 
-	 */
-	public void setChartValues(List<TreeMap<LocalDateTime, Integer>> chartValues) {
-		this.chartValues = chartValues;
-	}
-
-
-	/*@param
-	 *@return
-	 *@throws
-	 *
-	 * 
-	 */
 	public void addChartValues(int index, TreeMap<LocalDateTime, Integer>chartValue) {
 		
 		if(index<chartValues.size())
@@ -67,7 +42,10 @@ public class FileData {
 		{
 			value = Integer.parseInt(str);
 		} catch (NumberFormatException e) {
-			value = 0;
+		try
+		{
+			value = (int) Double.parseDouble(str);
+		} catch (NumberFormatException f) 		{ return 0;}
 			return value;
 		}
 		return value;
@@ -77,20 +55,15 @@ public class FileData {
 	 * @return the AggregationLevel
 	 */
 	public AggregationLevel getLevel() { return level; }
-
-	/**
-	 * @param level object  the level object  to set
-	 */
-	public void setLevel(AggregationLevel level) {	this.level = level;	}
+	public void setLevel(AggregationLevel l) {	level = l;	}
 	/**
 	 * @return the files
 	 */
-	public List<File> getFiles() {		return files;	}
-	public void setFiles(List<File> files) {		this.files = files;	}
+	public List<File> getFiles() 		{		return files;	}
+	public void setFiles(List<File> fs) {		files = fs;	}
 
-	public String getFileName() {		return fileName;	}
-
-	public void setFileName(String fileName) {		this.fileName = fileName;	}
+	public String getFileName() 		{		return fileName;	}
+	public void setFileName(String fil) {		fileName = fil;	}
 
 	public FileData() {
 		chartValues = new ArrayList<TreeMap<LocalDateTime, Integer>>();//TreeMap<LocalDateTime, Integer>();
@@ -98,52 +71,32 @@ public class FileData {
 
 	public String getString(int number) 
 	{
-		if (number < 10)			return "0" + String.valueOf(number);
+		if (number < 10)	return "0" + String.valueOf(number);
 		return String.valueOf(number);
 	}
-
-	/*@param
-	 *@return
-	 *@throws
-	 *
-	 * 
-	 */
-
+	//-------------------------------------------------------------------------------------
 	public TreeMap<LocalDateTime, Integer> aggMinuteData(LocalDate date, String[] points) {
 		int hourOfDay = 0;
 		int minutes = 0;
 		TreeMap<LocalDateTime, Integer> chartValue = new TreeMap<LocalDateTime, Integer>();
 		
 		for (int i = 1; i < 60 * 24; i++, minutes++) {
-			if (minutes == 60) {
-				hourOfDay++;
-				minutes = 0;
-			}
+			if (minutes == 60) {	hourOfDay++;	minutes = 0; }
 			int value;
 			if (i < points.length) {
 				value = findValFromString(points[i]);
 				System.out.println(value);
 			} 
-			else
-			{
-				value = 0;
-			}
+			else value = 0;
 
 			LocalTime time = LocalTime.MIDNIGHT;
 			time = time.withHour(hourOfDay);
 			time = time.withMinute(minutes);			
-				chartValue.put(date.atTime(time), value);
-			
+			chartValue.put(date.atTime(time), value);
 		}
 		return chartValue;
 	}
 
-	/*@param
-	 *@return
-	 *@throws
-	 *
-	 * 
-	 */
 	public TreeMap<LocalDateTime, Integer>  aggHourData(LocalDate date, String[] points) {
 		int hourOfDay = 0;
 		int minutes = 0;
@@ -158,119 +111,63 @@ public class FileData {
 				minutes = 0;
 				value = 0;
 			}
-			if (i < points.length) {
-				value += findValFromString(points[i]);
-			} else
-			{
-				value += 0;
-			}
+			if  (i < points.length)
+				value +=  findValFromString(points[i]);
 		}
 		return chartValue;
 	}
 
-	/*@param
-	 *@return
-	 *@throws
-	 *
-	 * 
-	 */
 	public TreeMap<LocalDateTime, Integer> aggDayData(LocalDate date, String[] points) {
 		TreeMap<LocalDateTime, Integer> chartValue = new TreeMap<LocalDateTime, Integer>();
 		int value = 0;
-		for (int i = 1; i < points.length; i++) {
+		for (int i = 1; i < points.length; i++) 
 			value += findValFromString(points[i]);
-		}
+		
 		chartValue.put(date.atStartOfDay(), value);
+		System.out.println(points[0] + ": " + value);
 		return chartValue;
 	}
 
-	/*@param
-	 *@return
-	 *@throws
-	 *
-	 * 
-	 */
 	public TreeMap<LocalDateTime, Integer> aggWeekData(LocalDate date, String[] points) {
 		TreeMap<LocalDateTime, Integer> chartValue = new TreeMap<LocalDateTime, Integer>();
 		int value = 0;
-		for (int i = 1; i < points.length; i++) {
+		for (int i = 1; i < points.length; i++) 
 			value += findValFromString(points[i]);
-		}
+		
 		int dayWeek = date.getDayOfWeek().getValue();
 		LocalDateTime time = date.plusDays(8-dayWeek).atStartOfDay();
 		if(chartValue.containsKey(time))
-		{
-			chartValue.put(time, chartValue.get(time)+value);
-		}
-		else
-		{
-			chartValue.put(time, value);
-		}
+			value =chartValue.get(time)+value;
+		chartValue.put(time, value);
 		return chartValue;
 	}
 	
-	
-	
-	
-	/*@param
-	 *@return
-	 *@throws
-	 *
-	 * 
-	 */
 	public TreeMap<LocalDateTime, Integer> aggMonthData(LocalDate date, String[] points) {
 		TreeMap<LocalDateTime, Integer> chartValue = new TreeMap<LocalDateTime, Integer>();
 		int value = 0;
-		for (int i = 1; i < points.length; i++) {
+		for (int i = 1; i < points.length; i++) 
 			value += findValFromString(points[i]);
-		}
+		
 		LocalDateTime time = date.withDayOfMonth(1).atStartOfDay();
 		if(chartValue.containsKey(time))
-		{
-			chartValue.put(time, chartValue.get(time)+value);
-		}
-		else
-		{
-			chartValue.put(time, value);
-		}
+			value =chartValue.get(time)+value;
+		chartValue.put(time, value);
 		return chartValue;
 	}
 
-
-	/*@param
-	 *@return
-	 *@throws
-	 *
-	 * 
-	 */
 	public TreeMap<LocalDateTime, Integer> aggYearData(LocalDate date, String[] points) {
 		TreeMap<LocalDateTime, Integer> chartValue = new TreeMap<LocalDateTime, Integer>();
 		int value = 0;
-		for (int i = 1; i < points.length; i++) {
+		for (int i = 1; i < points.length; i++) 
 			value += findValFromString(points[i]);
-		}
 		
 		LocalDateTime time = date.withDayOfYear(1).atStartOfDay();
 		if(chartValue.containsKey(time))
-		{
-			chartValue.put(time, chartValue.get(time)+value);
-		}
-		else
-		{
-			chartValue.put(time, value);
-		}
+			value = chartValue.get(time)+value;
+		chartValue.put(time, value);
 		return chartValue;
 	}
-	
-	
-	
-
-	/*@param
-	 *@return
-	 *@throws
-	 *
-	 * 
-	 */
+	//-----------------------------------------------------------------------------------------
 	public void collectData(LocalDate fromDate, LocalDate endDate, boolean multiLine) {
 		FileInputStream finStream = null;
 		BufferedReader buffReader = null;
@@ -278,8 +175,8 @@ public class FileData {
 		int i = 0;
 		for(File file:files)
 		{
-		try {
-			
+		try 
+		{
 			finStream = new FileInputStream(file);
 			String line;
 			String cvsSplitBy = ",";
@@ -294,27 +191,20 @@ public class FileData {
 				date = LocalDate.parse(points[0],dtf);
 				Period difference = Period.between(fromDate, date);
 				
-				if(difference.isNegative())
-				{
-					continue;
-				}
+				if(difference.isNegative())			continue;
 
 				difference = Period.between(date, endDate);
-				if(difference.isNegative())
-				{
-					continue;
-				}
+				if(difference.isNegative())			continue;
 				
 				switch (level) {
-				case MINUTES:	addChartValues(i, aggMinuteData(date, points));		break;
+				case MINUTES:	addChartValues(i,aggMinuteData(date, points));		break;
 				case HOUR:		addChartValues(i,aggHourData(date, points));		break;
 				case DAY:		addChartValues(i,aggDayData(date, points));			break;
 				case WEEK:		addChartValues(i,aggWeekData(date, points));		break;
 				case MONTH:		addChartValues(i,aggMonthData(date, points));		break;
 				case YEAR:		addChartValues(i,aggYearData(date, points));		break;
 
-				default:
-					break;
+				default:		break;			
 				}
 			}
 
