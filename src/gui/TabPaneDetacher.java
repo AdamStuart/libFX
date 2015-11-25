@@ -68,14 +68,14 @@ public class TabPaneDetacher {
     private TabPane tabPane;
     private Tab currentTab;
     private final List<Tab> originalTabs;
-    private final Map<Integer, Tab> tapTransferMap;
+    private final Map<Integer, Tab> tabTransferMap;
     private String[] stylesheets;
     private final BooleanProperty alwaysOnTop;
 
     private TabPaneDetacher() {
         originalTabs = new ArrayList<>();
         stylesheets = new String[]{};
-        tapTransferMap = new HashMap<>();
+        tabTransferMap = new HashMap<>();
         alwaysOnTop = new SimpleBooleanProperty();
     }
 
@@ -122,9 +122,9 @@ public class TabPaneDetacher {
         this.tabPane = tabPane;
         originalTabs.addAll(tabPane.getTabs());
         for (int i = 0; i < tabPane.getTabs().size(); i++) 
-            tapTransferMap.put(i, tabPane.getTabs().get(i));
+            tabTransferMap.put(i, tabPane.getTabs().get(i));
        
-        Scene scene = tabPane.getScene();			// AST copy the stylesheets across
+        Scene scene = tabPane.getScene();			// AST copy the stylesheets across (must be a better way!)
         if (scene != null)
         {
         	ObservableList<String> objs = scene.getStylesheets();
@@ -132,7 +132,7 @@ public class TabPaneDetacher {
         	int i = 0;
         	for (String s : objs) 	strs[i++] = s;
         	stylesheets(strs);
-        }
+        }											//----------------------------------
         tabPane.getTabs().stream().forEach(t -> {   t.setClosable(false);    });
         tabPane.setOnDragDetected(
                 (MouseEvent event) -> {
@@ -178,7 +178,7 @@ public class TabPaneDetacher {
     	int W = 800;
     	int H = 500;
         int originalTab = originalTabs.indexOf(tab);
-        tapTransferMap.remove(originalTab);
+        tabTransferMap.remove(originalTab);
         Pane content = (Pane) tab.getContent();
         if (content == null) {
             throw new IllegalArgumentException("Can not detach Tab '" + tab.getText() + "': content is empty (null).");
@@ -199,11 +199,11 @@ public class TabPaneDetacher {
             stage.close();
             tab.setContent(content);
             int originalTabIndex = originalTabs.indexOf(tab);
-            tapTransferMap.put(originalTabIndex, tab);
+            tabTransferMap.put(originalTabIndex, tab);
             int index = 0;
-            SortedSet<Integer> keys = new TreeSet<>(tapTransferMap.keySet());
+            SortedSet<Integer> keys = new TreeSet<>(tabTransferMap.keySet());
             for (Integer key : keys) {
-                Tab value = tapTransferMap.get(key);
+                Tab value = tabTransferMap.get(key);
                 if(!tabPane.getTabs().contains(value)){
                     tabPane.getTabs().add(index, value);
                 }
@@ -211,7 +211,7 @@ public class TabPaneDetacher {
             }
             tabPane.getSelectionModel().select(tab);
         });
-        stage.setOnShown((WindowEvent t) -> {   tab.getTabPane().getTabs().remove(tab);  });
+        stage.setOnShown((WindowEvent t) -> {   tab.getTabPane().getTabs().remove(tab);  });		// TODO -- make it possible to clone here, instead of remove
         stage.show();
     }
 
