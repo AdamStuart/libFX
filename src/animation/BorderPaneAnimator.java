@@ -1,4 +1,4 @@
-package gui;
+package animation;
 
 import javafx.animation.Animation;
 import javafx.animation.Transition;

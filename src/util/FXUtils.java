@@ -18,6 +18,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.SkinBase;
 import javafx.stage.Screen;
+import javafx.stage.Window;
 
 /**
  * Utils that contains methods that depend on JavaFX classes.
@@ -38,6 +39,16 @@ public class FXUtils {
                 insets1.getBottom() + insets2.getBottom(), insets1.getLeft() + insets2.getLeft());
     }
 
+    
+    public static  Node getRoot(Node n)
+    {
+    	Node node = n;
+    	while (node.getParent() != null)
+    		node = node.getParent();
+    	return node;
+    }
+    
+   public static Window getWindow(Node n)   {	   return n.getScene().getWindow();   }
     /**
      * determine if the {@code Node} is the ancestorNode of another {@code Node} or the same.
      *

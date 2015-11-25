@@ -24,6 +24,7 @@ import java.util.TreeSet;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Parent;
@@ -83,17 +84,10 @@ public class TabPaneDetacher {
      *
      * @return The new instance of the TabPaneDetacher.
      */
-    public static TabPaneDetacher create() {
-        return new TabPaneDetacher();
-    }
+    public static TabPaneDetacher create() {        return new TabPaneDetacher();    }
 
-    public BooleanProperty alwaysOnTopProperty() {
-        return alwaysOnTop;
-    }
-
-    public Boolean isAlwaysOnTop() {
-        return alwaysOnTop.get();
-    }
+    public BooleanProperty alwaysOnTopProperty() {        return alwaysOnTop;    }
+    public Boolean isAlwaysOnTop() {        return alwaysOnTop.get();    }
 
     /**
      * 
@@ -108,7 +102,7 @@ public class TabPaneDetacher {
     }
     
     /**
-     * Sets the stylesheets that should be assigend to the new created {@link Stage}.
+     * Sets the stylesheets that should be assigned to the new created {@link Stage}.
      *
      * @param stylesheets The stylesheets to be set.
      * @return The current TabPaneDetacher instance.
@@ -127,8 +121,17 @@ public class TabPaneDetacher {
     public TabPaneDetacher makeTabsDetachable(TabPane tabPane) {
         this.tabPane = tabPane;
         originalTabs.addAll(tabPane.getTabs());
-        for (int i = 0; i < tabPane.getTabs().size(); i++) {
+        for (int i = 0; i < tabPane.getTabs().size(); i++) 
             tapTransferMap.put(i, tabPane.getTabs().get(i));
+       
+        Scene scene = tabPane.getScene();			// AST copy the stylesheets across
+        if (scene != null)
+        {
+        	ObservableList<String> objs = scene.getStylesheets();
+        	String[] strs = new String[objs.size()];
+        	int i = 0;
+        	for (String s : objs) 	strs[i++] = s;
+        	stylesheets(strs);
         }
         tabPane.getTabs().stream().forEach(t -> {   t.setClosable(false);    });
         tabPane.setOnDragDetected(
