@@ -175,11 +175,12 @@ public class TabPaneDetacher {
         
     	if(tab == null)           return;
         
-    	int W = 800;
-    	int H = 500;
         int originalTab = originalTabs.indexOf(tab);
         tabTransferMap.remove(originalTab);
-        Pane content = (Pane) tab.getContent();
+    	double W = tab.getTabPane().getWidth();
+    	double H =  tab.getTabPane().getHeight();
+      
+        Pane content = (Pane) tab.getContent();					// TODO -- make it possible to clone here, instead of access original value		
         if (content == null) {
             throw new IllegalArgumentException("Can not detach Tab '" + tab.getText() + "': content is empty (null).");
         }
@@ -195,7 +196,7 @@ public class TabPaneDetacher {
         stage.setHeight(H);
         stage.setX(p.getX()-W/2);
         stage.setY(p.getY());
-        stage.setOnCloseRequest((WindowEvent t) -> {
+        stage.setOnCloseRequest((e) -> {
             stage.close();
             tab.setContent(content);
             int originalTabIndex = originalTabs.indexOf(tab);
@@ -204,14 +205,13 @@ public class TabPaneDetacher {
             SortedSet<Integer> keys = new TreeSet<>(tabTransferMap.keySet());
             for (Integer key : keys) {
                 Tab value = tabTransferMap.get(key);
-                if(!tabPane.getTabs().contains(value)){
-                    tabPane.getTabs().add(index, value);
-                }
+                if(!tabPane.getTabs().contains(value))
+                	tabPane.getTabs().add(index, value);
                 index++;
             }
             tabPane.getSelectionModel().select(tab);
         });
-        stage.setOnShown((WindowEvent t) -> {   tab.getTabPane().getTabs().remove(tab);  });		// TODO -- make it possible to clone here, instead of remove
+        stage.setOnShown((e) -> {   tab.getTabPane().getTabs().remove(tab);  });		// TODO -- make it possible to clone here, instead of remove
         stage.show();
     }
 
