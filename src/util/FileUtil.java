@@ -46,6 +46,7 @@ import javafx.scene.input.Dragboard;
 import javafx.stage.FileChooser;
 import model.AttributeValue;
 import model.CSVTableData;
+import model.IntegerDataRow;
 import services.SystemInfo;
 
 public class FileUtil
@@ -246,10 +247,11 @@ public class FileUtil
 			findkeys(kids.item(i), list);
 	}
 		
+	//TODO ASSUMES INTS NOW
 	static public CSVTableData openCSVfile(String absPath, TableView<ObservableList<StringProperty>> table)
 	{
 		if (absPath == null) return null;				// || table == null
-		CSVTableData output = new CSVTableData();
+		CSVTableData output = new CSVTableData(absPath.substring(absPath.lastIndexOf(File.pathSeparator)));
 		try
 		{
 			String[] row = null;
@@ -263,14 +265,14 @@ public class FileUtil
 			nCols = row.length;
 			System.out.println(nCols + " columns");
 			boolean isHeader = true;
-			List<ObservableList<String>> data = output.getData();
+			List<IntegerDataRow> data = output.getData();
 			int idx = 0;
 			for (String fld : row)
 			{
 				StringUtil.TYPES type = StringUtil.inferType(fld);
 				isHeader &= StringUtil.isString(type) || StringUtil.isEmpty(type);  
 				output.getColumnNames().add(fld);
-				data.add(FXCollections.observableArrayList());
+				data.add(new IntegerDataRow(nCols));
 				System.out.println("Column Name: " + fld);
 			    if (table != null) table.getColumns().add(TableUtil.createColumn(idx++, fld));
 			}
@@ -337,6 +339,7 @@ public class FileUtil
 	{
 		String source = fileSrc.getPath();
 		File destFolder = new File(StringUtil.chopExtension(fileSrc.getAbsolutePath()));
+		if (destFolder.exists()) return ("Target Folder Exists");
 		StringBuffer entryList = new StringBuffer();
 		if (destFolder.mkdirs())
 		{
@@ -427,15 +430,17 @@ public class FileUtil
 	public static boolean isImageFile(File f){		return isPNG(f) || isJPEG(f);	}
 	public static boolean isTextFile(File f){		return isTXT(f) || isCSV(f);	}
 	
-	static public boolean isXML(File f)		{ 		return fileEndsWith(f,".xml", "wsp");	}
-	static public boolean isJPEG(File f)	{ 		return fileEndsWith(f,".jpg", "jpeg");	}
+	static public boolean isXML(File f)		{ 		return fileEndsWith(f,".xml", ".wsp");	}
+	static public boolean isJPEG(File f)	{ 		return fileEndsWith(f,".jpg", ".jpeg");	}
 	static public boolean isPNG(File f)		{ 		return fileEndsWith(f,".png");	}
 	static public boolean isTXT(File f)		{ 		return fileEndsWith(f,".txt");	}
 	static public boolean isCSV(File f)		{ 		return fileEndsWith(f,".csv");	}
 	static public boolean isCSS(File f)		{ 		return fileEndsWith(f,".css");	}
 	static public boolean isWebloc(File f)	{ 		return fileEndsWith(f,".webloc", ".url");	}
 	static public boolean isFCS(File f)		{ 		return fileEndsWith(f,".fcs", ".lmd");	}
-	
+	static public boolean isZip(File f)		{ 		return fileEndsWith(f,".zip", ".gz", ".acs");	}
+	static public boolean isSVG(File f)		{ 		return fileEndsWith(f,".svg");	}
+
 	static public FileChooser.ExtensionFilter zipFilter = new FileChooser.ExtensionFilter("Zip files (*.zip)", "*.zip", "*.gz", "*.acs");
 	static public FileChooser.ExtensionFilter fcsFilter = new FileChooser.ExtensionFilter("FCS files", "*.fcs", "*.lmd");
 
@@ -655,5 +660,6 @@ public class FileUtil
 		return SwingFXUtils.toFXImage(bufferedImage, null);
 	}
 
+ 
 
 }

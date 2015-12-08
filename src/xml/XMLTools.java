@@ -23,7 +23,7 @@ public class XMLTools
 	}
 	
 	//-----------------------------------------------------------------------------
-	public Node getChildByPath(Node value, String[] path)
+	public static Node getChildByPath(Node value, String[] path)
 	{
 		for (String step : path)
 		{
@@ -32,4 +32,13 @@ public class XMLTools
 		}
 		return value;
 	}
+	
+	//-----------------------------------------------------------------------------
+	public static String getChildAttribute(Node node, String attr)
+	{
+		Node attrNode = node.getAttributes().getNamedItem(attr);
+		String ref = attrNode == null ? "" : attrNode.getTextContent();
+		return ref;
+	}
+
 }

@@ -7,6 +7,8 @@ public class Range
 	public double min() { return min;	}
 	public double max() { return max;	}
 	public double width() { return max-min;	}
+	public void set(double mini, double maxi)	{ 	min = mini; max = maxi;	 }
+	
 	public Range(float mini, float maxi)	{		min = mini; max = maxi;	}
 	public Range(double mini, double maxi)	{		min = mini; max = maxi;	}
 	public Range(int mini, int maxi)		{		min = mini; max = maxi;	}

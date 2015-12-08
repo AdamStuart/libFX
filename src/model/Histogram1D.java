@@ -1,9 +1,10 @@
 package model;
 
-import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
 public class Histogram1D
@@ -17,7 +18,9 @@ public class Histogram1D
 
 	public String toString() { return name + "  " + range.toString(); }
 	public Range getRange()	{ return range;	}
+	public int getSize()	{ return size;	}
 	public String getName() { return name; 	}
+	public int[] getCounts() { return counts; 	}
 	// ----------------------------------------------------------------------------------------------------
 	public Histogram1D(int len, Range inX)
 	{
@@ -26,7 +29,7 @@ public class Histogram1D
 	
 	public Histogram1D(String inName,Range inX)
 	{
-		this(inName, DEFAULT_HISTO_LEN, inX, false);
+		this(inName, DEFAULT_HISTO_LEN, inX, true);
 	}
 	
 	public Histogram1D(String inName, int len, Range inX)
@@ -44,6 +47,13 @@ public class Histogram1D
 		isLog = log;
 	}
 
+	public Histogram1D(Histogram1D orig)
+	{
+		this(orig.getName(), orig.getSize(), orig.getRange(), orig.isLog);
+		for (int i=0; i< size; i++)
+			counts[i] = orig.counts[i];
+	}
+
 	public double getPercentile(int perc)
 	{
 		double val = 0;
@@ -56,36 +66,68 @@ public class Histogram1D
 		return out;
 	}
 	
-	private int getArea()
+	public int getArea()
 	{
 		int area = 0;
 		for (int i=0; i<size; i++)
 			area += counts[i];
 		return area;
 	}
+	public int getGutterCount()
+	{
+		int area = 0;
+		for (int i=0; i<GUTTER_WIDTH; i++)
+			area += counts[i];
+		return area;
+	}
 //	int counter = 0;
 	// ----------------------------------------------------------------------------------------------------
+	int GUTTER_WIDTH = 5;
+	
 	public void count(double x)
 	{
 		int bin = -1;
-		if (isLog)
-			bin = (int) (0.5 + ((Math.log(x) - range.min) * range.width()) / size);
-		else
-			bin = (int) (0.5 + ((x - range.min) / range.width()) * size);
-
-		if (bin < 0) bin = 0;
-		if (bin >= size) bin = size-1;
+		if (x < range.min )
+			return;	// System.out.println("out of range " + x);
+	
+		bin = valToBin(x);
+		if (bin < GUTTER_WIDTH) 		return;			//	THROWING AWAY BOTTOM BINS  HERE
+		if (bin >= size)  		bin = size-1;
 		counts[bin]++;
-//		counter++;
-//		System.out.println("incrementing " + counter);
 	}
 
-//	public void count(float x)
-//	{
-//		int bin = (int) (0.5 + ((Math.log(x) - range.min) / range.width()) * size);
-//		if (bin >= 0 && bin < size)
-//			counts[bin]++;
-//	}
+	
+	// ----------------------------------------------------------------------------------------------------
+	public double binToVal(int bin)
+	{
+		if (isLog)
+			return range.min + bin  * range.width()/ size;   // ?????		NOT LOG  ENOUGH
+
+		return range.min + ((bin  * range.width()) / size);
+	}
+	public int valToBin(double d)
+	{
+		if (isLog)
+			return (int) Math.round(((Math.log(d) - Math.log(range.min)) / Math.log(range.width())) * size);
+	
+		return (int) Math.round((d - range.min) * size / range.width() );
+	}
+	// ----------------------------------------------------------------------------------------------------
+	public void add(Histogram1D other)
+	{
+		boolean log = other.isLog;
+		if (log != isLog)	
+			System.out.println("Transform mismatch error");
+		
+		for (int i=0; i<other.getSize(); i++)
+		{
+			double ct = (double) other.getCounts()[i];
+			double val = other.binToVal(i);
+			int bin = valToBin(val);
+			if (bin >= 0 && bin < size)
+				counts[bin] += ct;
+		}
+	}
 
 	// ----------------------------------------------------------------------------------------------------
 	boolean grayscale = true;
@@ -99,6 +141,17 @@ public class Histogram1D
 		for (int row = 0; row < size; row++)
 			max = Math.max(max, counts[row]);
 		return max;
+	}
+	// ----------------------------------------------------------------------------------------------------
+	double getModePosition()	{
+		int max = 0;
+		int position = 0;
+		for (int row = 0; row < size; row++)
+		{
+			if (counts[row] > max) position = row;
+			max = Math.max(max, counts[row]);
+		}
+		return position;
 	}
 	// ----------------------------------------------------------------------------------------------------
 	Color colorLookup(int val)
@@ -123,28 +176,31 @@ public class Histogram1D
 	}
 
 	// ----------------------------------------------------------------------------------------------------
-	public XYChart.Series getDataSeries()
-	{
-		double[] smoothed = smooth();
-		double scale = range.width() / size;
-		XYChart.Series series = new XYChart.Series();
-		double sum = 0;
-		int ct = 0;
-		double upper = 0;
-		for (int i = 0; i < size; i++)
+	public XYChart.Series getDataSeries()	{ return getDataSeries(0.);	}
+	
+		public XYChart.Series getDataSeries(double yOffset)
 		{
-			sum += smoothed[i];
-			double x = range.min + (i * scale);
-			series.getData().add(new XYChart.Data(x, smoothed[i]));
-			if (x > 500)  upper += smoothed[i];
-		}
+		XYChart.Series series = new XYChart.Series();
+		try
+		{
+			double[] smoothed = smooth();
 		
-//		if (series.nodeProperty() != null)
-//		{
-//			ObjectProperty<Node> p = series.nodeProperty();
-//					((Node)(series.nodeProperty().getValue())).setVisible(false);
-//		}
-		System.out.println("Mean: " + (int) (sum / size) + " w/ " + (int) (100 * upper / sum) + "% events > 500");
+				double scale = range.width() / (size+1);
+				double area = getArea();
+				for (int i = 0; i < size; i++)
+				{
+					double x = range.min + (i * scale);
+					x = (x > 0) ? (Math.log(x) - 5) : 0;
+//					if (x < 0) x = 0;
+					double y = smoothed[i] / area + yOffset;
+					series.getData().add(new XYChart.Data(x,y));
+				}
+		}
+		catch (Exception e)
+		{
+			System.out.println("EXCEPTION CAUGHT");
+		}
+		System.out.println(getName() + " done");
 		return series;
 	}
 
@@ -233,12 +289,10 @@ public class Histogram1D
 		return vector;
 	}
 	private double getRadius(int resolution)	{	return 10.0;	}
+	
 	public LineChart<Number, Number> makeChart()
 	{
-//		double roundedMin = ((int) r.min() / 100 ) * 100;
-//		double roundedMax = ((int) r.max() / 100 ) * 100;
-//		double unit = (roundedMax - roundedMin) / 5;
-		NumberAxis  xAxis = new NumberAxis();		//roundedMin, roundedMax, unit
+		NumberAxis  xAxis = new NumberAxis();	
 		NumberAxis  yAxis = new NumberAxis();
 		LineChart<Number, Number>  chart = new LineChart<Number, Number>(xAxis, yAxis);
 		chart.setTitle(getName());
@@ -246,6 +300,8 @@ public class Histogram1D
 		chart.getData().add( getDataSeries());	
 		chart.setLegendVisible(false);
 		chart.setPrefHeight(100);
+		VBox.setVgrow(chart, Priority.ALWAYS);
+		chart.setId(getName());
 		return chart;
 	}
 

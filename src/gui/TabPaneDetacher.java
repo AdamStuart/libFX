@@ -136,7 +136,7 @@ public class TabPaneDetacher {
         tabPane.getTabs().stream().forEach(t -> {   t.setClosable(false);    });
         tabPane.setOnDragDetected(
                 (MouseEvent event) -> {
-                    if (event.getSource() instanceof TabPane) {
+                    if (event.getSource() instanceof TabPane && event.getSceneY() < 100) {	// AST HACK -- only drag from the top
                         Parent rootPane = tabPane.getScene().getRoot();
                         rootPane.setOnDragOver((DragEvent event1) -> {
                             event1.acceptTransferModes(TransferMode.ANY);
