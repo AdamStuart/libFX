@@ -3,6 +3,11 @@ package model;
 import java.util.ArrayList;
 import java.util.List;
 
+import gui.Borders;
+import javafx.scene.Node;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Region;
 import util.StringUtil;
 
 public class CSVTableData
@@ -13,6 +18,9 @@ public class CSVTableData
 	private List<IntegerDataRow> rows;
 	private List<Range> ranges;
 	private List<Histogram1D> histograms;
+	private List<Histogram2D> histogram2Ds;
+	private List<OverlaidScatterChart> scatters;
+	private List<Image> images;
 	
 	public CSVTableData(String id)
 	{
@@ -22,17 +30,21 @@ public class CSVTableData
 		rows = new ArrayList<IntegerDataRow>();
 		ranges = new ArrayList<Range>();
 		histograms = new ArrayList<Histogram1D>();
+		histogram2Ds = new ArrayList<Histogram2D>();
+		scatters = new ArrayList<OverlaidScatterChart>();
+		images = new ArrayList<Image>();
 	}
 	
-	public CSVTableData(CSVTableData orig, String newid)
-	{
-		name = newid;
-		types = new ArrayList<StringUtil.TYPES>(orig.getTypes());
-		columnNames = new ArrayList<String>(orig.getColumnNames());
-		rows = new ArrayList<IntegerDataRow>(orig.getData());
-		ranges = new ArrayList<Range>(orig.getRanges());
-		histograms = new ArrayList<Histogram1D>(orig.getHistograms());
-	}
+//	public CSVTableData(CSVTableData orig, String newid)
+//	{
+//		name = newid;
+//		types = new ArrayList<StringUtil.TYPES>(orig.getTypes());
+//		columnNames = new ArrayList<String>(orig.getColumnNames());
+//		rows = new ArrayList<IntegerDataRow>(orig.getData());
+//		ranges = new ArrayList<Range>(orig.getRanges());
+//		histograms = new ArrayList<Histogram1D>(orig.getHistograms());
+//		scatters = new ArrayList<OverlaidScatterChart>(orig.getScatters());
+//	}
 	
 	public void clear()  {
 		types.clear();
@@ -40,14 +52,28 @@ public class CSVTableData
 		rows.clear();
 		ranges.clear();
 		histograms.clear();		
+		scatters.clear();		
+		images.clear();		
 	}
 	
+	private int getIndex(String name)		{ return columnNames.indexOf(name); }
 	public  String getName() 				{ return name; }
 	public  List<StringUtil.TYPES> getTypes() { return types; }
 	public  List<Range> getRanges() 		{ return ranges; }
+	public  List<Image> getImages() 		{ return images; }
 	public  Range getRange(int i) 			{ return ranges.get(i); }
 	public  List<Histogram1D> getHistograms() { return histograms; }
-	public  Histogram1D getHistogram(int i) { return histograms.get(i); }
+	public  Histogram1D getHistogram(int i) 
+	{ 
+		if (histograms.isEmpty()) generateHistograms(); 
+		return histograms.get(i); 
+	}
+	public  List<OverlaidScatterChart> getScatters() 
+	{ 
+		if (scatters.isEmpty()) generateScatters(); 
+		return scatters; 
+	}
+	public void clearScatters()				{		scatters.clear();		}		// force regeneration
 	
 	public  List<String> getColumnNames() 	{ return columnNames; }
 	public 	int getCount()					{ return rows.size();	}
@@ -121,6 +147,110 @@ public class CSVTableData
 		}
 	}
 	//--------------------------------------------------------------------------------
+	 public void generateScatters()
+	{
+		images.add(getImage( "CD3", "CD4"));
+		images.add(getImage( "CD3", "CD19"));
+		images.add(getImage( "CD25", "CD38"));
+		images.add(getImage( "CD39", "CD38"));
+		images.add(getImage("CD25", "CD27"));
+	}
+	
+	public OverlaidScatterChart generateScatter(String xParm, String yParm)
+	{
+		final NumberAxis xAxis = new NumberAxis();
+		xAxis.setLabel(xParm);
+		
+		final NumberAxis yAxis = new NumberAxis();
+		yAxis.setLabel(yParm);
+		
+		OverlaidScatterChart scatter = new OverlaidScatterChart<Number, Number>(xAxis, yAxis);
+//		
+//		xAxis.setOnMouseClicked(ev -> {
+//			if (ev.isShiftDown()) prevXParm(scatter);
+//			else				nextXParm(scatter);
+//		});
+//		yAxis.setOnMouseClicked(ev -> {
+//			if (ev.isShiftDown()) prevYParm(scatter);
+//			else				nextYParm(scatter);
+//		});
+//
+		scatter.setTitle("Ten Bin Gutter");
+		Node chartPlotArea = scatter.lookup(".chart-plot-background");
+		if (chartPlotArea != null)
+		{
+			Region rgn = (Region) chartPlotArea;
+			rgn.setBorder(Borders.blueBorder1);
+		}
+		setLayer(scatter, xParm, yParm, 0);
+		return scatter;
+
+	}
+// TODO move up into a controller
+	private void setLayer(OverlaidScatterChart scatter, String xName, String yName, int idx)
+	{
+		images.clear();
+		Image img = getImage( xName, yName);
+		images.add(img);
+	
+	}
+	private Image getImage(String xName, String yName)
+	{
+		int xIdx = getIndex(xName);
+		int yIdx = getIndex(yName);
+		if (xIdx < 0 || yIdx < 0)
+			return null;		// error;
+		Range xRange = ranges.get(xIdx);
+		Range yRange = ranges.get(yIdx);
+		
+		LogHistogram2D histo2D = new LogHistogram2D(100, xRange, yRange);
+		for (IntegerDataRow row : rows)
+		{
+			int x = row.get(xIdx).get();
+			int y = row.get(yIdx).get();
+			if (insideGates(xIdx, x, yIdx, y))
+				histo2D.count(x, y);
+		}
+		Image img = histo2D.asImage();
+		return img;
+	}
+	
+	private boolean insideGates(int xIdx, int x, int yIdx, int y)
+	{
+		return (x > 0 && y > 0);
+	}
+	int xIndex = 0;
+	int yIndex = 1; 
+	int nDimensions = 8;
+	String[] dims = new String[]{"CD3", "CD25","CD4", "CD19", "CD38", "CD39", "CD161", "CD27" };
+//	private void prevXParm(OverlaidScatterChart scatter)
+//	{
+//		xIndex--;
+//		if (xIndex < 0) xIndex = nDimensions;
+//		setLayer(scatter, dims[xIndex], dims[yIndex], -1);
+//	}
+//	private void nextXParm(OverlaidScatterChart scatter)
+//	{
+//		xIndex++;
+//		if (xIndex >= nDimensions) xIndex = 0;
+//		setLayer(scatter, dims[xIndex], dims[yIndex], 1);
+//		
+//	}
+//	private void prevYParm(OverlaidScatterChart scatter)
+//	{
+//		yIndex--;
+//		if (yIndex < 0) yIndex = nDimensions;
+//		setLayer(scatter, dims[xIndex], dims[yIndex], -1);
+//		
+//	}
+//	private void nextYParm(OverlaidScatterChart scatter)
+//	{
+//		yIndex++;
+//		if (yIndex >= nDimensions) yIndex = 0;
+//		setLayer(scatter, dims[xIndex], dims[yIndex], 1);
+//		
+//	}
+	//--------------------------------------------------------------------------------
 	public void calculateStats()
 	{
 		int nCols = getWidth();
@@ -135,4 +265,5 @@ public class CSVTableData
 			status += " Gutter: " + (int) gutter + " / " + (int) area;
 		}
 	}
+
 }

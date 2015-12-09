@@ -11,12 +11,16 @@ public class Histogram2D
 {
 	int size;
 	int[][] counts;
+	int mode = 0;
 	Range xRange, yRange;
 	
 	public Histogram2D(int len, Range inX, Range inY)
 	{
 		size = len;
 		counts = new int[size][];
+		xRange = inX;
+		yRange = inY;
+		
 		for (int i=0; i<len; i++)
 			counts[i] = new int[size];
 	}
@@ -28,8 +32,17 @@ public class Histogram2D
 		counts[xBin][yBin]++;
 	}
 	
+	public int calcMode()
+	{
+		for (int i=0; i<size; i++)
+			for (int j=0; j<size; j++)
+				mode = Math.max(mode, counts[i][j]);
+		return mode;
+	}
+	
 	public Image asImage()
 	{
+		if (mode <= 0) 	calcMode();
 		WritableImage pixels = new WritableImage(size, size);
 		
 		final PixelWriter pixelWriter = pixels.getPixelWriter();
@@ -42,14 +55,15 @@ public class Histogram2D
 	}
 	boolean grayscale = true;
 	
-	double mode = 0;
-	void setMode(double d) { mode = d;	}
+
 	Color colorLookup(int val)
 	{
 		if (mode != 0) 
 		if (grayscale)
 		{
-			double v = val / mode;
+			double v = Math.log(val) / Math.log(mode);
+			if (v > 1) v= 1;
+			if (v < 0) v= 0;
 			return new Color(v,v,v,1);
 		}
 		return Color.RED;
