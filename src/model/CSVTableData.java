@@ -1,13 +1,20 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import gui.Borders;
 import javafx.scene.Node;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import util.StringUtil;
 
 public class CSVTableData
@@ -20,7 +27,7 @@ public class CSVTableData
 	private List<Histogram1D> histograms;
 	private List<Histogram2D> histogram2Ds;
 	private List<OverlaidScatterChart> scatters;
-	private List<Image> images;
+	private Map<String, Image> images;
 	
 	public CSVTableData(String id)
 	{
@@ -32,7 +39,7 @@ public class CSVTableData
 		histograms = new ArrayList<Histogram1D>();
 		histogram2Ds = new ArrayList<Histogram2D>();
 		scatters = new ArrayList<OverlaidScatterChart>();
-		images = new ArrayList<Image>();
+		images = new HashMap<String, Image>();
 	}
 	
 //	public CSVTableData(CSVTableData orig, String newid)
@@ -60,7 +67,7 @@ public class CSVTableData
 	public  String getName() 				{ return name; }
 	public  List<StringUtil.TYPES> getTypes() { return types; }
 	public  List<Range> getRanges() 		{ return ranges; }
-	public  List<Image> getImages() 		{ return images; }
+	public  Map<String,Image> getImages() 		{ return images; }
 	public  Range getRange(int i) 			{ return ranges.get(i); }
 	public  List<Histogram1D> getHistograms() { return histograms; }
 	public  Histogram1D getHistogram(int i) 
@@ -68,11 +75,11 @@ public class CSVTableData
 		if (histograms.isEmpty()) generateHistograms(); 
 		return histograms.get(i); 
 	}
-	public  List<OverlaidScatterChart> getScatters() 
-	{ 
-		if (scatters.isEmpty()) generateScatters(); 
-		return scatters; 
-	}
+//	public  List<OverlaidScatterChart> getScatters() 
+//	{ 
+//		if (scatters.isEmpty()) generateScatters(); 
+//		return scatters; 
+//	}
 	public void clearScatters()				{		scatters.clear();		}		// force regeneration
 	
 	public  List<String> getColumnNames() 	{ return columnNames; }
@@ -147,14 +154,30 @@ public class CSVTableData
 		}
 	}
 	//--------------------------------------------------------------------------------
-	 public void generateScatters()
+	//move to app specific subclass 
+	
+	public void generateScatters(VBox container)
 	{
-		images.add(getImage( "CD3", "CD4"));
-		images.add(getImage( "CD3", "CD19"));
-		images.add(getImage( "CD25", "CD38"));
-		images.add(getImage( "CD39", "CD38"));
-		images.add(getImage("CD25", "CD27"));
-	}
+		int i=0;
+		images.put("CD3/CD4", getImage( "CD3", "CD4"));
+		images.put("CD3/CD19", getImage( "CD3", "CD19"));
+		images.put("CD25/CD38", getImage( "CD25", "CD38"));
+		images.put("CD39/CD38", getImage( "CD39", "CD38"));
+		images.put("CD25/CD27", getImage("CD25", "CD27"));
+		images.put("CD4/CD161", getImage("CD4", "CD161"));
+
+		for (String label : images.keySet())
+		{
+			Image img = getImages().get(label);
+			ImageView view = new ImageView(img);
+			view.setFitWidth(200);
+			view.setFitHeight(200);
+			view.setScaleY(-1);
+			container.getChildren().add(view);
+			container.getChildren().add(new Label(label));
+			i++;
+		}
+}
 	
 	public OverlaidScatterChart generateScatter(String xParm, String yParm)
 	{
@@ -189,10 +212,10 @@ public class CSVTableData
 // TODO move up into a controller
 	private void setLayer(OverlaidScatterChart scatter, String xName, String yName, int idx)
 	{
-		images.clear();
-		Image img = getImage( xName, yName);
-		images.add(img);
-	
+//		images.clear();
+//		Image img = getImage( xName, yName);
+//		images.add(img);
+//	
 	}
 	private Image getImage(String xName, String yName)
 	{
@@ -265,5 +288,35 @@ public class CSVTableData
 			status += " Gutter: " + (int) gutter + " / " + (int) area;
 		}
 	}
+
+	public void populateCSVTable(TableView<IntegerDataRow> csvtable)
+	{
+		csvtable.getColumns().clear();
+		TableColumn<IntegerDataRow, Integer> rowNumColumn = new TableColumn<>("#");  
+        rowNumColumn.setCellValueFactory(cellData -> cellData.getValue().getRowNum().asObject());
+		csvtable.getColumns().add(rowNumColumn);
+		for (int i=0;i<getColumnNames().size();i++)
+		{
+            String name = getColumnNames().get(i);
+            TableColumn<IntegerDataRow, Integer> newColumn = new TableColumn<>(name);  
+            final int j = i;
+            newColumn.setCellValueFactory(cellData -> cellData.getValue().get(j).asObject());
+			csvtable.getColumns().add(newColumn);
+		}
+		csvtable.getItems().clear();
+		int nCols = csvtable.getColumns().size();
+
+		int nRows = getData().size();  
+		for (int row=0; row<nRows; row++)
+		{
+			IntegerDataRow newRow = new IntegerDataRow(nCols);
+			newRow.setRowNum(row);
+			for (int i=1;i<nCols;i++)
+			{
+				Integer k = getDataRow(row).get(i-1).get();
+				newRow.set(i-1, k);
+			}
+			csvtable.getItems().add(newRow);
+		}	}
 
 }

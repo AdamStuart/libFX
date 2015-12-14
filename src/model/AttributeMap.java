@@ -192,7 +192,7 @@ public class AttributeMap extends HashMap<String, String>
 	//-------------------------------------------------------------
 	public String getStyleString()
 	{
-		StringBuffer buff = new StringBuffer();
+		StringBuilder buff = new StringBuilder();
 		for (String key : keySet())
 			if (key.startsWith("-fx-"))
 				buff.append(key).append(": ").append(get(key)).append("; ");
@@ -202,7 +202,7 @@ public class AttributeMap extends HashMap<String, String>
 	//-------------------------------------------------------------
 	public String makeElementString(String name)
 	{
-		StringBuffer buff = new StringBuffer("<" + name + " ");
+		StringBuilder buff = new StringBuilder("<" + name + " ");
 		for (String key : keySet())
 			buff.append(key).append("=").append(get(key)).append(", ");
 		String trunc =  StringUtil.chopLast2(buff.toString());

@@ -37,7 +37,7 @@ public class DBUtil
 		// ----------------------------------------------------
 	  public static	String createSchema(String tableName, String ... fields)
 	{
-		 StringBuffer line = new StringBuffer(tableName + "\n(");
+		 StringBuilder line = new StringBuilder(tableName + "\n(");
 		 line.append("id VARCHAR(100),\n");
 		 for (String fld : fields)
 		 {
@@ -242,7 +242,7 @@ public class DBUtil
 
 	public static String getWhere(Map<String, String> criteria)
 	{
-		StringBuffer buffer = new StringBuffer (" WHERE ");
+		StringBuilder buffer = new StringBuilder (" WHERE ");
 		boolean first = true;
 		for (String key : criteria.keySet())
 		{

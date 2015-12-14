@@ -51,7 +51,7 @@ public class StringUtil
 	
 	public static String callURL(String urlString)
 	{
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		try
 		{
 			URL url = new URL(urlString);

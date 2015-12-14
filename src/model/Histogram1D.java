@@ -1,8 +1,12 @@
 package model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Data;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -16,6 +20,9 @@ public class Histogram1D
 	boolean isLog = true;
 	private String name;
 
+
+	
+	
 	public String toString() { return name + "  " + range.toString(); }
 	public Range getRange()	{ return range;	}
 	public int getSize()	{ return size;	}
@@ -54,6 +61,7 @@ public class Histogram1D
 			counts[i] = orig.counts[i];
 	}
 
+	// ----------------------------------------------------------------------------------------------------
 	public double getPercentile(int perc)
 	{
 		double val = 0;
@@ -62,7 +70,7 @@ public class Histogram1D
 		int i;
 		for (i=0; val<evCount; i++)
 			val += counts[i];
-		double out = range.min + (i * range.width() / size);
+		double out = range.min + (i * range.width() / size);		// TODO LOG??
 		return out;
 	}
 	
@@ -73,6 +81,7 @@ public class Histogram1D
 			area += counts[i];
 		return area;
 	}
+	// ----------------------------------------------------------------------------------------------------
 	public int getGutterCount()
 	{
 		int area = 0;
@@ -101,7 +110,7 @@ public class Histogram1D
 	public double binToVal(int bin)
 	{
 		if (isLog)
-			return range.min + bin  * range.width()/ size;   // ?????		NOT LOG  ENOUGH
+			return Math.log(range.min + bin  * range.width()/ size) - 5;   // TODO Transform fn subtracts 5 log  -- asymmetric!!!
 
 		return range.min + ((bin  * range.width()) / size);
 	}
@@ -132,18 +141,17 @@ public class Histogram1D
 	// ----------------------------------------------------------------------------------------------------
 	boolean grayscale = true;
 
-	double mode = 0;
 
-	void setMode(double d)	{		mode = d;	} // this will be the top of the Y axis
+	void setMode(double d)	{		mode = d;	} // this will determine the top of the Y axis
 
-	double getMode()	{
+	public double getMode()	{
 		int max = 0;
 		for (int row = 0; row < size; row++)
 			max = Math.max(max, counts[row]);
 		return max;
+
 	}
-	// ----------------------------------------------------------------------------------------------------
-	double getModePosition()	{
+	public double getModePosition()	{
 		int max = 0;
 		int position = 0;
 		for (int row = 0; row < size; row++)
@@ -153,6 +161,64 @@ public class Histogram1D
 		}
 		return position;
 	}
+	// ----------------------------------------------------------------------------------------------------
+	public void calcDistributionStats()	{
+		int sum = 0;
+		count = 0;
+		for (int row = 0; row < size; row++)
+		{
+			count += counts[row];
+			sum += counts[row] * binToVal(row);
+		}
+		mean = sum / count;
+		 
+		int total = 0;
+		int row = 0;
+		while (total < count/100.)
+			total += counts[row++];
+		firstPercentile = row;
+		while (total < count/10.)
+			total += counts[row++];
+		tenthPercentile = row;
+
+		while (total < count/2.)
+			total += counts[row++];
+		median = binToVal(row);
+		
+		while (total < 9 * count/10.)
+			total += counts[row++];
+		ninetiethPercentile = row;
+		while (total < 99 * count/100.)
+			total += counts[row++];
+		topPercentile = row;
+	}
+	
+	private	int firstPercentile, tenthPercentile, ninetiethPercentile, topPercentile;
+	private double count = 0;
+	private double mode = 0;
+	private double median;
+	private double mean;
+	private double stDev;
+	private double below1Stdev;
+	private double below2Stdev;
+	private double above1Stdev;
+	private double above2Stdev;
+	
+	public double getMedian()			{ return median;	}
+	public double getMean()				{ return mean;	}
+	public double getStDev()			{ return stDev;	}
+	
+	public double getBelow1Stdev()		{ return below1Stdev;	}
+	public double getBelow2Stdev()		{ return below2Stdev;	}
+	public double getAbove1Stdev()		{ return above1Stdev;	}
+	public double getAbove2Stdev()		{ return above2Stdev;	}
+
+	public int 	getPercentile1()		{ return firstPercentile;	}
+	public int 	getPercentile10()		{ return tenthPercentile;	}
+	public int 	getPercentile90()		{ return ninetiethPercentile;	}
+	public int 	getPercentile99()		{ return topPercentile;	}
+	
+
 	// ----------------------------------------------------------------------------------------------------
 	Color colorLookup(int val)
 	{
@@ -190,7 +256,7 @@ public class Histogram1D
 				for (int i = 0; i < size; i++)
 				{
 					double x = range.min + (i * scale);
-					x = (x > 0) ? (Math.log(x) - 5) : 0;
+					x = (x > 0) ? (Math.log(x) - 5) : 0;			// resolve this with valtobin
 //					if (x < 0) x = 0;
 					double y = smoothed[i] / area + yOffset;
 					series.getData().add(new XYChart.Data(x,y));
@@ -290,11 +356,12 @@ public class Histogram1D
 	}
 	private double getRadius(int resolution)	{	return 10.0;	}
 	
-	public LineChart<Number, Number> makeChart()
+	// ----------------------------------------------------------------------------------------------------
+	public OverlaidLineChart makeChart()
 	{
 		NumberAxis  xAxis = new NumberAxis();	
 		NumberAxis  yAxis = new NumberAxis();
-		LineChart<Number, Number>  chart = new LineChart<Number, Number>(xAxis, yAxis);
+		OverlaidLineChart  chart = new OverlaidLineChart(xAxis, yAxis);
 		chart.setTitle(getName());
 		chart.setCreateSymbols(false);
 		chart.getData().add( getDataSeries());	
@@ -304,5 +371,129 @@ public class Histogram1D
 		chart.setId(getName());
 		return chart;
 	}
+	
+	public OverlaidLineChart makePeakFitChart()
+	{
+		OverlaidLineChart chart = makeChart();
+		List<Double> peaks = new ArrayList<Double>();
+		List<Double> valleys = new ArrayList<Double>();
+		scanPeaks(peaks, valleys);
+		
+		NumberAxis  xAxis = (NumberAxis) chart.getXAxis();
+		NumberAxis  yAxis = (NumberAxis) chart.getYAxis();
+	    double min = xAxis.getLowerBound();
+	    double max = xAxis.getUpperBound();
+	    double ymin = yAxis.getLowerBound();
+	    double ymax = yAxis.getUpperBound();
 
+		chart.layout();
+//		for (int i=0; i< 10; i++)
+		chart.addVerticalValueMarker(new Data<Number, Number>(1, 1 ), Color.RED, 1);
+		chart.addVerticalValueMarker(new Data<Number, Number>(2, 1 ), Color.RED, 1);
+		for (Double p : peaks)
+		{
+//			double x = xAxis.getDisplayPosition(p);
+//			chart.addVerticalValueMarker(new Data<Number, Number>(x, 1), Color.CYAN, 1.8);
+			chart.addVerticalValueMarker(new Data<Number, Number>(p, 1), Color.DARKCYAN, 2.8);
+		}
+		for (Double v : valleys)
+		{
+//			double x = xAxis.getValueForDisplay(v).doubleValue();
+			chart.addVerticalValueMarker(new Data<Number, Number>(v, 0), Color.DARKGREEN, .7);
+		}
+	
+		return chart;
+	}
+
+	
+	private void scanPeaks(List<Double> peaksa, List<Double> valleysa)
+	{
+		int NOISE = 5;
+		boolean ascending = false;
+		boolean descending = false;
+		List<Integer> peaks = new ArrayList<Integer>();
+		List<Integer> valleys = new ArrayList<Integer>();
+		double[] smoothed = smooth();
+		for (int i=1; i<size; i++)
+		{
+			if (smoothed[i] == smoothed[i-1])		continue;
+			if (smoothed[i] < NOISE)				continue;
+			if (smoothed[i] > smoothed[i-1])
+			{
+				if (descending) valleys.add(new Integer(i-1));
+				ascending = true;
+				descending = false;
+			}
+			else if (smoothed[i] < smoothed[i-1])
+			{
+				if (ascending) peaks.add(new Integer(i-1));
+				descending = true;
+				ascending = false;
+			}
+		}
+		
+		// needs a pass here to remove minor peaks and valleys (tho' smoothing does much of this)
+		for (int i=peaks.size()-1; i>0; i--)
+		{
+			int cur = peaks.get(i);
+			int prevPeak = peaks.get(i-1);
+			int valley = valleys.size() > i ? valleys.get(i-1) : 0;
+			if ((valley / (cur + prevPeak) > 0.8) && ((cur - prevPeak < 5)))
+			{
+				peaks.remove(i);
+				valleys.remove(i-1);
+			}
+		}	
+		
+		if (peaks.size() == 0)
+		{
+			System.out.println("Error, peaksize = 0, Nothing rose above 5 event noise");
+			return;
+		}
+		
+		if (peaks.size() == 1)
+		{
+			System.out.println("Single Peak at " + peaks.get(0));
+			peaksa.add(new Double(binToVal(peaks.get(0))));
+			return;
+		}
+		for (Integer i : peaks)
+			peaksa.add(new Double(binToVal(i)));
+		
+		for (Integer i : valleys)
+			valleysa.add(new Double(binToVal(i)));
+		
+		System.out.println("Found " + peaks.size() + " peaks and " + valleys.size() + " valleys.");
+	
+		if (peaks.size() > 1)
+		{
+			for (int i=0; i<peaks.size()-1; i++)
+			{
+				System.out.println("Peak at " + peaksa.get(i) + " has height of " + counts[peaks.get(i)]);
+				if (i < valleys.size())
+					System.out.println("Valley at " + valleysa.get(i) + " has height of " + counts[valleys.get(i)]);
+			}
+			System.out.println("----------------------------------------------------------");
+			System.out.println("");
+			System.out.println("");
+		}
+		
+	}
+	public LineChart<Number, Number> makeRawDataChart()
+	{
+		NumberAxis  xAxis = new NumberAxis();	
+		NumberAxis  yAxis = new NumberAxis();
+		LineChart<Number, Number>  chart = new LineChart<Number, Number>(xAxis, yAxis);
+		chart.setTitle(getName());
+		chart.setCreateSymbols(false);
+		chart.getData().add( rawDataSeries());	
+		chart.setLegendVisible(false);
+		chart.setPrefHeight(300);
+		
+		// draw lines at 5 percentiles, mode, median
+		
+		VBox.setVgrow(chart, Priority.ALWAYS);
+		chart.setId("Profile: " + getName());
+		return chart;
+	}
 }

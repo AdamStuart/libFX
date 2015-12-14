@@ -62,7 +62,7 @@ public class FileUtil
 
 	static public Document openXML(File f)
 	{
-		StringBuffer buff = new StringBuffer();
+		StringBuilder buff = new StringBuilder();
 		readFileIntoBuffer(f, buff);
 		return convertStringToDocument(buff.toString());
 	}
@@ -70,7 +70,7 @@ public class FileUtil
 	static public String openXMLfile(File f)
 	{
 		Document parseddoc = openXML(f);
-		StringBuffer xmlOut = new StringBuffer();
+		StringBuilder xmlOut = new StringBuilder();
 		if (parseddoc != null)
 		{
 			NodeList nodes = parseddoc.getChildNodes();
@@ -90,7 +90,7 @@ public class FileUtil
 	}
 	static public String urlFromPlist(String path)
 		{
-		StringBuffer buff = new StringBuffer();
+		StringBuilder buff = new StringBuilder();
 		readFileIntoBuffer(path, buff);
 		int startDict = buff.indexOf("dict");
 		int idx = buff.indexOf("http", startDict);
@@ -127,7 +127,7 @@ public class FileUtil
 	static public ObservableList<String> urlsFromPlist(File f)
 	{
 		ObservableList<String> list = FXCollections.observableArrayList();
-		StringBuffer buff = new StringBuffer();
+		StringBuilder buff = new StringBuilder();
 		readFileIntoBuffer(f, buff);
 		Document parseddoc = convertStringToDocument(buff.toString());
 		if (parseddoc != null)
@@ -190,7 +190,7 @@ public class FileUtil
 	//-------------------------------------------------------------
 	static public TreeItem<Node> getXMLtree(File f, String[] suppressNames)
 	{
-		StringBuffer buff = new StringBuffer();
+		StringBuilder buff = new StringBuilder();
 		readFileIntoBuffer(f, buff);
 		return getXMLtree(buff.toString(), suppressNames);
 	}
@@ -340,7 +340,7 @@ public class FileUtil
 		String source = fileSrc.getPath();
 		File destFolder = new File(StringUtil.chopExtension(fileSrc.getAbsolutePath()));
 		if (destFolder.exists()) return ("Target Folder Exists");
-		StringBuffer entryList = new StringBuffer();
+		StringBuilder entryList = new StringBuilder();
 		if (destFolder.mkdirs())
 		{
 			String targetUnZipPath = destFolder.getAbsolutePath();
@@ -384,7 +384,7 @@ public class FileUtil
 	
 	static String LINE_DELIM = "\n";
 	
-	static private void readNode(Node node, StringBuffer buff, int indent)
+	static private void readNode(Node node, StringBuilder buff, int indent)
 	{
 //		Element elem = node.getOwnerDocument().getDocumentElement();  //ChildNodes();
 		String text = node.getTextContent();
@@ -457,12 +457,12 @@ public class FileUtil
 	
 	static public String readFiles(Dragboard db)
 	{
-		StringBuffer buff = new StringBuffer();
+		StringBuilder buff = new StringBuilder();
 		db.getFiles().forEach(f ->readFile(f, buff));
 		return buff.toString();
 	}
 
-	static public void readFile(File inFile, StringBuffer buff)
+	static public void readFile(File inFile, StringBuilder buff)
 	{
 		if (inFile.isDirectory())
 		{
@@ -473,7 +473,7 @@ public class FileUtil
 	}
 
 	
-	static public void readFileIntoBuffer(File f, StringBuffer buff)
+	static public void readFileIntoBuffer(File f, StringBuilder buff)
 	{
 		readFileIntoBuffer(f.getAbsolutePath(), buff);
 	}
@@ -481,11 +481,11 @@ public class FileUtil
 	
 	static public String readFileIntoString(String absolutePath)
 	{
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		readFileIntoBuffer(absolutePath, buffer);
 		return buffer.toString();
 	}
-	static public void readFileIntoBuffer(String absolutePath, StringBuffer buff)
+	static public void readFileIntoBuffer(String absolutePath, StringBuilder buff)
 	{
         BufferedReader br = null;
         try {

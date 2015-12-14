@@ -15,7 +15,7 @@ public class TreeUtil
 			expandAll(child, open);
 	}
 	
-	static public void dumpTree(TreeItem<String> t, int indent, StringBuffer buff)
+	static public void dumpTree(TreeItem<String> t, int indent, StringBuilder buff)
 	{
 		String pad = "          ".substring(0,indent);
 //		String pad = "   ";
@@ -27,7 +27,7 @@ public class TreeUtil
 				dumpTree(child, indent + 1, buff);
 		buff.append(pad + ")\n" );
 	}
-	static public void xmlTree(TreeItem<String> t, int indent, StringBuffer buff)
+	static public void xmlTree(TreeItem<String> t, int indent, StringBuilder buff)
 	{
 		String pad = "                ".substring(0,2 * indent);
 //		String pad = "   ";

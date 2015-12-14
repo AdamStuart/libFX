@@ -3,8 +3,11 @@ package xml;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import util.StringUtil;
+
 public class XMLTools
 {
+	
 	//-----------------------------------------------------------------------------
 	public static Node getChildByName(Node value, String name)
 	{
@@ -40,5 +43,11 @@ public class XMLTools
 		String ref = attrNode == null ? "" : attrNode.getTextContent();
 		return ref;
 	}
+	
+	public static double getDoubleAttribute(org.w3c.dom.Node elem, String attrName)
+	{
+		return StringUtil.toDouble(getChildAttribute(elem, attrName));
+	}
+	
 
 }

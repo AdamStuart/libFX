@@ -32,7 +32,7 @@ public class DBInsertTask<T> extends DBTask<T>
 	private String getValList()
 	{
 		if (fields == null || fields.size() == 0) return "";
-		StringBuffer buffer = new StringBuffer(" VALUES (");
+		StringBuilder buffer = new StringBuilder(" VALUES (");
 		for (String v : fields.keySet())  
 			buffer.append("\'" + fields.get(v) + "\', ");
 		String valList = StringUtil.chopLast2(buffer.toString()) + ")";
@@ -42,7 +42,7 @@ public class DBInsertTask<T> extends DBTask<T>
 	private String getFieldList()
 	{
 		if (fields == null || fields.size() == 0) return "";
-		StringBuffer buffer = new StringBuffer(" (");
+		StringBuilder buffer = new StringBuilder(" (");
 		for (String f : fields.keySet())  buffer.append(f + ", ");
 		String fldList = StringUtil.chopLast2(buffer.toString()) + ")";
 		return fldList;

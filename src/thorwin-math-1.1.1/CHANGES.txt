@@ -1,0 +1,14 @@
+Version 1.1.0
+-------------
+
+* Optimized matrix operations
+
+All operations (add, subtract, transpose, multiply) have been profiled and
+optimized significantly.
+
+
+* Added MatrixOperations and VectorOperations
+
+These classes that implement low-level matrix and vector operations. Optionally
+the default Java implementation can be replaced by a a native implementation,
+allowing a significant performance boost.
