@@ -29,7 +29,7 @@ public class OverlaidLineChart extends LineChart<Number,Number>
 	    * @param marker must not be null.
 	    */
 	   public void addVerticalValueMarker(Data<Number, Number> marker, Color c, double strokeWid) {
-		   addVerticalValueMarker(marker, c, strokeWid);
+		   addVerticalValueMarker(marker, c, strokeWid, null);
 	   }
 	   public void addVerticalValueMarker(Data<Number, Number> marker, Color c, double strokeWid, StrokeType strokeType) {
 	       Objects.requireNonNull(marker, "the marker must not be null");
