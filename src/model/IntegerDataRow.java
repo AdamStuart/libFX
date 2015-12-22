@@ -12,7 +12,7 @@ public class IntegerDataRow
 	
     public IntegerDataRow(int nCols)
 	{
-        for(int i=0; i<nCols; ++i)
+    	for(int i=0; i<nCols; ++i)
         	vals.add(new SimpleIntegerProperty(0));
 	}
     public IntegerProperty getRowNum()	{	return rowNum;		}
@@ -20,4 +20,5 @@ public class IntegerDataRow
 	public void set(int i, Integer s)	{ 	vals.get(i).set(s);	} 
     public IntegerProperty get(int i) 	{ 	return vals.get(i); }
     public int getWidth()				{ 	return vals.size();	}
+    public void addPColumn(int v)		{	vals.add(new SimpleIntegerProperty(v)); }
 }
