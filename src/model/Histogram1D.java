@@ -248,27 +248,28 @@ public class Histogram1D
 		return Color.RED;
 	}
 	// ----------------------------------------------------------------------------------------------------
-	public XYChart.Series rawDataSeries()
+	public XYChart.Series<Number, Number> rawDataSeries()
 	{
 		System.out.println("Mode: " + getMode());
 		double scale = range.width() / size;
-		XYChart.Series series = new XYChart.Series();
+		XYChart.Series<Number, Number> series = new XYChart.Series<Number, Number>();
 		for (int i = 0; i < size; i++)
-			series.getData().add(new XYChart.Data(i * scale, counts[i]));
+			series.getData().add(new XYChart.Data<Number, Number>(i * scale, counts[i]));
 		return series;
 	}
 
 	// ----------------------------------------------------------------------------------------------------
-	public XYChart.Series getDataSeries()	{ return getDataSeries(0.);	}
+	public XYChart.Series<Number, Number> getDataSeries(String seriesName)	{ return getDataSeries(seriesName, 0.);	}
 	
-	public XYChart.Series getDataSeries(double yOffset )
+	public XYChart.Series<Number, Number> getDataSeries(String seriesName, double yOffset )
 	{
-		return getDataSeries(yOffset, getArea());
+		return getDataSeries(seriesName, yOffset, getArea());
 	}
 	
-	public XYChart.Series getDataSeries(double yOffset, double area)
+	public XYChart.Series<Number, Number> getDataSeries(String seriesName, double yOffset, double area)
 	{
-		XYChart.Series series = new XYChart.Series();
+		XYChart.Series<Number, Number> series = new XYChart.Series<Number, Number>();
+		series.nameProperty().set(seriesName);;
 		try
 		{
 			double[] smoothed = smooth();
@@ -276,18 +277,15 @@ public class Histogram1D
 				double scale = range.width() / (size+1);
 				for (int i = 0; i < size; i++)
 				{
-					double x = range.min + (i * scale);
-					x = (x > 0) ? (Math.log(x) - 5) : 0;			// resolve this with valtobin
-	//				if (x < 0) x = 0;
+					double x = range.min + (i * scale);		//valToBin(i);  //   
+					x =  (x > 0) ? (Math.log(x) - 5) : 0;			// resolve this with valtobin
+
 					double y = smoothed[i] / area + yOffset;
-					series.getData().add(new XYChart.Data(x,y));
+					series.getData().add(new XYChart.Data<Number, Number>(x,y));
 				}
 		}
-		catch (Exception e)
-		{
-			System.out.println("EXCEPTION CAUGHT");
-		}
-		System.out.println(getName() + " done");
+		catch (Exception e)		{			System.out.println("EXCEPTION CAUGHT " + e.getMessage());		}
+//		System.out.println(getName() + " done");
 		return series;
 	}
 	
@@ -388,7 +386,7 @@ public class Histogram1D
 		OverlaidLineChart  chart = new OverlaidLineChart(xAxis, yAxis);
 		chart.setTitle(getName());
 		chart.setCreateSymbols(false);
-		chart.getData().add( getDataSeries());	
+		chart.getData().add( getDataSeries("All"));	
 		chart.setLegendVisible(false);
 		chart.setPrefHeight(100);
 		VBox.setVgrow(chart, Priority.ALWAYS);

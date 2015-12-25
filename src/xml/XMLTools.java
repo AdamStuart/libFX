@@ -26,7 +26,7 @@ public class XMLTools
 	}
 	
 	//-----------------------------------------------------------------------------
-	public static Node getChildByPath(Node value, String[] path)
+	public static Node getChildByPath(Node value, String... path)
 	{
 		for (String step : path)
 		{
