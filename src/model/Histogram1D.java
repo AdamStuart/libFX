@@ -515,17 +515,18 @@ public class Histogram1D
 		return chart;
 	}
 //------------------------------------------------------------------------------
+//Numerical Recipes in C by Press et. al. and read the section on data fitting.
+//https://en.wikipedia.org/wiki/Full_width_at_half_maximum
+//http://mathworld.wolfram.com/FullWidthatHalfMaximum.html
+//Levenberg Marquardt is a least-squares/gaussian algorithm, so is somewhat noise sensitive.
+	static double SQRT2 = Math.sqrt(2.0);
 	public void scanPeaks()
 	{
 		peaks.clear();
-//		if (peaks.size() > 0) 		return;  // already done
-		boolean useMean = false;  		
 		boolean allPeaks = false;  	
-		boolean shoulderPeaks = false; 
 
 		int mode = 0; 
 		double[] peakHisto = new double[size];
-		double maxPeakHeight = 0;
 		try
 		{
 			int bin;
@@ -537,124 +538,101 @@ public class Histogram1D
 			while (!finished && peaks.size() < 10)
 			{
 				double modeValue = 0.;
-				for (bin = 0; bin < size; bin++)  // A
-					if (peakHisto[bin] > modeValue)
-					{
-						modeValue = peakHisto[bin];
-						mode = bin;
-					}
-				if (modeValue == 0)			{	finished = true;	break;		}
+				for (bin = 0; bin < size; bin++) 
+					if (peakHisto[bin] > modeValue)		{	modeValue = peakHisto[bin];		mode = bin;	}
+				if (modeValue == 0)						{	finished = true;	break;		}
 
-				int[] pkBounds = new int[2];			
-				int[] fringe = new int[2];
-				pkBounds[0] = pkBounds[1] = fringe[0] = fringe[1] = mode; // for now
-				double halfMax = modeValue / 2.;
-				double WIDTHFACTOR = 1.5;
-				int dx = -1; 
-				for (int direction = 0; direction < 2; direction++)
-				{
-					double halfWidthHalfMax = 0.;
-					boolean everDroppedBelow75 = false;
-					boolean stop = false;
-					double FLOOR = 0.01;
-					for (bin = mode; bin < size && bin >= 0 && !stop; bin += dx)
-					{
-						int slopeWidth = (int) pin(halfWidthHalfMax, size / 32., size / 8.);
-						int slopeLow = Math.max(0, bin - slopeWidth / 2);
-						int slopeHigh = Math.min(size - 1, bin + slopeWidth / 2);
-						double slope = getSlope(peakHisto, slopeLow, slopeHigh - slopeLow + 1);
-//						boolean rising = (direction == 0) == (slope < 0);
-						boolean rising = (direction == 0) ? slope < 0 : slope > 0;
-
-						if (halfWidthHalfMax > 0 && pkBounds[direction] == mode) 
-						{
-							double curWidth = Math.abs(bin - mode);
-							double expected = Math.abs(modeValue - peakHisto[bin]) / halfMax * halfWidthHalfMax;
-							if (peakHisto[bin] < FLOOR)
-							{
-								pkBounds[direction] = bin;
-								stop = true; 
-							}
-							else if (curWidth > WIDTHFACTOR * expected) 		
-								pkBounds[direction] = bin;						
-							else if (curWidth > expected && rising) 			
-							{
-								pkBounds[direction] = bin;
-								stop = true;
-							}
-						}
-						else if (halfWidthHalfMax > 0) 		{	if (peakHisto[bin] == 0. || rising)	 stop = true;	}
-						else if (peakHisto[bin] < halfMax) 					
-						{
-							int chanMinusOne = Math.max(0, bin - 1);
-							halfWidthHalfMax = Math.abs(bin - mode) - ((halfMax - peakHisto[bin]) / (peakHisto[chanMinusOne] - halfMax));
-						}
-						else if (rising && shoulderPeaks && everDroppedBelow75)
-						{
-							pkBounds[direction] = bin;
-							stop = true;
-						}
-						if (peakHisto[bin] < halfMax * 75. / 50.) everDroppedBelow75 = true;
-					}
-					
-					fringe[direction] = pin(bin, 0, size - 1);
-					if (pkBounds[direction] == mode)
-						pkBounds[direction] = fringe[direction] = ((direction == 0) ? 0 : (size - 1)); 
-					dx = 1;
-				}
+//				int[] pkBounds = new int[2];			
+				int lowEnd, highEnd;
+				lowEnd = highEnd = mode; // initialize all bounds to mode
+				int sub = mode;
+				int sooper = mode;
+				
+				sub = lowEnd = findBounds(mode, -1, peakHisto, modeValue);
+				sooper = highEnd = findBounds(mode, 1, peakHisto, modeValue);
+				if (lowEnd<= 0)	lowEnd = 0;
+				if (sub <= 0)		sub = 0;
+				
 				Peak peak = new Peak(this);
-				if (pkBounds[0] <= 0)			pkBounds[0] = 0;
-				if (fringe[0] <= 0)		fringe[0] = 0;
-
-				peak.setBounds(pkBounds[0], pkBounds[1]);
+				peak.setBounds(lowEnd, highEnd);
 				peak.setAmplitude( modeValue);
-				maxPeakHeight =Math.max(maxPeakHeight, modeValue);
-				peak.setArea(0);
-				if (useMean)          											
-				{
-					double tempArea = 0.;
-					double count = 0.;
-					for (bin = pkBounds[0]; bin <= pkBounds[1]; bin++)
-					{
-						count += peakHisto[bin];
-						tempArea += bin * peakHisto[bin];
-					}
-//					peak.setMean(tempArea / count);
-					peak.setArea(count);
-				}
+				for (peak.setArea(0), bin = lowEnd; bin < highEnd; bin++)		peak.addArea(peakHisto[bin]);
+				double peakArea = peak.getArea();
+				
+				double seen = 0.;
+				for (bin = lowEnd; bin <= highEnd && seen < peakArea / 2; bin++)
+					seen += peakHisto[bin];
+				if (bin == 0) peak.setMean(bin);
 				else
-				{ 
-					for (bin = pkBounds[0]; bin < pkBounds[1]; bin++)
-						peak.addArea(peakHisto[bin]);
-					double seen = 0.;
-					for (bin = pkBounds[0]; bin <= pkBounds[1] && seen < peak.getArea() / 2; bin++)
-						seen += peakHisto[bin];
-					if (bin == 0) peak.setMean(bin);
-					else
-					{
-						double crossover = peakHisto[bin - 1];
-						double intoChannel = seen - peak.getArea() / 2;
-						double ratio = intoChannel / crossover;
-						peak.setMean(bin - ratio);
-					}
+				{
+					double crossover = peakHisto[bin - 1];
+					double intoChannel = seen - peak.getArea() / 2;
+					double ratio = intoChannel / crossover;
+					peak.setMean(bin - ratio);
 				}
 				
-				for (bin = fringe[0]; bin <= fringe[1]; bin++)
+				for (bin = sub; bin <= sooper; bin++)
 				{
 					totalPeakArea += peakHisto[bin];
 					peakHisto[bin] = 0.;
 				}
 				double minArea = getMinPeakArea(area);
 				if (!allPeaks && (peak.getArea() < minArea)) 
-					finished = (((double) (totalPeakArea) / (double) (peak.getArea())) > 0.95);		// STOP at > 96% classified
+					finished = (totalPeakArea / peakArea) > 0.95;		// STOP at > 95% classified
 				else peaks.add(peak);
 			}
 		}
 		catch (Throwable ex)		{			ex.printStackTrace();		}
 		Collections.sort(peaks);
-		for (Peak p: peaks)
-			System.out.println(toString() + " " + p.toString());
+		for (Peak p: peaks)			System.out.println(toString() + " " + p.toString());
 	}
+	
+	//------------------------------------------------------------------------------
+	// walk from the mode in either positive or negative direction 
+	//	until a return condition is found
+	
+	private int findBounds(int mode, int direction, double[] peakHisto, double modeValue)
+	{
+		double halfMax = modeValue / 2.;
+		boolean shoulderPeaks = false; 
+		double halfWidthHalfMax = 0.;
+		boolean wasBelowThreshold = false;
+		double WIDTHFACTOR = SQRT2;
+		double FLOOR = 0.01;
+		int bin;
+		for (bin = mode; between(bin, 0, size); bin += direction)
+		{
+			int slopeWidth = (int) pin(halfWidthHalfMax, size / 32., size / 8.);
+			int slopeLow = Math.max(0, bin - slopeWidth / 2);
+			int slopeHigh = Math.min(size - 1, bin + slopeWidth / 2);
+			double slope = getSlope(peakHisto, slopeLow, slopeHigh - slopeLow + 1);
+//			boolean rising = (direction == 0) == (slope < 0);
+			boolean rising = (direction == 0) ? slope < 0 : slope > 0;
+
+			if (halfWidthHalfMax > 0) 
+			{
+				double curWidth = Math.abs(bin - mode);
+				double expected = Math.abs(modeValue - peakHisto[bin]) / halfMax * halfWidthHalfMax;
+				if (peakHisto[bin] < FLOOR)					return bin;	
+				else if (curWidth > expected && rising) 	return bin;
+				else if (curWidth > WIDTHFACTOR * expected) return bin;	
+			}
+			else if (halfWidthHalfMax > 0) 			
+			{
+				if (peakHisto[bin] == 0. || rising)	 return bin;		
+			}
+			else if (rising && shoulderPeaks && wasBelowThreshold)		return bin;	
+			else if (peakHisto[bin] < halfMax) 					
+			{
+				int chanMinusOne = Math.max(0, bin - 1);
+				halfWidthHalfMax = Math.abs(bin - mode) - ((halfMax - peakHisto[bin]) / (peakHisto[chanMinusOne] - halfMax));
+			}
+			if (peakHisto[bin] < halfMax * WIDTHFACTOR) wasBelowThreshold = true;			// Sqrt(2) is Welch model of FWHM
+		}
+		return bin;
+		
+	}
+	//------------------------------------------------------------------------------
 	
 	private double getMinPeakArea(int area)	{		return Math.min(100., area / 100.);	}
 		

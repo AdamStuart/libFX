@@ -20,6 +20,7 @@ public class Population
 	
 	public String getName()				{ return name.get();	}
 	public double getCount()			{ return count.get();	}
+	public String getCountStr()			{ return String.format("%.1f", count.get());	}
 	public double getLow()				{ return low.get();	}
 	public double getHigh()				{ return high.get();	}
 	public String getMarker()			{ return marker.get();	}

@@ -36,7 +36,7 @@ public class Peak implements Comparable<Peak>
 		this();
 		histogram = h;
 	}
-
+//@formatter:off
 	public double getMean()  		{ 	return mean;	}
 	public void setMean(double d)  	{  	mean = d;	}
 	public double getStdev()  		{ 	return stdev;	}
@@ -57,6 +57,7 @@ public class Peak implements Comparable<Peak>
 	public void addArea(double a)	{   area += a; }
 	public double get(double x)		{	return gauss(x, mean, stdev, getUnitAmplitude());	}
 	public double getCV()			{	return stdev / mean;	}
+//@formatter:on
 	
 	public Path getPath()
 	{

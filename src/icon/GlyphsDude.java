@@ -60,6 +60,17 @@ public class GlyphsDude {
 
     	}
      }
+    
+	public static Text createProgressStatusIcon(String status)
+	{
+		if ("NONE".equals(status))  return createIcon(FontAwesomeIcons.SQUARE_ALT,"16"  );
+		if ("PLANNED".equals(status))  return createIcon(FontAwesomeIcons.CLOCK_ALT,"16"  );
+		if ("INPROGRESS".equals(status))  return createIcon(FontAwesomeIcons.GEAR,"16"  );
+		if ("COMPLETE".equals(status))  return createIcon(FontAwesomeIcons.CHECK,"16"  );
+		if ("ABORTED".equals(status))  return createIcon(FontAwesomeIcons.EXCLAMATION,"16"  );
+		if ("ERROR".equals(status))  return createIcon(FontAwesomeIcons.EXCLAMATION_TRIANGLE,"16"  );
+		return null;
+	}
     public static Button plusButton()
     {
     	return createIconButton(FontAwesomeIcons.PLUS_CIRCLE, "", "16", "16", ContentDisplay.CENTER);
@@ -218,5 +229,7 @@ public class GlyphsDude {
         Text label = GlyphsDude.createIcon(icon, iconSize);
         treeItem.setGraphic(label);
     }
+
+
 
 }

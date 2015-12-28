@@ -1,5 +1,10 @@
 package xml;
 
+import org.w3c.dom.CharacterData;
+import org.w3c.dom.Comment;
+import org.w3c.dom.Element;
+import org.w3c.dom.EntityReference;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -48,6 +53,54 @@ public class XMLTools
 	{
 		return StringUtil.toDouble(getChildAttribute(elem, attrName));
 	}
+
+	//--------------------------------------------------------------------------------
+
+	public static boolean nodeContains(org.w3c.dom.Node node, String  strUpper)
+	{
+//		String strUpper = str.toUpperCase();
+		if (node == null) return false;
+		String nodeName = node.getNodeName();
+		if (nodeName != null)
+		{
+			System.out.println(nodeName);
+			if (nodeName.toUpperCase().contains(strUpper))
+				return true;
+			if (node instanceof Element)
+			{
+				String s = getTextValue((Element) node).trim().toUpperCase();
+				System.out.println(s);
+
+				if (s.contains(strUpper))
+					return true;
+			}
+			NamedNodeMap map = node.getAttributes();
+			if (map != null)
+			for (int x=0; x<map.getLength(); x++)
+			{
+				Node n = map.item(x);
+				if (nodeContains(n, strUpper))
+								return true;
+			}
+		}
+
+        for (int i=0; i<node.getChildNodes().getLength(); i++)
+        	if (nodeContains(node.getChildNodes().item(i), strUpper))
+        		return true;
+		return false;
+	}
 	
+
+	public static String getTextValue(org.w3c.dom.Element valueEle) {
+		    StringBuffer value = new StringBuffer();
+		    NodeList nl = valueEle.getChildNodes();
+		    for (int i = 0; i < nl.getLength(); i++) {
+		      Node item = nl.item(i);
+		      if ((item instanceof CharacterData && !(item instanceof Comment)) || item instanceof EntityReference) {
+		        value.append(item.getNodeValue());
+		      }
+		    }
+		    return value.toString();
+		  }
 
 }

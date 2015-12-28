@@ -9,6 +9,8 @@ import gui.Borders;
 import javafx.collections.FXCollections;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
+import javafx.scene.chart.Chart;
+import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
@@ -30,9 +32,9 @@ public class CSVTableData
 	private List<String> columnNames;
 	private List<IntegerDataRow> rows;
 	private List<Range> ranges;
-	private List<Histogram1D> histograms;
-	private Map<String, List<Histogram1D>> gatedHistogramMap;
-	private List<Histogram2D> histogram2Ds;
+	private Map<String, Histogram1D> histograms;
+	private Map<String, Map<String, Histogram1D>> gatedHistogramMap;
+//	private List<Histogram2D> histogram2Ds;
 	private List<OverlaidScatterChart<Number, Number>> scatters;
 	private Map<String, Image> images;
 	private Map<String, Integer> gateNames = new HashMap<String, Integer>();
@@ -45,11 +47,11 @@ public class CSVTableData
 		columnNames = FXCollections.observableArrayList();
 		rows = new ArrayList<IntegerDataRow>();
 		ranges = new ArrayList<Range>();
-		histograms = new ArrayList<Histogram1D>();
-		histogram2Ds = new ArrayList<Histogram2D>();
+		histograms = new HashMap<String,Histogram1D>();
+//		histogram2Ds = new ArrayList<Histogram2D>();
 		scatters = new ArrayList<OverlaidScatterChart<Number, Number>>();
 		images = new HashMap<String, Image>();
-		gatedHistogramMap = new HashMap<String, List<Histogram1D>>();
+		gatedHistogramMap = new HashMap<String, Map<String, Histogram1D>>();
 	}
 	//--------------------------------------------------------------------------------
 	
@@ -72,13 +74,15 @@ public class CSVTableData
 	public  List<Range> getRanges() 			{ return ranges; }
 	public  Map<String,Image> getImages() 		{ return images; }
 	public  Range getRange(int i) 				{ return ranges.get(i); }
-	public  List<Histogram1D> getHistograms() 	{ return histograms; }
+	public  Map<String,Histogram1D> getHistograms() 	{ return histograms; }
 	public  Histogram1D getHistogram(int i) 
 	{ 
 		if (histograms.isEmpty()) generateHistograms(); 
 		return histograms.get(i); 
 	}
 	
+	public  Map<String,Histogram1D> getGatedHistograms(String key) 	{ return gatedHistogramMap.get(key); }
+
 	public  List<String> getColumnNames() 	{ 	return columnNames; }
 	public 	int getCount()					{ 	return rows.size();	}
 	public 	int getWidth()					{	return (rows.size() == 0) ? 0 : rows.get(0).getWidth();	}
@@ -155,16 +159,17 @@ public class CSVTableData
 					hist.count(s);			// we ignore the bottom 5 bins here!!		<<================
 				}
 			}
-			histograms.add(hist);
 			if (hist != null)
-				System.out.println( "Area: " + hist.getArea() + " / " + rows.size()); 
+			{	
+				histograms.put(hist.getName(), hist);
+				System.out.println(hist.getName() +  " has area: " + hist.getArea() + " / " + rows.size()); 
+			}
 		}
 	}
 	//--------------------------------------------------------------------------------
-
 	public void generateGatedHistograms(String popName)
 	{
-		List<Histogram1D> gatedHistograms = new ArrayList<Histogram1D>();
+		Map<String, Histogram1D> gatedHistograms = new HashMap<String, Histogram1D>();
 		int index = gateIndex(popName);
 		if (index >= 0)
 		{
@@ -181,26 +186,28 @@ public class CSVTableData
 						hist.count(val);	
 					}
 				}
-				gatedHistograms.add(hist);
-				System.out.println( "Area: " + hist.getArea() + " / " + rows.size()); 
+				gatedHistograms.put(hist.getName(), hist);
+				System.out.println(hist.getName() +  " has area: " + hist.getArea() + " / " + rows.size()); 
 			}
 			gatedHistogramMap.put(popName, gatedHistograms);
 		}
 	}
-
+	//--------------------------------------------------------------------------------
+	public Histogram1D getGatedHistogram(GraphRequest req)
+	{
+		return getGatedHistogram(req.getX(), req.getPopulation());
+	}
 	public Histogram1D getGatedHistogram(String dimName, String popName)
 	{
-		List<Histogram1D> gatedHistograms = gatedHistogramMap.get(popName);
+		Map<String, Histogram1D> gatedHistograms = gatedHistogramMap.get(popName);
 		if (gatedHistograms == null) 
 			gatedHistograms = histograms;
 
 		if (gatedHistograms == null) return null;
-		for (Histogram1D h : gatedHistograms)
-			if (h != null && h.getName().equals(dimName))
-				return h;
-		return null;
+		return gatedHistograms.get(dimName);
 	}
 
+	//--------------------------------------------------------------------------------
 	public List<Point2D> getPointList(String popName, String xDim, String yDim)
 	{
 		List<Point2D> pointList = new ArrayList<Point2D>();
@@ -247,14 +254,15 @@ public class CSVTableData
 		}
 }
 	//--------------------------------------------------------------------------------
+	public OverlaidScatterChart<Number, Number> getGatedScatterChart(GraphRequest req)
+	{
+		return getGatedScatterChart(req.getPopulation(), req.getX(), req.getY());
+	}
 	public OverlaidScatterChart<Number, Number> getGatedScatterChart(String popName, String xDim, String yDim)
 	{
-		List<Histogram1D> popHistoList = gatedHistogramMap.get(popName);
-		Histogram1D xHisto =null;
-		Histogram1D yHisto =null;
-		for (Histogram1D h : popHistoList)
-			if (h.getName().equals(xDim)) xHisto = h;
-			else if (h.getName().equals(yDim)) yHisto = h;
+		Map<String, Histogram1D> popHistoList = gatedHistogramMap.get(popName);
+		Histogram1D xHisto =popHistoList.get(xDim);
+		Histogram1D yHisto =popHistoList.get(yDim);
 		if ((xHisto == null) || (yHisto == null)) return null;
 
 		NumberAxis xAxis = new NumberAxis(xDim, Math.log(xHisto.getRange().min)-5, Math.log(xHisto.getRange().max)-5, 1);		// needs log transform
@@ -275,37 +283,6 @@ public class CSVTableData
 	}
 	
 	
-	//--------------------------------------------------------------------------------
-	public OverlaidScatterChart<Number, Number> generateScatter(String xParm, String yParm)
-	{
-		final NumberAxis xAxis = new NumberAxis();
-		xAxis.setLabel(xParm);
-		
-		final NumberAxis yAxis = new NumberAxis();
-		yAxis.setLabel(yParm);
-		
-		OverlaidScatterChart<Number, Number> scatter = new OverlaidScatterChart<Number, Number>(xAxis, yAxis);
-//		
-//		xAxis.setOnMouseClicked(ev -> {
-//			if (ev.isShiftDown()) prevXParm(scatter);
-//			else				nextXParm(scatter);
-//		});
-//		yAxis.setOnMouseClicked(ev -> {
-//			if (ev.isShiftDown()) prevYParm(scatter);
-//			else				nextYParm(scatter);
-//		});
-//
-		scatter.setTitle("Ten Bin Gutter");
-		Node chartPlotArea = scatter.lookup(".chart-plot-background");
-		if (chartPlotArea != null)
-		{
-			Region rgn = (Region) chartPlotArea;
-			rgn.setBorder(Borders.blueBorder1);
-		}
-		setLayer(scatter, xParm, yParm, 0);
-		return scatter;
-
-	}
 // TODO move up into a controller
 	private void setLayer(OverlaidScatterChart<Number, Number> scatter, String xName, String yName, int idx)
 	{
@@ -363,6 +340,37 @@ public class CSVTableData
 	}
 	boolean inRange(double x, double a, double b)	{ return x >= a && x < b;	}
 	
+	
+	//--------------------------------------------------------------------------------
+	public int addPColumn(String parent, String pop)	{		return addPColumn(parent, pop, null);	}
+	
+	public int addPColumn(String parent, String pop, String name)
+	{
+		Map<String, Histogram1D> dataset = getGatedHistograms(parent);
+		if (dataset == null) return -1;
+		
+		boolean positivePop = pop.endsWith("+");
+		boolean negativePop = pop.endsWith("-");
+		if (positivePop == negativePop) return -1;
+		if (StringUtil.isEmpty(name))	 name = pop;
+		String dim = StringUtil.chopLast(pop);
+		Histogram1D histo = dataset.get(dim);
+		if (histo == null)  return -1;
+		List<Peak> peaks = histo.getPeaks();
+		if (peaks.size() == 1)
+		{
+			if (negativePop) addPColumnPeakIndex(name, histo, 0);
+			if (positivePop) addPColumnAbove(name, histo, peaks.get(0).getMax());
+		}
+		if (peaks.size() >= 2)
+		{
+			if (negativePop) addPColumnPeakIndex(name, histo, 0);
+			if (positivePop) addPColumnPeakIndex(name, histo, peaks.size()-1);
+		}
+	
+		return -1;
+	}
+
 	//--------------------------------------------------------------------------------
 	public void addPColumnPeakIndex(String id, Histogram1D histogram, int peakNum)
 	{
@@ -474,6 +482,7 @@ public class CSVTableData
 		}
 	}
 
+
 	//--------------------------------------------------------------------------------
 	public void populateCSVTable(TableView<IntegerDataRow> csvtable)
 	{
@@ -507,6 +516,30 @@ public class CSVTableData
 	}
 
 	//--------------------------------------------------------------------------------
+	public List<Chart> process(List<GraphRequest> requests)
+	{
+		List<Chart> charts = new ArrayList<Chart>();
+		for (GraphRequest req : requests)
+		{
+			if (req.isHistogram())
+			{
+				Histogram1D histo = getGatedHistogram(req.getX(), req.getPopulation());
+				if (histo != null)
+				{
+					OverlaidLineChart chart = showGatedHistogram(req);
+					charts.add(chart);
+				}
+			}
+			if (req.isScatter())
+			{
+				OverlaidScatterChart<Number, Number> chart = getGatedScatterChart(req);
+				charts.add(chart);
+			}
+		}
+		return charts;
+	}
+
+	//--------------------------------------------------------------------------------
 	public void makeGatedHistogramOverlay(Histogram1D histo, 
 					OverlaidLineChart peakFitChart, double offsetIncrement, String ... pops)
 	{
@@ -527,14 +560,17 @@ public class CSVTableData
 
 
 	//--------------------------------------------------------------------------------
+	public OverlaidLineChart showGatedHistogram(GraphRequest req)
+	{
+		return showGatedHistogram(req.getPopulation(), req.firstChild(), req.getX());
+	}
+	
 	public OverlaidLineChart showGatedHistogram(String parent, String child, String dim)
 	{
 		if (StringUtil.isEmpty(parent))	parent = "All";
 		Histogram1D parentHisto = getGatedHistogram(dim, parent);
 		Histogram1D childHisto = getGatedHistogram(dim, child );
-		
-		if (parentHisto == null || childHisto == null)
-			return null;
+		if (parentHisto == null || childHisto == null)		return null;
 
 		NumberAxis  xAxis = new NumberAxis();	
 		xAxis.setLabel(dim);
@@ -543,11 +579,64 @@ public class CSVTableData
 		chart.setTitle(child + " Definition");
 		chart.setCreateSymbols(false);
 		chart.getData().add( parentHisto.getDataSeries(parent, 0, parentHisto.getArea()));	
-		chart.getData().add( childHisto.getDataSeries(child, 0, parentHisto.getArea()));			//
+		chart.getData().add( childHisto.getDataSeries(child, 0, parentHisto.getArea()));		// scale child to parent area
 		chart.setLegendVisible(false);
-		chart.setPrefHeight(100);
+//		chart.setPrefHeight(100);
 		VBox.setVgrow(chart, Priority.ALWAYS);
 		chart.setId(parent + "/" + child);
 		return chart;
 	}
+	//--------------------------------------------------------------------------------
+	public void generateHistograms(VBox graphVBox)
+	{
+		Map<String, Histogram1D> histos = getHistograms(); 
+		if (histos == null) return;
+		for (String key : histos.keySet())
+		{
+			Histogram1D histo = histos.get(key);
+			if (histo == null) continue;		// first 5 are null
+			Range r = histo.getRange();
+			if (r.width() < 50) continue;
+			LineChart<Number, Number> chart = histo.makeChart();
+			graphVBox.getChildren().add(chart);
+			VBox.setVgrow(chart, Priority.ALWAYS);
+		}
+	}
+	//--------------------------------------------------------------------------------
+	// DEAD CODE
+	public OverlaidScatterChart<Number, Number> generateScatter(GraphRequest req)
+	{
+		return generateScatter(req.getX(), req.getY());
+	}
+	public OverlaidScatterChart<Number, Number> generateScatter(String xParm, String yParm)
+	{
+		final NumberAxis xAxis = new NumberAxis();
+		xAxis.setLabel(xParm);
+		
+		final NumberAxis yAxis = new NumberAxis();
+		yAxis.setLabel(yParm);
+		
+		OverlaidScatterChart<Number, Number> scatter = new OverlaidScatterChart<Number, Number>(xAxis, yAxis);
+//		
+//		xAxis.setOnMouseClicked(ev -> {
+//			if (ev.isShiftDown()) prevXParm(scatter);
+//			else				nextXParm(scatter);
+//		});
+//		yAxis.setOnMouseClicked(ev -> {
+//			if (ev.isShiftDown()) prevYParm(scatter);
+//			else				nextYParm(scatter);
+//		});
+//
+		scatter.setTitle("Ten Bin Gutter");
+		Node chartPlotArea = scatter.lookup(".chart-plot-background");
+		if (chartPlotArea != null)
+		{
+			Region rgn = (Region) chartPlotArea;
+			rgn.setBorder(Borders.blueBorder1);
+		}
+		setLayer(scatter, xParm, yParm, 0);
+		return scatter;
+
+	}
+
 }
