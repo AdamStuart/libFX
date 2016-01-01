@@ -1,5 +1,8 @@
 package services;
 
+import java.io.File;
+
+import util.FileUtil;
 import util.StringUtil;
 
 /*
@@ -38,5 +41,15 @@ public final class MD5
 	public static String forBytes(final byte[] bytes)
 	{
 		return HashCodeBuilder.md5(bytes);
+	}
+
+	public static String forFile(File f)
+	{
+		try
+		{
+			byte[] bytes = FileUtil.readAsBytes(f);
+			return forBytes(bytes);
+		}
+		catch(Exception e) { return null; 	} 
 	}
 }
