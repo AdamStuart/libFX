@@ -2,7 +2,7 @@ package services;
 
 /*
  * Copyright 2012 Daniel Bechler
- *
+ * added SHA256
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,15 +24,19 @@ final class HashCodeBuilder
 	public enum HashCodeType
 	{
 		MD5,
-		SHA1
+		SHA1, 
+		SHA256
 	}
 
 	private HashCodeBuilder()	{	}
 
 	public static String md5(final String text)		{		return hash(text, HashCodeType.MD5);	}
 	public static String sha1(final String text)	{		return hash(text, HashCodeType.SHA1);	}
+	public static String sha256(final String text)	{		return hash(text, HashCodeType.SHA256);	}
 	public static String md5(final byte[] bytes)	{		return hash(bytes, HashCodeType.MD5);	}
 	public static String sha1(final byte[] bytes)	{		return hash(bytes, HashCodeType.SHA1);	}
+	public static String sha256(final byte[] bytes)	{		return hash(bytes, HashCodeType.SHA256);	}
+	
 	public static String hash(final String text, final HashCodeType type)	{		return hash(text.getBytes(), type);	}
 
 	public static String hash(final byte[] bytes, final HashCodeType type)	

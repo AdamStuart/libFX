@@ -13,12 +13,13 @@ public class GraphRequest extends StatisticRequest
 	String z = ".";
 	String[] children;
 	
-	public GraphRequest(Graph type, String xDim, String yDim, String mom, String ... kids)
+	public GraphRequest(Graph typ, String xDim, String yDim, String mom, String ... kids)
 	{
 		super(mom);
 		x = xDim;
 		y = yDim;
 		children = kids;
+		type = typ;
 	}
 	
 	public String firstChild()	{ return children == null || children.length == 0 ? "" : children[0];	}

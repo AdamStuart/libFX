@@ -8,8 +8,8 @@ import java.util.Map;
 import gui.Borders;
 import javafx.collections.FXCollections;
 import javafx.geometry.Point2D;
+import javafx.geometry.Side;
 import javafx.scene.Node;
-import javafx.scene.chart.Chart;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
@@ -81,7 +81,9 @@ public class CSVTableData
 		return histograms.get(i); 
 	}
 	
-	public  Map<String,Histogram1D> getGatedHistograms(String key) 	{ return gatedHistogramMap.get(key); }
+	public  Map<String,Histogram1D> getGatedHistograms(String popname) 	
+	{ 	 return ("All".equals(popname)) ? histograms : gatedHistogramMap.get(popname);
+	}
 
 	public  List<String> getColumnNames() 	{ 	return columnNames; }
 	public 	int getCount()					{ 	return rows.size();	}
@@ -146,11 +148,12 @@ public class CSVTableData
 		if (nRows <= 0) return ;
 //		IntegerDataRow row0 = rows.get(0);
 		int nCols = columnNames.size();
-		for (int i=0;i<nCols; i++)
+		for (int i=5;i<nCols; i++)
+//		for (int i=0;i<nCols; i++)
 		{
 			Histogram1D hist = null;		// put null in the first five slots
-			if (i >= 5) 		// first five columns are position and size,		skip them
-			{
+//			if (i >= 5) 		// first five columns are position and size,		skip them
+//			{
 				hist = new Histogram1D(columnNames.get(i) , ranges.get(i));
 				for (int row=0; row<nRows; row++)		// first pass to calculate tails
 				{
@@ -158,7 +161,7 @@ public class CSVTableData
 					Integer s = aRow.get(i).get();
 					hist.count(s);			// we ignore the bottom 5 bins here!!		<<================
 				}
-			}
+//			}
 			if (hist != null)
 			{	
 				histograms.put(hist.getName(), hist);
@@ -226,7 +229,7 @@ public class CSVTableData
 				}
 			}
 		}
-		System.out.println( "There are " + pointList.size() + "points in " + popName); 
+		System.out.println( "There are " + pointList.size() + " points in " + popName); 
 		return pointList;
 	}
 
@@ -261,12 +264,16 @@ public class CSVTableData
 	public OverlaidScatterChart<Number, Number> getGatedScatterChart(String popName, String xDim, String yDim)
 	{
 		Map<String, Histogram1D> popHistoList = gatedHistogramMap.get(popName);
+		if (popHistoList == null) return null;
+			
 		Histogram1D xHisto =popHistoList.get(xDim);
 		Histogram1D yHisto =popHistoList.get(yDim);
 		if ((xHisto == null) || (yHisto == null)) return null;
 
 		NumberAxis xAxis = new NumberAxis(xDim, Math.log(xHisto.getRange().min)-5, Math.log(xHisto.getRange().max)-5, 1);		// needs log transform
 		NumberAxis yAxis = new NumberAxis(yDim, Math.log(yHisto.getRange().min)-5, Math.log(yHisto.getRange().max)-5, 1);
+		xAxis.setTickLabelsVisible(false);		// use CSS
+		yAxis.setTickLabelsVisible(false);
 		OverlaidScatterChart<Number, Number> chart = new OverlaidScatterChart<Number, Number>(xAxis, yAxis);
 		Series<Number,Number> dataset = new Series<Number,Number>();
 		dataset.setNode(new Circle(2));
@@ -279,6 +286,7 @@ public class CSVTableData
 			dataset.getData().add(new XYChart.Data<Number, Number>(x,y));
 		}
 		chart.setTitle(popName);
+		chart.setLegendVisible(false);
 		return chart;
 	}
 	
@@ -305,7 +313,7 @@ public class CSVTableData
 		{
 			int x = row.get(xIdx).get();
 			int y = row.get(yIdx).get();
-			if (insideGates(xIdx, x, yIdx, y))
+			if (insideGates(xIdx, x, yIdx, y))		// stub
 				histo2D.count(x, y);
 		}
 		Image img = histo2D.asImage();
@@ -342,12 +350,14 @@ public class CSVTableData
 	
 	
 	//--------------------------------------------------------------------------------
-	public int addPColumn(String parent, String pop)	{		return addPColumn(parent, pop, null);	}
+	public int addPColumn(String parent, String pop)	{		return addPColumn(parent, pop, pop);	}
 	
 	public int addPColumn(String parent, String pop, String name)
 	{
 		Map<String, Histogram1D> dataset = getGatedHistograms(parent);
 		if (dataset == null) return -1;
+for (String key : dataset.keySet())
+	System.out.println("Area in " + key + ": " + dataset.get(key).getArea());
 		
 		boolean positivePop = pop.endsWith("+");
 		boolean negativePop = pop.endsWith("-");
@@ -357,22 +367,23 @@ public class CSVTableData
 		Histogram1D histo = dataset.get(dim);
 		if (histo == null)  return -1;
 		List<Peak> peaks = histo.getPeaks();
+		int parentIdx = "All".equals(parent) ? -1 : gateNames.get(parent);
 		if (peaks.size() == 1)
 		{
-			if (negativePop) addPColumnPeakIndex(name, histo, 0);
-			if (positivePop) addPColumnAbove(name, histo, peaks.get(0).getMax());
+			if (negativePop) addPColumnPeakIndex(name, parentIdx, histo, 0);
+			if (positivePop) addPColumnAbove(name, parentIdx, histo, peaks.get(0).getMax());
 		}
 		if (peaks.size() >= 2)
 		{
-			if (negativePop) addPColumnPeakIndex(name, histo, 0);
-			if (positivePop) addPColumnPeakIndex(name, histo, peaks.size()-1);
+			if (negativePop) addPColumnPeakIndex(name, parentIdx, histo, 0);
+			if (positivePop) addPColumnPeakIndex(name, parentIdx, histo, peaks.size()-1);
 		}
 	
 		return -1;
 	}
 
 	//--------------------------------------------------------------------------------
-	public void addPColumnPeakIndex(String id, Histogram1D histogram, int peakNum)
+	public void addPColumnPeakIndex(String id, int parentIdx, Histogram1D histogram, int peakNum)
 	{
 		Peak peak = histogram.getPeaks().get(peakNum);
 		double minVal = peak.getMin();
@@ -382,7 +393,8 @@ public class CSVTableData
 		for (IntegerDataRow row : rows)
 		{
 			int x = histogram.valToBin(row.get(index).get());
-			int val = inRange(x, minVal, maxVal) ? 1 : 0;
+			int parentVal = parentIdx < 0 ? 1 : row.get(parentIdx).get();
+			int val = parentVal == 0 ? 0 : (inRange(x, minVal, maxVal) ? 1 : 0);
 			if (val == 1) ct++;
 			row.addPColumn(val);
 		}
@@ -394,7 +406,7 @@ public class CSVTableData
 	}
 
 	//--------------------------------------------------------------------------------
-	public void addPColumnAbove(String id, Histogram1D histogram, double floor)
+	public void addPColumnAbove(String id, int parentIdx, Histogram1D histogram, double floor)
 	{
 		double minVal = floor;
 		int index = indexOf(histogram.getName());
@@ -402,7 +414,8 @@ public class CSVTableData
 		for (IntegerDataRow row : rows)
 		{
 			int x = histogram.valToBin(row.get(index).get());
-			int val = (x >= minVal) ? 1 : 0;
+			int parentVal = parentIdx < 0 ? 1 : row.get(parentIdx).get();
+			int val= (parentVal == 0) ? 0 : ((x >= minVal) ? 1 : 0);
 			if (val == 1) ct++;
 			row.addPColumn(val);
 		}
@@ -412,31 +425,32 @@ public class CSVTableData
 	}
 
 	//--------------------------------------------------------------------------------
-	public void addPColumnAnd(String newCol, String ... src)
-	{
-		int[] indices = new int[src.length];
-		int ct = 0;
-		for (int i = 0; i < src.length; i++)
-		{
-			String s = src[i];
-			indices[i] = gateNames.get(s);
-		}
-
-		for (IntegerDataRow row : rows)
-		{
-			double val = 1;
-			for (int i = 0; i < src.length; i++)
-				val *= row.get(indices[i]).getValue();			// TODO make double
-			if (val == 1) 
-			{
-				ct++;
-				row.addPColumn((int) val);
-			}
-		}
-		gateNames.put(newCol, rows.get(0).getWidth()-1);
-		generateGatedHistograms(newCol);
-		System.out.println(ct + " events were in gate " + newCol);
-	}
+	// done implicitly by sending parent to addPColumn calls above
+//	public void addPColumnAnd(String newCol, String ... src)
+//	{
+//		int[] indices = new int[src.length];
+//		int ct = 0;
+//		for (int i = 0; i < src.length; i++)
+//		{
+//			String s = src[i];
+//			indices[i] = gateNames.get(s);
+//		}
+//
+//		for (IntegerDataRow row : rows)
+//		{
+//			double val = 1;
+//			for (int i = 0; i < src.length; i++)
+//				val *= row.get(indices[i]).getValue();			// TODO make double
+//			if (val == 1) 
+//			{
+//				ct++;
+//				row.addPColumn((int) val);
+//			}
+//		}
+//		gateNames.put(newCol, rows.get(0).getWidth()-1);
+//		generateGatedHistograms(newCol);
+//		System.out.println(ct + " events were in gate " + newCol);
+//	}
 
 	
 	//	private void prevXParm(OverlaidScatterChart scatter)
@@ -477,8 +491,8 @@ public class CSVTableData
 			if (h == null) continue;
 			double area = h.getArea(); 
 			double gutter = h.getGutterCount(); 
-			System.out.println(status);
 			status += " Gutter: " + (int) gutter + " / " + (int) area;
+			System.out.println(status);
 		}
 	}
 
@@ -516,25 +530,15 @@ public class CSVTableData
 	}
 
 	//--------------------------------------------------------------------------------
-	public List<Chart> process(List<GraphRequest> requests)
+	public List<XYChart<Number, Number>> process(List<GraphRequest> requests)
 	{
-		List<Chart> charts = new ArrayList<Chart>();
+		List<XYChart<Number, Number>> charts = new ArrayList<XYChart<Number, Number>>();
 		for (GraphRequest req : requests)
 		{
 			if (req.isHistogram())
-			{
-				Histogram1D histo = getGatedHistogram(req.getX(), req.getPopulation());
-				if (histo != null)
-				{
-					OverlaidLineChart chart = showGatedHistogram(req);
-					charts.add(chart);
-				}
-			}
+				charts.add(showGatedHistogram(req));
 			if (req.isScatter())
-			{
-				OverlaidScatterChart<Number, Number> chart = getGatedScatterChart(req);
-				charts.add(chart);
-			}
+				charts.add(getGatedScatterChart(req));
 		}
 		return charts;
 	}
@@ -571,7 +575,11 @@ public class CSVTableData
 		Histogram1D parentHisto = getGatedHistogram(dim, parent);
 		Histogram1D childHisto = getGatedHistogram(dim, child );
 		if (parentHisto == null || childHisto == null)		return null;
-
+		System.out.println(parentHisto.getName() + " area: " + parentHisto.getArea());
+		System.out.println(childHisto.getName() + " area: " + childHisto.getArea());
+		if (parentHisto.getArea() == 0) System.out.println("no parent events");
+		else System.out.println("Freq of Parent: " + (int)(100 * childHisto.getArea() / (double) parentHisto.getArea()) + "%");
+		
 		NumberAxis  xAxis = new NumberAxis();	
 		xAxis.setLabel(dim);
 		NumberAxis  yAxis = new NumberAxis();
@@ -579,15 +587,17 @@ public class CSVTableData
 		chart.setTitle(child + " Definition");
 		chart.setCreateSymbols(false);
 		chart.getData().add( parentHisto.getDataSeries(parent, 0, parentHisto.getArea()));	
-		chart.getData().add( childHisto.getDataSeries(child, 0, parentHisto.getArea()));		// scale child to parent area
+		chart.getData().add( childHisto.getDataSeries(child, 0, parentHisto.getArea()));		// scale child to parent area -- not working!!
 		chart.setLegendVisible(false);
+		chart.getXAxis().setTickLabelsVisible(false);		// use CSS
+		chart.getYAxis().setTickLabelsVisible(false);
 //		chart.setPrefHeight(100);
 		VBox.setVgrow(chart, Priority.ALWAYS);
 		chart.setId(parent + "/" + child);
 		return chart;
 	}
 	//--------------------------------------------------------------------------------
-	public void generateHistograms(VBox graphVBox)
+	public void generateRawHistogramCharts(VBox graphVBox)
 	{
 		Map<String, Histogram1D> histos = getHistograms(); 
 		if (histos == null) return;
@@ -599,6 +609,9 @@ public class CSVTableData
 			if (r.width() < 50) continue;
 			LineChart<Number, Number> chart = histo.makeChart();
 			graphVBox.getChildren().add(chart);
+			chart.getXAxis().setTickLabelsVisible(false);		// use CSS
+			chart.getYAxis().setTickLabelsVisible(false);
+			chart.getXAxis().setVisible(false);
 			VBox.setVgrow(chart, Priority.ALWAYS);
 		}
 	}

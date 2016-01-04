@@ -21,7 +21,7 @@ public class Histogram1D
 	boolean isLog = true;
 	private String name;
 	private List<Peak> peaks = FXCollections.observableArrayList();
-	public List<Peak> getPeaks()	{ return peaks;	}
+	public List<Peak> getPeaks()	{  if (peaks.isEmpty()) scanPeaks(); return peaks;	}
 // ----------------------------------------------------------------------------------------------------
 	
 	public String toString() { return name + "  " + range.toString(); }
@@ -277,8 +277,8 @@ public class Histogram1D
 				double scale = range.width() / (size+1);
 				for (int i = 0; i < size; i++)
 				{
-					double x = range.min + (i * scale);		//valToBin(i);  //   
-					x =  (x > 0) ? (Math.log(x) - 5) : 0;			// resolve this with valtobin
+					double x = range.min + (i * scale);			//valToBin(i);  //   
+					x =  (x > 0) ? (Math.log(x) - 5) : 0;		// resolve this with valtobin
 
 					double y = smoothed[i] / area + yOffset;
 					series.getData().add(new XYChart.Data<Number, Number>(x,y));
@@ -388,7 +388,7 @@ public class Histogram1D
 		chart.setCreateSymbols(false);
 		chart.getData().add( getDataSeries("All"));	
 		chart.setLegendVisible(false);
-		chart.setPrefHeight(100);
+//		chart.setPrefHeight(100);
 		VBox.setVgrow(chart, Priority.ALWAYS);
 		chart.setId(getName());
 		return chart;
@@ -407,7 +407,9 @@ public class Histogram1D
 		for (Peak p : peaks)
 		{
 			p.calcStats();
-			peakFitChart.addVerticalValueMarker(new Data<Number, Number>(binToVal((int) p.getMean()), -1), Color.DARKCYAN, 2.8);
+//			int bin  = (int) p.getMean();
+//			double val = binToVal(bin);
+//			peakFitChart.addVerticalValueMarker(new Data<Number, Number>(val, -1), Color.DARKCYAN, 2.8);
 			p.setHistogram(this);
 			peakFitChart.addBellCurveMarker(p, Color.GREENYELLOW, 1);
 		}
@@ -515,7 +517,7 @@ public class Histogram1D
 		return chart;
 	}
 //------------------------------------------------------------------------------
-//Numerical Recipes in C by Press et. al. and read the section on data fitting.
+//Numerical Recipes in C by Press et. al.:from the section on data fitting.
 //https://en.wikipedia.org/wiki/Full_width_at_half_maximum
 //http://mathworld.wolfram.com/FullWidthatHalfMaximum.html
 //Levenberg Marquardt is a least-squares/gaussian algorithm, so is somewhat noise sensitive.
@@ -634,7 +636,7 @@ public class Histogram1D
 	}
 	//------------------------------------------------------------------------------
 	
-	private double getMinPeakArea(int area)	{		return Math.min(100., area / 100.);	}
+	private double getMinPeakArea(int area)	{		return Math.max(100., area / 100.);	}
 		
 	int pin(int x,int min,int max) { return Math.min(max,  Math.max(x, min));  }
 	double pin(double x,double min,double max) { return Math.min(max,  Math.max(x, min));  }
