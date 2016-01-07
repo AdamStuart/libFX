@@ -7,7 +7,6 @@ import javafx.collections.FXCollections;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.chart.XYChart.Data;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -21,7 +20,7 @@ public class Histogram1D
 	boolean isLog = true;
 	private String name;
 	private List<Peak> peaks = FXCollections.observableArrayList();
-	public List<Peak> getPeaks()	{  if (peaks.isEmpty()) scanPeaks(); return peaks;	}
+	public List<Peak> getPeaks()	{  if (peaks.isEmpty()) scanPeaks(null); return peaks;	}
 // ----------------------------------------------------------------------------------------------------
 	
 	public String toString() { return name + "  " + range.toString(); }
@@ -403,15 +402,16 @@ public class Histogram1D
 
 	public void addPeakMarkers(OverlaidLineChart peakFitChart)
 	{
-		scanPeaks();
+		scanPeaks(peakFitChart);
 		for (Peak p : peaks)
 		{
-			p.calcStats();
+			p.calcStdev();
 //			int bin  = (int) p.getMean();
 //			double val = binToVal(bin);
 //			peakFitChart.addVerticalValueMarker(new Data<Number, Number>(val, -1), Color.DARKCYAN, 2.8);
 			p.setHistogram(this);
-			peakFitChart.addBellCurveMarker(p, Color.GREENYELLOW, 1);
+			p.setChart(peakFitChart);
+			peakFitChart.addBellCurveMarker(p, Color.BLUE, 1);
 		}
 	}
 	
@@ -521,8 +521,9 @@ public class Histogram1D
 //https://en.wikipedia.org/wiki/Full_width_at_half_maximum
 //http://mathworld.wolfram.com/FullWidthatHalfMaximum.html
 //Levenberg Marquardt is a least-squares/gaussian algorithm, so is somewhat noise sensitive.
-	static double SQRT2 = Math.sqrt(2.0);
-	public void scanPeaks()
+static double SQRT2 = Math.sqrt(2.0);  // the threshold for full width at half max
+	
+	public void scanPeaks(OverlaidLineChart peakFitChart)
 	{
 		peaks.clear();
 		boolean allPeaks = false;  	
@@ -555,7 +556,7 @@ public class Histogram1D
 				if (lowEnd<= 0)	lowEnd = 0;
 				if (sub <= 0)		sub = 0;
 				
-				Peak peak = new Peak(this);
+				Peak peak = new Peak(this, peakFitChart);
 				peak.setBounds(lowEnd, highEnd);
 				peak.setAmplitude( modeValue);
 				for (peak.setArea(0), bin = lowEnd; bin < highEnd; bin++)		peak.addArea(peakHisto[bin]);

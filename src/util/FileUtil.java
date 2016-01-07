@@ -436,6 +436,20 @@ public class FileUtil
      return strs;
 	}
 
+	public static void writeTextFile(File parentFile, String childName, String content)
+	{
+		try
+		{
+			File target = new File(parentFile.getAbsolutePath(), childName);
+			if (target.exists()) 		target.delete();
+			target = createFileFromByteArray(content.getBytes(), target);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+
 	public static File createFileFromByteArray(final byte[] data, final File target) throws IOException
 	{
 		final File parent = target.getParentFile();

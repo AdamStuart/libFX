@@ -151,103 +151,13 @@ public class OverlaidLineChart extends LineChart<Number,Number>
 	           
 	           
 	       }
-	       boolean showRightEdge = true;
-	       boolean showLefEdge = true;
 	       for (Peak curve : bellCurveMarkers) 
 	       {
-			double startBin = curve.getMin();
-			double endBin = curve.getMax();
-//			double lowerx = ((NumberAxis) getXAxis()).getLowerBound();
-//			Number lowerX = getXAxis().toRealValue(lowerx);
-			// double upperx = ((NumberAxis) getXAxis()).getUpperBound();
-			// Number upperX = getXAxis().toRealValue(upperx);
-			// double xRange = upperx - lowerx;
-
-			double lowery = ((NumberAxis) getYAxis()).getLowerBound();
-			// Number lowerY = getYAxis().toRealValue(lowery);
-			double uppery = ((NumberAxis) getYAxis()).getUpperBound();
-			// Number upperY = getYAxis().toRealValue(uppery);
-			// double yRange = uppery - lowery;
-
-			Histogram1D histo = curve.getHistogram();
-			double y0 = getYAxis().getDisplayPosition(getYAxis().toRealValue(lowery));
-			Point2D left = new Point2D(getXAxis().getDisplayPosition(histo.binToVal((int) startBin)), y0);
-			Point2D right = new Point2D(getXAxis().getDisplayPosition(histo.binToVal((int) endBin)), y0);
-
-			
-			double x = histo.binToVal((int) curve.getMean());
-			double h = getXAxis().getDisplayPosition(x);
-			double y = histo.getValue((int) curve.getMean()) / histo.getArea();	//2.5 * curve.getUnitAmplitude();			// HACK
-			double v = getYAxis().getDisplayPosition(y);
-			
-			double altV = curve.get(curve.getMean());
-			double altV2 = getYAxis().getDisplayPosition(altV);
-			
-			Point2D center = new Point2D(h, v);
-			double ytemp;
-			// fill 7 points around the center, in the order:  4, 2, 1, 3, 6, 5, 7
-			
-			int xNegBin = (int) ((startBin + curve.getMean()) / 2);
-			double x2 = histo.binToVal(xNegBin);
-			double x2Neg = getXAxis().getDisplayPosition(x2);
-			ytemp = curve.get(x2);   // histo.getValue(xNegBin) / histo.getArea();				// usually near 0
-			double y2Neg= getYAxis().getDisplayPosition(ytemp);
-			
-			int xNegBin1 = (int) ((startBin + xNegBin )/ 2);
-			double x1 = histo.binToVal(xNegBin1);
-			double x1Neg = getXAxis().getDisplayPosition(x1);
-			ytemp = curve.get(x1);   // histo.getValue(xNegBin1) / histo.getArea();				
-			double y1Neg = getYAxis().getDisplayPosition(ytemp);
-
-			int xNegBin3 = (int) ((curve.getMean() + xNegBin)/ 2);
-			double x3 = histo.binToVal(xNegBin3);
-			double x3Neg = getXAxis().getDisplayPosition(x3);
-			ytemp = curve.get(x3);   // histo.getValue(xNegBin3) / histo.getArea();				
-			double y3Neg = getYAxis().getDisplayPosition(ytemp);
-
-			
-			int x6PosBin= (int) ((endBin + curve.getMean()) / 2);
-			double x6 = histo.binToVal(x6PosBin	);
-			double xPos = getXAxis().getDisplayPosition(x6);
-			ytemp = curve.get(x6);   // histo.getValue(xPosBin) / histo.getArea();
-			double y6Pos = getYAxis().getDisplayPosition(ytemp);
-
-			int xPosBin5 = (int) ((x6PosBin + curve.getMean()) / 2);
-			double x5 = histo.binToVal(xPosBin5);
-			double x5Pos = getXAxis().getDisplayPosition(x5);
-			ytemp = curve.get(x5);   // histo.getValue(xPosBin5) / histo.getArea();
-			double y5Pos = getYAxis().getDisplayPosition(ytemp);
-
-			int xPosBin7 = (int) ((endBin + x6PosBin) / 2);
-			double x7 = histo.binToVal(xPosBin7);
-			double x7Pos = getXAxis().getDisplayPosition(x7);
-			ytemp = curve.get(x7);   // histo.getValue(xPosBin7) / histo.getArea();			
-			double y7Pos = getYAxis().getDisplayPosition(ytemp);
-			
-				
-		     Point2D[] dataPoints = new Point2D[] 
-    			 { 	left, 		new Point2D(x1Neg, y1Neg),   	new Point2D(x2Neg, y2Neg), 	 new Point2D(x3Neg, y3Neg), 
-    				 center,  	new Point2D(x5Pos, y5Pos), 		new Point2D(xPos, y6Pos), 	 new Point2D(x7Pos, y7Pos), 
-    				 right};
 
 		    Path path = curve.getPath();
-			path.getElements().clear();
-			if (showLefEdge)
-				path.getElements().addAll(new MoveTo(left.getX(), uppery), new LineTo(left.getX(), y0)); // draw the bounds
-
-			path.getElements().add(new MoveTo(left.getX(), left.getY()));
-			for (int i = 1; i < dataPoints.length; i++) 
-			{
-		      	path.getElements().add(new LineTo(dataPoints[i].getX(), dataPoints[i].getY()));
-		      	System.out.println("" +  String.format("%.2f", dataPoints[i].getY()));
-			}
-				
-			
-		    if (showRightEdge)
-		    	path.getElements().addAll(new MoveTo(right.getX(), y0), new LineTo(right.getX(), uppery));
-	       
 			path.setStroke(Color.BLUE);
-			path.setStrokeWidth(1);
+			path.setStrokeWidth(2);
+			curve.setNode(path);
 	
 					
 //					
