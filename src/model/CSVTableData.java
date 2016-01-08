@@ -82,7 +82,7 @@ public class CSVTableData
 	}
 	
 	public  Map<String,Histogram1D> getGatedHistograms(String popname) 	
-	{ 	 return ("All".equals(popname)) ? histograms : gatedHistogramMap.get(popname);
+	{ 	 return ("All".equals(popname) || "^".equals(popname)) ? histograms : gatedHistogramMap.get(popname);
 	}
 
 	public  List<String> getColumnNames() 	{ 	return columnNames; }
@@ -367,7 +367,7 @@ for (String key : dataset.keySet())
 		Histogram1D histo = dataset.get(dim);
 		if (histo == null)  return -1;
 		List<Peak> peaks = histo.getPeaks();
-		int parentIdx = "All".equals(parent) ? -1 : gateNames.get(parent);
+		int parentIdx = ("All".equals(parent) || "^".equals(parent)) ? -1 : gateNames.get(parent);
 		if (peaks.size() == 1)
 		{
 			if (negativePop) addPColumnPeakIndex(name, parentIdx, histo, 0);
@@ -571,7 +571,7 @@ for (String key : dataset.keySet())
 	
 	public OverlaidLineChart showGatedHistogram(String parent, String child, String dim)
 	{
-		if (StringUtil.isEmpty(parent))	parent = "All";
+		if (StringUtil.isEmpty(parent))	parent = "^";
 		Histogram1D parentHisto = getGatedHistogram(dim, parent);
 		Histogram1D childHisto = getGatedHistogram(dim, child );
 		if (parentHisto == null || childHisto == null)		return null;

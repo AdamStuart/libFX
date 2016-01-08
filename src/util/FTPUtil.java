@@ -98,4 +98,17 @@ public class FTPUtil
 	        inputStream.close();
 	    }
 	}
+	
+	
+	// Zip up the contents of a folder, and upload it as a single file
+	
+	public static void zipAndUploadDirectory(FTPClient ftpClient,
+			        String remoteDirPath, String localParentDir, String remoteParentDir)
+			        throws IOException {
+	    
+		File zipFile = FileUtil.compress(new File(localParentDir));
+		
+		uploadSingleFile(ftpClient, zipFile.getAbsolutePath(), remoteParentDir);
+		FileUtil.moveToTrash(zipFile);
+	}	
 }

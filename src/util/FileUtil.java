@@ -585,6 +585,17 @@ public class FileUtil
 		return SwingFXUtils.toFXImage(bufferedImage, null);
 	}
 
+	public static void moveToTrash(File file)
+	{
+		// TODO -- implement a trash folder to save the cache for analysis
+		try
+		{
+			file.delete();
+		}
+		catch (Exception e) { e.printStackTrace(); }
+		
+	}
+
  
 
 }
