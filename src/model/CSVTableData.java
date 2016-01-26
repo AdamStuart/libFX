@@ -148,8 +148,8 @@ public class CSVTableData
 		if (nRows <= 0) return ;
 //		IntegerDataRow row0 = rows.get(0);
 		int nCols = columnNames.size();
-		for (int i=5;i<nCols; i++)
-//		for (int i=0;i<nCols; i++)
+//		for (int i=5;i<nCols; i++)
+		for (int i=0;i<nCols; i++)
 		{
 			Histogram1D hist = null;		// put null in the first five slots
 //			if (i >= 5) 		// first five columns are position and size,		skip them
