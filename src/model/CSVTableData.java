@@ -1,5 +1,7 @@
 package model;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,7 +10,6 @@ import java.util.Map;
 import gui.Borders;
 import javafx.collections.FXCollections;
 import javafx.geometry.Point2D;
-import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
@@ -23,6 +24,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
+import util.FileUtil;
 import util.StringUtil;
 
 public class CSVTableData
@@ -66,6 +68,8 @@ public class CSVTableData
 	}
 	//--------------------------------------------------------------------------------
 	
+	private int nRows()			{ return rows.size(); }
+	private int nColumns()		{ return columnNames.size(); }
 
 	private int getIndex(String name)			{ return columnNames.indexOf(name); }
 	private int gateIndex(String name)			{ return name == null ? null : gateNames.get(name); }
@@ -323,7 +327,7 @@ public class CSVTableData
 	//--------------------------------------------------------------------------------
 	private boolean insideGates(int xIdx, int x, int yIdx, int y)
 	{
-		return (x > 0 && y > 0);
+		return (x > 0 && y > 0);		// TODO
 	}
 	int xIndex = 0;
 	int yIndex = 1; 
@@ -348,7 +352,47 @@ public class CSVTableData
 	}
 	boolean inRange(double x, double a, double b)	{ return x >= a && x < b;	}
 	
-	
+	public void makeUnitFile(File f)
+	{
+		if (FileUtil.isCSV(f))
+		{
+			String fName = f.getAbsolutePath().replace(".csv", ".unit");
+			File unitFile = new File(fName);
+			if (unitFile.exists()) return;
+			
+			try
+			{
+				FileOutputStream fileOutputStream = new FileOutputStream(unitFile);
+				int offset = 0;
+				for (IntegerDataRow row : rows)		// scan for ranges of all columns
+				{
+					for (int i=0;i<nColumns();i++)
+					{
+						double d = transform(i, row.get(i).get());
+						byte[] bytes = convertDoubleToBytes(d);
+						fileOutputStream.write(bytes);
+					}
+				}
+				fileOutputStream.flush();
+				fileOutputStream.close();
+			}
+			catch (Exception e) {	e.printStackTrace();	}
+		}
+	}
+
+	private byte[] convertDoubleToBytes(double d)
+	{
+		byte[] output = new byte[8];
+		long lng = Double.doubleToLongBits(d);
+		for(int i = 0; i < 8; i++) 
+			output[i] = (byte)((lng >> ((7 - i) * 8)) & 0xff);		
+		return output;
+	}
+
+	double transform(int colIndex, int value)
+	{
+		return Math.log(value) - 4;
+	}
 	//--------------------------------------------------------------------------------
 	public int addPColumn(String parent, String pop)	{		return addPColumn(parent, pop, pop);	}
 	

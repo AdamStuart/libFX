@@ -13,6 +13,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.StringReader;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +25,7 @@ import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import javax.swing.filechooser.FileSystemView;
 import javax.xml.parsers.DocumentBuilder;
@@ -40,7 +45,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TreeItem;
 import javafx.scene.image.Image;
 import javafx.scene.input.Dragboard;
 import javafx.stage.FileChooser;
@@ -222,28 +226,80 @@ public class FileUtil
 		//--------------------------------------------------------------------------------------
 	static public File compress(File fileSrc)
 	{
-       String source = fileSrc.getPath();
-       String targetZipPath = source + ".gz";
-      int bufferSize = 10000;
-         
-       try {
-                    //Compress file
-           FileOutputStream fileOutputStream =  new FileOutputStream(targetZipPath);
-           GZIPOutputStream gZIPOutputStream = new GZIPOutputStream(fileOutputStream);
-                    
-           byte[] buffer = new byte[bufferSize];
-           try (FileInputStream fileInputStream = new FileInputStream(source)) 
-           {
-              int numberOfByte;
-              while((numberOfByte = fileInputStream.read(buffer, 0, bufferSize)) != -1)
-                    gZIPOutputStream.write(buffer, 0, numberOfByte);
-            }
-            gZIPOutputStream.close();
-            } 
-       catch (IOException ex) {      Logger.getLogger(null).log(Level.SEVERE, "compress failed");    }
-       return new File(targetZipPath);
+		String source = fileSrc.getPath();
+		String targetZipPath = source + ".zip";
+          
+       try 
+       {                    //Compress file
+           pack(source, targetZipPath);
+//
+//           
+//           GZIPOutputStream gZIPOutputStream = new GZIPOutputStream(new FileOutputStream(targetZipPath));
+//           	compressDeep(fileSrc, gZIPOutputStream);
+//            gZIPOutputStream.close();
+            return new File(targetZipPath);
+       } 
+       catch (FileAlreadyExistsException ex) 
+       {   
+    	   System.out.println("FileAlreadyExistsException: " + ex.getMessage()); 
+    	   return null;
+       }
+       catch (IOException ex) 
+           {   
+    	   System.out.println("compress failed: " + ex.getMessage()); 
+    	   return null;
+       } 				// Logger.getLogger(null).log(Level.SEVERE, );    }
 
    }
+//	static public void compressDeep(File f, GZIPOutputStream gzip)
+//	{
+//	    String fileName = f.getName();
+//	    if (fileName.startsWith(".")) return ;
+//	    	int bufferSize = 10000;
+//		    
+//       byte[] buffer = new byte[bufferSize];
+//        try (FileInputStream fileInputStream = new FileInputStream(f.getAbsoluteFile())) 
+//        {
+//           int numberOfByte;
+//           while((numberOfByte = fileInputStream.read(buffer, 0, bufferSize)) != -1)
+//        	   gzip.write(buffer, 0, numberOfByte);
+//         }
+//        catch (IOException ex) 
+//        {   
+//     	   System.out.println("file compress failed: " + f.getName() + " " + ex.getMessage()); 
+//        } // Logger.getLogger(null).log(Level.SEVERE, );    }
+//	    
+//        if (f.isDirectory())
+//	    	for (File child : f.listFiles())
+//	    		compressDeep(child, gzip);
+//	   
+//
+//	}
+	
+	public static void pack(String sourceDirPath, String zipFilePath) throws IOException {
+	    Path p = Files.createFile(Paths.get(zipFilePath));
+
+	    ZipOutputStream zs = new ZipOutputStream(Files.newOutputStream(p));
+	    try {
+	        Path pp = Paths.get(sourceDirPath);
+	        Files.walk(pp)
+	          .filter(path -> !Files.isDirectory(path))
+	          .forEach(path -> {
+	              String sp = path.toAbsolutePath().toString().replace(pp.toAbsolutePath().toString(), "").replace(path.getFileName().toString(), "");
+	              ZipEntry zipEntry = new ZipEntry(sp + "/" + path.getFileName().toString());
+	              try {
+	                  zs.putNextEntry(zipEntry);
+	                  zs.write(Files.readAllBytes(path));
+	                  zs.closeEntry();
+	            } catch (Exception e) 
+	              {      System.err.println(e);         }
+	          });
+	    } finally {
+	    	
+	        zs.close();
+	    }
+	}
+	
 // this creates a sibling folder with the same name as the zip file (without .zip)
 	
 	static public String decompress(File fileSrc)
