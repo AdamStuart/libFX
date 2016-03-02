@@ -198,6 +198,15 @@ public class StringUtil
 		}
 		catch(NumberFormatException e)		{			return -1;		}
 	}
+	public static int toInteger (String s, int deflt) 
+	{
+		if (isEmpty(s)) return deflt;
+		try
+		{
+			return Integer.parseInt(s);
+		}
+		catch(NumberFormatException e)		{	return deflt;	}
+	}
 	//-----------------------------------------------------------------------------------
 	private static final Pattern LINE_BREAK_PATTERN = Pattern.compile("\\s*\\n\\s*");
 
@@ -432,5 +441,74 @@ public class StringUtil
 		return "";
 	}
 
+	public static String beforeColon(String rawString)
+	{
+		int idx = rawString.indexOf(":");
+		if (idx < 0) return rawString;
+		return rawString.substring(0, idx).trim();
+	}
+	public static String afterColon(String rawString)
+	{
+		int idx = rawString.indexOf(":");
+		if (idx < 0) return "";
+		return rawString.substring(idx+1).trim();
+	}
 
+	public static String clearQuotes(String s)
+	{
+		String t = s.trim();
+		if (t.startsWith("\"") && t.endsWith("\""))
+			return t.substring(1, t.length()-2);
+		return t;
+	}
+
+	// a simple line wrapper based on character count and word boundaries
+	public static String asciiWrap(String inputStr, int lineLen)
+	{
+		if (inputStr == null) return "";
+		StringBuilder out = new StringBuilder();
+		int curLineStart = 0;
+		int inputLen = inputStr.length();
+		int idx = 0;
+		int prevSpace = 0;
+		
+		while (idx < inputLen)
+		{
+			int nextSpace = inputStr.indexOf(' ', idx);
+			if (nextSpace < 0)
+			{
+				out.append(inputStr.substring(prevSpace)).append("\n");
+				idx = inputLen;
+			}
+			else
+			if (nextSpace - curLineStart > lineLen)
+			{
+				out.append(inputStr.substring(curLineStart, prevSpace)).append("\n");
+				curLineStart = prevSpace + 1;
+				prevSpace = curLineStart;
+				idx = curLineStart;
+			}
+			else
+			{
+				prevSpace = nextSpace;
+				idx = nextSpace + 1;
+			}
+		}
+		
+		return out.toString();
+	}
+
+	public static String firstWord(String value)
+	{
+		int idx = value.indexOf(' ');
+		if (idx < 0) return value;
+		return value.substring(0, idx);
+	}
+
+	public static Integer readClosestInt(String string)
+	{
+		if (!isNumber(string)) return 0;
+		if (isInteger(string)) return toInteger(string); 
+		return (int) (toDouble(string) + 0.5);
+	}
 }

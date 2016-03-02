@@ -9,6 +9,8 @@ import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 //http://www.codejava.net/java-se/networking/ftp/how-to-upload-a-directory-to-a-ftp-server
 
+import javafx.concurrent.Task;
+
 public class FTPUtil
 {
 	static boolean SKIP_INVISIBLES = true;
@@ -66,18 +68,10 @@ public class FTPUtil
 	            		System.out.println(msg  + remoteFilePath);
 	            	}
 
-	                String remoteParent = remoteParentDir +  "/" + remoteDirName;
-         	
-	 
-	                // upload the sub directory
-//	                String parent = remoteParentDir + "/" + item.getName();
-//	                if (remoteParentDir.equals("")) 
-//	                    parent = item.getName();
-	 
+	                String remoteParent = remoteParentDir +  "/" + remoteDirName;	 
 	                localParentDir = item.getAbsolutePath();
 	               	if (verbose)
 	               	{
-	                
 	               		System.out.println("localParentDir: "  + localParentDir);
 	               		System.out.println("remoteParentDir: "  + remoteParent);
 	               		System.out.println("remoteFilePath: "  + itemName);
@@ -106,6 +100,7 @@ public class FTPUtil
 	 
 	    InputStream inputStream = new FileInputStream(localFile);
 	    try {
+//	    	task,updateMessage(localFilePath);
 	        ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
 	        boolean ok = ftpClient.storeFile(remoteFilePath, inputStream);
 	       if (verbose)

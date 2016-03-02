@@ -65,6 +65,15 @@ public class FileUtil
 		catch (Exception e){}
 	}
 
+	static public void openFile(Application app, Path f)
+	{
+		try
+		{
+			app.getHostServices().showDocument(f.toUri().toURL().toExternalForm());
+		}
+		catch (Exception e){}
+	}
+
 	static public Document openXML(File f)
 	{
 		StringBuilder buff = new StringBuilder();
@@ -153,20 +162,19 @@ public class FileUtil
 	{
 		String type = node.getNodeName();
 		if ("key".equals(type))
-		{
 			list.add(new AttributeValue());
-		}
 		NodeList kids = node.getChildNodes();			// recurse
 		int sie = kids.getLength();
 		for (int i=0; i<sie; i++)
 			findkeys(kids.item(i), list);
 	}
 		
-	//TODO ASSUMES INTS NOW
+	//-------------------------------------------------------------
+	//TODO ASSUMES INTS NOW -- move to CSVTableData
 	static public CSVTableData openCSVfile(String absPath, TableView<ObservableList<StringProperty>> table)
 	{
 		if (absPath == null) return null;				// || table == null
-		CSVTableData output = new CSVTableData(absPath.substring(absPath.lastIndexOf(File.pathSeparator)));
+		CSVTableData output = new CSVTableData(absPath.substring(1+absPath.lastIndexOf(File.pathSeparator)));
 		try
 		{
 			String[] row = null;
@@ -219,7 +227,7 @@ public class FileUtil
 			e.printStackTrace();	
 			return null;
 		}
-		catch (Exception e)				{			e.printStackTrace();	return null;	}
+		catch (Exception e)		{	e.printStackTrace();	return null;	}
 		return output;
 	}
 	
@@ -229,6 +237,8 @@ public class FileUtil
 		String source = fileSrc.getPath();
 		String targetZipPath = source + ".zip";
           
+		File extant = new File(targetZipPath);
+		if (extant.exists()) extant.delete();
        try 
        {                    //Compress file
            pack(source, targetZipPath);
@@ -285,19 +295,16 @@ public class FileUtil
 	        Files.walk(pp)
 	          .filter(path -> !Files.isDirectory(path))
 	          .forEach(path -> {
-	              String sp = path.toAbsolutePath().toString().replace(pp.toAbsolutePath().toString(), "").replace(path.getFileName().toString(), "");
-	              ZipEntry zipEntry = new ZipEntry(sp + "/" + path.getFileName().toString());
+	              String parent = path.toAbsolutePath().toString().replace(pp.toAbsolutePath().toString(), "").replace(path.getFileName().toString(), "");
+	              ZipEntry zipEntry = new ZipEntry(parent + "/" + path.getFileName().toString());
 	              try {
 	                  zs.putNextEntry(zipEntry);
 	                  zs.write(Files.readAllBytes(path));
 	                  zs.closeEntry();
-	            } catch (Exception e) 
-	              {      System.err.println(e);         }
+	            } catch (Exception e)    {   System.err.println(e);   }
 	          });
-	    } finally {
-	    	
-	        zs.close();
-	    }
+	    } 
+	    finally 	 {   zs.close();	}
 	}
 	
 // this creates a sibling folder with the same name as the zip file (without .zip)
@@ -311,7 +318,6 @@ public class FileUtil
 		if (destFolder.mkdirs())
 		{
 			String targetUnZipPath = destFolder.getAbsolutePath();
-			int bufferSize = 10000;
 			try
 			{
 				FileInputStream fileInputStream = new FileInputStream(source);
@@ -349,8 +355,6 @@ public class FileUtil
 	}
 //--------------------------------------------------------------------------------------
 	
-	static String LINE_DELIM = "\n";
-	
 	static private void readNode(Node node, StringBuilder buff, int indent)
 	{
 //		Element elem = node.getOwnerDocument().getDocumentElement();  //ChildNodes();
@@ -368,13 +372,14 @@ public class FileUtil
 		for (int i=0; i<sie; i++)
 			readNode(kids.item(i), buff, indent+1);
 	}
-	
+	//--------------------------------------------------------------------------------------
 	static public String doublespaced(int indent)
 	{
 		if (indent > 12)  return "                                   ";
 		return "                                   ".substring(0, 2*indent);
 	}
 
+	//--------------------------------------------------------------------------------------
 	public static Document convertStringToDocument(String xmlStr) {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();  
         DocumentBuilder builder;  
@@ -388,37 +393,43 @@ public class FileUtil
         } 
         return null;
     }
-	static public boolean hasXMLFiles(Dragboard db)
-	{
-//		Assert.assertNotNull(db);
-		return db.getFiles().stream().filter(f -> isXML(f)).count() > 0;
-	}
+	//--------------------------------------------------------------------------------------
+	// @formatter:off
+static public boolean hasXMLFiles(Dragboard db)	{	return db.getFiles().stream().filter(f -> isXML(f)).count() > 0;	}
 
 	public static boolean isImageFile(File f){		return isPNG(f) || isJPEG(f);	}
 	public static boolean isTextFile(File f){		return isTXT(f) || isCSV(f);	}
 	
-	static public boolean isXML(File f)		{ 		return fileEndsWith(f,".xml", ".wsp");	}
+	static public boolean isXML(File f)		{ 		return fileEndsWith(f,".xml");	}
 	static public boolean isJPEG(File f)	{ 		return fileEndsWith(f,".jpg", ".jpeg");	}
 	static public boolean isPNG(File f)		{ 		return fileEndsWith(f,".png");	}
 	static public boolean isTXT(File f)		{ 		return fileEndsWith(f,".txt");	}
+	static public boolean isCSV(Path f)		{ 		return pathEndsWith(f,".csv");	}
 	static public boolean isCSV(File f)		{ 		return fileEndsWith(f,".csv");	}
 	static public boolean isCSS(File f)		{ 		return fileEndsWith(f,".css");	}
 	static public boolean isWebloc(File f)	{ 		return fileEndsWith(f,".webloc", ".url");	}
 	static public boolean isFCS(File f)		{ 		return fileEndsWith(f,".fcs", ".lmd");	}
 	static public boolean isZip(File f)		{ 		return fileEndsWith(f,".zip", ".gz", ".acs");	}
 	static public boolean isSVG(File f)		{ 		return fileEndsWith(f,".svg");	}
+	static public boolean isOBO(File f)		{ 		return fileEndsWith(f,".obo");	}
 
 	static public FileChooser.ExtensionFilter zipFilter = new FileChooser.ExtensionFilter("Zip files (*.zip)", "*.zip", "*.gz", "*.acs");
 	static public FileChooser.ExtensionFilter fcsFilter = new FileChooser.ExtensionFilter("FCS files", "*.fcs", "*.lmd");
+	// @formatter:om
 
 	
 	
 	static private boolean fileEndsWith(File f, String ...extensions)
 	{
+		if (f == null) return false;
 		String path = f.getAbsolutePath().toLowerCase();  
 		for (String ext : extensions)
 			if (path.endsWith(ext.toLowerCase())) return true;
 		return false;
+	}
+	static private boolean pathEndsWith(Path p, String ...extensions)
+	{
+		return fileEndsWith(p.toFile(), extensions);
 	}
 	
 	

@@ -1,11 +1,20 @@
 package model;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.sun.xml.internal.messaging.saaj.util.ParseUtil;
 
 import gui.Borders;
 import javafx.collections.FXCollections;
@@ -42,6 +51,7 @@ public class CSVTableData
 	private Map<String, Integer> gateNames = new HashMap<String, Integer>();
 	//--------------------------------------------------------------------------------
 	
+	
 	public CSVTableData(String id)
 	{
 		name = id;
@@ -56,7 +66,51 @@ public class CSVTableData
 		gatedHistogramMap = new HashMap<String, Map<String, Histogram1D>>();
 	}
 	//--------------------------------------------------------------------------------
-	
+	static final String TAB = "\t";
+	static public  CSVTableData readZKWfile(Path p)
+	{
+		CSVTableData tableData = new CSVTableData(p.toString());
+		
+		int lineCt = 0;
+		try
+		{
+			FileInputStream fis = new FileInputStream(p.toFile());
+			BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+			String line = null;
+			
+			line = br.readLine();		// first line is text labels, but not in columns
+			String[] columns = line.split(TAB); 
+			tableData.setColumnNames(Arrays.asList(line.split(TAB)));
+			int len = columns.length;
+			line = br.readLine();
+
+			while (line != null) {
+				String[] row = line.split(TAB);  
+				if (row.length != len)	throw new IllegalArgumentException();		// there must be the same number of tabs in every row
+				IntegerDataRow dataRow = new IntegerDataRow(row.length); 
+				for (int i = 0; i< row.length; i++)
+					dataRow.set(i, StringUtil.readClosestInt(row[i]));
+				tableData.getData().add(dataRow);
+				line = br.readLine();
+				lineCt++;
+			}
+		 
+			br.close();
+		}
+		catch (NumberFormatException e)		{ e.printStackTrace();	return null; 	}
+		catch (IllegalArgumentException e)	{ e.printStackTrace();	return null; 	}
+		catch (FileNotFoundException e)		{ e.printStackTrace();	return null; 	}
+		catch (IOException e)				{ e.printStackTrace();	return null; 	}
+		System.out.println( lineCt + " lines");
+		
+		tableData.calculateRanges();
+//		tableData.generateHistograms();				just building a unit file here.  Segment.java has the full code 
+//		tableData.calculateStats();
+		System.out.println(tableData.getName() + " has row count: " + tableData.getCount());
+		return tableData;
+	}
+
+	//--------------------------------------------------------------------------------
 	public void clear()  {
 		types.clear();
 		columnNames.clear();
@@ -68,8 +122,8 @@ public class CSVTableData
 	}
 	//--------------------------------------------------------------------------------
 	
-	private int nRows()			{ return rows.size(); }
-	private int nColumns()		{ return columnNames.size(); }
+	public int nRows()			{ return rows.size(); }
+	public int nColumns()		{ return columnNames.size(); }
 
 	private int getIndex(String name)			{ return columnNames.indexOf(name); }
 	private int gateIndex(String name)			{ return name == null ? null : gateNames.get(name); }
@@ -352,19 +406,18 @@ public class CSVTableData
 	}
 	boolean inRange(double x, double a, double b)	{ return x >= a && x < b;	}
 	
-	public void makeUnitFile(File f)
+	public void makeUnitFile(Path f)
 	{
 		if (FileUtil.isCSV(f))
 		{
-			String fName = f.getAbsolutePath().replace(".csv", ".unit");
+			String fName = f.toString().replace(".csv", ".unit");
 			File unitFile = new File(fName);
-			if (unitFile.exists()) return;
+			if (unitFile.exists()) unitFile.delete();
 			
 			try
 			{
 				FileOutputStream fileOutputStream = new FileOutputStream(unitFile);
-				int offset = 0;
-				for (IntegerDataRow row : rows)		// scan for ranges of all columns
+				for (IntegerDataRow row : rows)		
 				{
 					for (int i=0;i<nColumns();i++)
 					{
@@ -400,8 +453,8 @@ public class CSVTableData
 	{
 		Map<String, Histogram1D> dataset = getGatedHistograms(parent);
 		if (dataset == null) return -1;
-for (String key : dataset.keySet())
-	System.out.println("Area in " + key + ": " + dataset.get(key).getArea());
+//for (String key : dataset.keySet())
+//	System.out.println("Area in " + key + ": " + dataset.get(key).getArea());
 		
 		boolean positivePop = pop.endsWith("+");
 		boolean negativePop = pop.endsWith("-");

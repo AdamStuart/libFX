@@ -127,7 +127,9 @@ public class FCSFileReader
 		for (int i = 0; i < nValues; i++) 
 		{
 			int idx = bodyStart + i * bytesPerValue;
-			float nextF = byteBuffer.getFloat(idx);
+			float nextF = 200.0f * (float) Math.random();
+//			float nextF = byteBuffer.getFloat(idx);
+			System.out.println("" + nextF);
 			FCSTableColumn column = columns.get(i % parms);
 			column.getData()[i / parms] = nextF;							// we only care about the first two parameters, the rest are ignored
 		}
@@ -173,8 +175,9 @@ public class FCSFileReader
 			max = Math.max(max, f);
 		}
 		if (min <=0) min = 0.1f;
-		Histogram1D histo = new Histogram1D(size, new Range(Math.log(min),Math.log(max-1)));
-		for (int i=0; i<nEvents; i++)
+//		Histogram1D histo = new Histogram1D(size, new Range(Math.log(min),Math.log(max-1)));
+		Histogram1D histo = new Histogram1D("Col1", size, new Range(min,max), false);
+		for (int i=0; i<nEvents; i++) 
 			histo.count(data[i]);
 
 		return histo;
