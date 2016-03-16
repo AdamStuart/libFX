@@ -255,7 +255,6 @@ public class BorderPaneRulers
 						if (useInches)
 						{
 							for (double i = 0; i < 8; i++)
-
 							{
 								double weight = i == 0 ? 1 : ((i == 4) ? .6 : .4);
 								double y = offset + i * interval * scaleY;
@@ -317,7 +316,7 @@ public class BorderPaneRulers
 	{
 		protected int pageCount = 1;
 		protected double interval = Screen.getPrimary().getDpi() / 8;
-		protected double pageLengthPixels = 2500;
+		protected double pageLengthPixels = 25000;
 		protected boolean horizontal;
 		double scaleX, scaleY, offsetX, offsetY;
 		Node drawPane;

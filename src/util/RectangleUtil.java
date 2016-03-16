@@ -55,7 +55,7 @@ public class RectangleUtil
 	static public void moveRect(Rectangle r, Point2D diff, Point2D constraint)
 	{
 		double x = r.getX() + diff.getX();
-		double y = r.getY()+ diff.getY();
+		double y = r.getY() + diff.getY();
 		
 		if (constraint != null)
 		{
@@ -375,5 +375,32 @@ public class RectangleUtil
 		r.setOnMouseMoved(event -> 		{	r.setCursor(Cursors.getResizeCursor(getPos(event, r)));	});
 		r.setOnMouseExited(event -> 	{	r.setCursor(Cursor.DEFAULT);	});
 	}
-	
+//	// **-------------------------------------------------------------------------------
+//	// derive a rectangle that expresses how the kid lies within the parent
+//	
+//	public static Rectangle ratioRect(Rectangle parent, Rectangle kid)
+//	{
+//		assert(parent.getWidth() > 0 && kid.getHeight() > 0);
+//		double relX = kid.getWidth() / parent.getWidth();
+//		double relY = kid.getHeight() / parent.getHeight();
+//		double ratioX = (kid.getX() - parent.getX()) * relX;
+//		double ratioY = (kid.getY() - parent.getX()) * relX;
+//		double ratioW = kid.getWidth() * relX;
+//		double ratioH = kid.getHeight() * relY;
+//		return new Rectangle(ratioX, ratioY, ratioW, ratioH);
+//	}
+//	
+//	// **-------------------------------------------------------------------------------
+//	// apply a ratio rectangle to derive the kid from the parent
+//
+//	public static Rectangle kidRect(Rectangle parent, Rectangle ratio)
+//	{
+//		double kidW = parent.getWidth() * ratio.getWidth();
+//		double kidH = parent.getHeight() * ratio.getHeight();
+//		double kidX = (parent.getX() + ratio.getX() * kidW);
+//		double kidY = (parent.getY() + ratio.getY() * kidH);
+//		return new Rectangle(kidX, kidY, kidW, kidH);
+//	}
+
+
 	}
