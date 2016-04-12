@@ -14,7 +14,7 @@ import javafx.scene.paint.Color;
 public class Histogram1D
 {
 	private static final int DEFAULT_HISTO_LEN = 100;
-	private int size;
+	private int size;		// the number of bins
 	private int[] counts;
 	private Range range;
 	boolean isLog = true;
@@ -112,17 +112,19 @@ public class Histogram1D
 	// ----------------------------------------------------------------------------------------------------
 	public double binToVal(int bin)
 	{
+		double binWidth = range.width() / size;
 		if (isLog)
-			return Math.log(range.min + bin  * range.width()/ size) - 5;   // TODO Transform fn subtracts 5 log  -- asymmetric!!!
+			return Math.log(range.min + bin  * binWidth) - 5;   // TODO Transform fn subtracts 5 log  -- asymmetric!!!
 
-		return range.min + ((bin  * range.width()) / size);
+		return range.min + (bin  * binWidth);
 	}
 	public int valToBin(double d)
 	{
+		double binWidth = range.width() / size;
 		if (isLog)
 			return (int) Math.round(((Math.log(d) - Math.log(range.min)) / Math.log(range.width())) * size);
 	
-		return (int) Math.round((d - range.min) * size / range.width() );
+		return (int) Math.round((d - range.min) / binWidth);
 	}
 	// ----------------------------------------------------------------------------------------------------
 	public void add(Histogram1D other)
@@ -273,15 +275,15 @@ public class Histogram1D
 		{
 			double[] smoothed = smooth();
 		
-				double scale = range.width() / (size+1);
-				for (int i = 0; i < size; i++)
-				{
-					double x = range.min + (i * scale);			//valToBin(i);  //   
-					x =  (x > 0) ? (Math.log(x) - 5) : 0;		// resolve this with valtobin
+			double scale = range.width() / (size+1);
+			for (int i = 0; i < size; i++)
+			{
+				double x = range.min + (i * scale);			//valToBin(i);  //   
+				x =  (x > 0) ? (Math.log(x) - 5) : 0;		// resolve this with valtobin
 
-					double y = smoothed[i] / area + yOffset;
-					series.getData().add(new XYChart.Data<Number, Number>(x,y));
-				}
+				double y = smoothed[i] / area + yOffset;
+				series.getData().add(new XYChart.Data<Number, Number>(x,y));
+			}
 		}
 		catch (Exception e)		{			System.out.println("EXCEPTION CAUGHT " + e.getMessage());		}
 //		System.out.println(getName() + " done");
@@ -387,8 +389,10 @@ public class Histogram1D
 		chart.setCreateSymbols(false);
 		chart.getData().add( getDataSeries("All"));	
 		chart.setLegendVisible(false);
-//		chart.setPrefHeight(100);
-		VBox.setVgrow(chart, Priority.ALWAYS);
+		chart.setPrefHeight(150);
+		chart.setPrefWidth(400);
+		chart.setMaxWidth(600);
+		VBox.setVgrow(chart, Priority.NEVER);
 		chart.setId(getName());
 		return chart;
 	}
@@ -411,7 +415,7 @@ public class Histogram1D
 //			peakFitChart.addVerticalValueMarker(new Data<Number, Number>(val, -1), Color.DARKCYAN, 2.8);
 			p.setHistogram(this);
 			p.setChart(peakFitChart);
-			peakFitChart.addBellCurveMarker(p, Color.BLUE, 1);
+			peakFitChart.addBellCurveMarker(p, Color.FORESTGREEN, 0.6);
 		}
 	}
 	
@@ -573,8 +577,8 @@ static double SQRT2 = Math.sqrt(2.0);  // the threshold for full width at half m
 					double ratio = intoChannel / crossover;
 					peak.setMean(bin - ratio);
 				}
-				
-				for (bin = sub; bin <= sooper; bin++)
+				assert(sooper <= 100);
+				for (bin = sub; bin < sooper; bin++)
 				{
 					totalPeakArea += peakHisto[bin];
 					peakHisto[bin] = 0.;

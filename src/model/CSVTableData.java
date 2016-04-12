@@ -125,6 +125,13 @@ public class CSVTableData
 	public int nRows()			{ return rows.size(); }
 	public int nColumns()		{ return columnNames.size(); }
 
+	private int getIndexByStart(String name)			
+	{
+		for (int i= 0; i< columnNames.size(); i++)
+			if (columnNames.get(i).startsWith(name))
+				return i;
+		return -1;
+	}
 	private int getIndex(String name)			{ return columnNames.indexOf(name); }
 	private int gateIndex(String name)			{ return name == null ? null : gateNames.get(name); }
 	public  String getName() 					{ return name; }
@@ -195,7 +202,10 @@ public class CSVTableData
 		}
 		
 		for (int i=0;i<nCols;i++)
-			ranges.add(new Range(mins[i], maxs[i]));
+		{
+			int min = Math.max(10,  mins[i]);
+			ranges.add(new Range(min, maxs[i]));
+		}
 	}
 	//--------------------------------------------------------------------------------
 	public void generateHistograms()
@@ -206,13 +216,13 @@ public class CSVTableData
 		if (nRows <= 0) return ;
 //		IntegerDataRow row0 = rows.get(0);
 		int nCols = columnNames.size();
-//		for (int i=5;i<nCols; i++)
-		for (int i=0;i<nCols; i++)
+		for (int i=5;i<nCols; i++)
+//		for (int i=0;i<nCols; i++)
 		{
 			Histogram1D hist = null;		// put null in the first five slots
 //			if (i >= 5) 		// first five columns are position and size,		skip them
 //			{
-				hist = new Histogram1D(columnNames.get(i) , ranges.get(i));
+				hist = new Histogram1D(columnNames.get(i) , ranges.get(i-5));
 				for (int row=0; row<nRows; row++)		// first pass to calculate tails
 				{
 					IntegerDataRow aRow = rows.get(row);
@@ -319,6 +329,7 @@ public class CSVTableData
 	{
 		return getGatedScatterChart(req.getPopulation(), req.getX(), req.getY());
 	}
+	
 	public OverlaidScatterChart<Number, Number> getGatedScatterChart(String popName, String xDim, String yDim)
 	{
 		Map<String, Histogram1D> popHistoList = gatedHistogramMap.get(popName);
@@ -359,8 +370,8 @@ public class CSVTableData
 	}
 	private Image getImage(String xName, String yName)
 	{
-		int xIdx = getIndex(xName);
-		int yIdx = getIndex(yName);
+		int xIdx = getIndexByStart(xName);
+		int yIdx = getIndexByStart(yName);
 		if (xIdx < 0 || yIdx < 0)
 			return null;		// error;
 		Range xRange = ranges.get(xIdx);
@@ -706,9 +717,9 @@ public class CSVTableData
 			if (r.width() < 50) continue;
 			LineChart<Number, Number> chart = histo.makeChart();
 			graphVBox.getChildren().add(chart);
-			chart.getXAxis().setTickLabelsVisible(false);		// use CSS
+//			chart.getXAxis().setTickLabelsVisible(false);		// use CSS
 			chart.getYAxis().setTickLabelsVisible(false);
-			chart.getXAxis().setVisible(false);
+//			chart.getXAxis().setVisible(false);
 			VBox.setVgrow(chart, Priority.ALWAYS);
 		}
 	}
