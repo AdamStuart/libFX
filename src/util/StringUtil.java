@@ -49,7 +49,7 @@ public class StringUtil
         }   catch (Exception e) {}  // ignore
 	}
 	
-	public static String callURL(String urlString)
+	public static String callURL(String urlString, boolean addNL)
 	{
 		StringBuilder buffer = new StringBuilder();
 		try
@@ -57,8 +57,9 @@ public class StringUtil
 			URL url = new URL(urlString);
 			BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
 			String strTemp = "";
+			String eol = addNL ? "\n" : "";
 			while (null != (strTemp = br.readLine()))			// WARNING: DON"T READ ON MAIN THREAD
-				buffer.append(strTemp);
+				buffer.append(strTemp).append(eol);  //
 		} catch (Exception ex)
 		{
 			ex.printStackTrace();
@@ -510,5 +511,19 @@ public class StringUtil
 		if (!isNumber(string)) return 0;
 		if (isInteger(string)) return toInteger(string); 
 		return (int) (toDouble(string) + 0.5);
+	}
+	
+	public static String readTag(String markup, String tagName)
+	{
+		String result = "";
+		int idx = markup.indexOf(tagName);
+		int idx2 = markup.indexOf(tagName,  idx + 1);
+		if (idx > 0 && idx2 > 0)
+		{
+			int start = 1 + markup.indexOf(">", idx + tagName.length());
+			int end = idx2-2;
+			result = markup.substring(start, end);
+		}
+		return result;
 	}
 }
