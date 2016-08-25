@@ -59,6 +59,11 @@ public class AnimationUtils {
             case FLIP_IN_Y:            return makeFlipRotation(node, Rotate.X_AXIS, true);
             case FLIP_OUT_Y:           return makeFlipRotation(node, Rotate.X_AXIS, false); 
             
+            case SLIDE_LEFT:           return makeSliderX(node, -200); 
+            case SLIDE_RIGHT:          return makeSliderX(node, 200); 
+            case SLIDE_UP:             return makeSliderY(node, -50); 
+            case SLIDE_DOWN:           return makeSliderY(node, 50); 
+
             case FADE_IN:              return makeFader(node, true,0,0); 
             case FADE_IN_UP:           return makeFader(node, true,0,20); 
             case FADE_IN_DOWN:         return makeFader(node, true,0,-20);  
@@ -246,7 +251,33 @@ public class AnimationUtils {
    		return   new  RotatedCachedTimelineTransition(  node, fadeIn, clockwise, node.getLayoutBounds().getWidth() / 2,
    						node.getLayoutBounds().getHeight() / 2, line);
    	}
-  
+    public static Transition makeSliderX(Node node, double x)
+  	{
+ 		double t0 = 0;
+ 		double t1 = 400;
+ 		double x1 = 0;
+    	Timeline t = new Timeline( slideX(node, t0, x1), slideX(node, t1,x));
+  		return   new  CachedTimelineTransition(  node,  t);
+  	}
+    public static Transition makeSliderY(Node node, double y)
+  	{
+ 		double t0 = 0;
+ 		double t1 = 500;
+ 		double y1 = 0;
+    	Timeline t = new Timeline( slideY(node, t0, y1), slideY(node, t1,y));
+  		return   new  CachedTimelineTransition(  node,  t);
+  	}
+	static  KeyFrame slideX(final Node node, double t, double x)
+    {
+    	return new KeyFrame(Duration.millis(t), 
+    					new KeyValue(node.layoutXProperty(), x, CachedTimelineTransition.WEB_EASE));
+   }
+	static  KeyFrame slideY(final Node node, double t, double y)
+    {
+    	return new KeyFrame(Duration.millis(t), 
+    					new KeyValue(node.layoutYProperty(), y, CachedTimelineTransition.WEB_EASE));
+   }
+	
     private static Transition makeFader(Node node, boolean fadeIn, double x, double y)
   	{
   		double opac0 = 0;
@@ -270,9 +301,9 @@ public class AnimationUtils {
 	static  KeyFrame fadeXY(final Node node, double t, double opac, double transX, double transY)
     {
     	return new KeyFrame(Duration.millis(t), 
-  					  new KeyValue(node.opacityProperty(), opac, CachedTimelineTransition.WEB_EASE),
-					  new KeyValue(node.translateXProperty(), transX, CachedTimelineTransition.WEB_EASE),
-    					new KeyValue(node.translateYProperty(), transY, CachedTimelineTransition.WEB_EASE));
+  					new KeyValue(node.opacityProperty(), opac, CachedTimelineTransition.WEB_EASE),
+					new KeyValue(node.translateXProperty(), transX, CachedTimelineTransition.WEB_EASE),
+    				new KeyValue(node.translateYProperty(), transY, CachedTimelineTransition.WEB_EASE));
     }
 
 	//----------------------------------------------------------------------------------------

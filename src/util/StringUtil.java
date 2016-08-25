@@ -63,6 +63,7 @@ public class StringUtil
 		} catch (Exception ex)
 		{
 			ex.printStackTrace();
+			System.out.println(urlString + " failed to load");
 		}
 		return buffer.toString();
 	}

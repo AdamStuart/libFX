@@ -42,6 +42,12 @@ public class Borders
 					new BorderStroke(Color.WHEAT, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(1))
 					);
 
+	static public Border thinEtchedBorder = new Border(
+					new BorderStroke(Color.GRAY, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(3)),
+					new BorderStroke(Color.LIGHTGRAY, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(1)),
+					new BorderStroke(Color.WHEAT, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(1))
+					);
+
 	static public Border lineBorder = new Border(new BorderStroke(Color.DARKGRAY, 
 					BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(1))	);
 

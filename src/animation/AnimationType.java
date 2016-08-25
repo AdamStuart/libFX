@@ -28,6 +28,11 @@ public enum AnimationType {
     PANIC_SHAKE, // Invalid password animation as on Mac OS X
     BUBBLE,
 
+    SLIDE_LEFT,		// AST adding slide transitions
+    SLIDE_RIGHT,
+    SLIDE_UP,
+    SLIDE_DOWN,
+    
     // Flippers
     FLIP,
     FLIP_IN_X,
