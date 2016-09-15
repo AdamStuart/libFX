@@ -7,6 +7,7 @@ import java.util.Scanner;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import util.StringUtil;
 
@@ -141,10 +142,32 @@ public class AttributeMap extends HashMap<String, String>
 		put("height", "" + r.getHeight());
 	}
 	//-------------------------------------------------------------
+	public void putCircle(Circle c)	
+	{
+		put("centerX", "" + c.getCenterX());
+		put("centerY", "" + c.getCenterY());
+		put("radius", "" + c.getRadius());
+	}
+	public Circle getCircle()	
+	{
+		Circle r = new Circle();
+		r.setCenterX(getDouble("x"));
+		r.setCenterY(getDouble("y"));
+		r.setRadius(getDouble("radius"));
+		return r;
+	}
+	//-------------------------------------------------------------
 	public void putFillStroke(Color fill, Color stroke)	
 	{
 		put("-fx-fill", fill.toString());
 		put("-fx-stroke", stroke.toString());
+	}
+	//-------------------------------------------------------------
+	public void putFillStroke(Color fill, Color stroke, double width)	
+	{
+		put("-fx-fill", fill.toString());
+		put("-fx-stroke", stroke.toString());
+		put("-fx-stroke-weight", ""  + width);
 	}
 	//-------------------------------------------------------------
 	public void putPaint(String key, Color stroke)	

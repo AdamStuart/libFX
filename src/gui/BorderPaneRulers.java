@@ -2,13 +2,18 @@ package gui;
 
 import javafx.animation.Animation;
 import javafx.animation.Transition;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
@@ -26,17 +31,16 @@ public class BorderPaneRulers
 	double rulerWidth = 30;
 	boolean useInches = true;
 	boolean useCM = false;
-
+	BorderPane borderpane;
+	Pane content;
 	
 	public BorderPaneRulers(BorderPane pane, Button togl)
 	{
-		Node content = pane.getCenter();
+		content =(Pane) ((ScrollPane) pane.getCenter()).getContent();
+		borderpane = pane;
 		assert(content != null);
-		addRulers(pane, content);
-		togl.setOnAction(new EventHandler<ActionEvent>()    {
-		    @Override public void handle(ActionEvent actionEvent) 
-		    {	toggleRulers(pane);  }
-	    });
+		addRulers(borderpane, content);
+		togl.setOnAction((ev) -> { toggleRulers(borderpane); } );
 	    Region topRuler = (Region)pane.getTop();
 	    Region leftRuler = (Region)pane.getLeft();
 		Rectangle clipRect = new Rectangle();
@@ -46,8 +50,9 @@ public class BorderPaneRulers
 		clipRect.heightProperty().bind(pane.heightProperty());
 
 		topRuler.translateXProperty().bind(content.translateXProperty().add(rulerWidth));
-		leftRuler.translateYProperty().bind(content.translateYProperty());		//.add(rulerWidth)
 		topRuler.scaleXProperty().bind(content.scaleXProperty());
+
+		leftRuler.translateYProperty().bind(content.translateYProperty());			//.add(rulerWidth)
 		leftRuler.scaleYProperty().bind(content.scaleYProperty());
 		
     
@@ -86,7 +91,7 @@ public class BorderPaneRulers
           final double curWidth = rulerWidth * frac;
           
           topRuler.setVisible(true);
-        topRuler.setPrefHeight(curWidth);  
+          topRuler.setPrefHeight(curWidth);  
           topRuler.setMaxHeight(curWidth); 
           topRuler.setMinHeight(curWidth);
           
@@ -135,6 +140,7 @@ public class BorderPaneRulers
 		pane.setLeft(new LeftRulerPane(content));
 		
 	}
+	//---------------------------------------------------------------------------------------------
 	public static final int	HORIZONTAL	= 0;
 	public static final int	VERTICAL	= 1;
 	public static final double DEFAULT_TICK_LENGTH	= 12;
@@ -171,11 +177,12 @@ public class BorderPaneRulers
 				double hght = rulerWidth;
 				while (offset < pageLengthPixels)
 				{
+					double scaler = interval * rulerscaleX.get();
 					if (useInches)
 					{
 						for (double i=0; i<8; i++)	
 						{
-							double x = offset + i * interval * scaleX;
+							double x = offset + i * scaler;
 							double tickLen = i == 0 ? getLongTick() : ((i == 4) ? getMediumTick() : getShortTick());
 	//						Line line = new Line(x, 0, x, tickLen);
 							double weight = i == 0 ? 1 : ((i == 4) ? .6 : .4);
@@ -195,14 +202,15 @@ public class BorderPaneRulers
 								getChildren().addAll(t, negT);
 							}
 						}
-					offset += 8 * interval * scaleX;
+					offset += 8 * scaler;
 					}
 					else if (useCM)
 					{
 						interval = Screen.getPrimary().getDpi() / 25.4;			// dots per mm
+						scaler = interval * rulerscaleY.get();
 						for (double i=0; i<10; i++)	
 						{
-							double x = offset + i * interval * scaleX;
+							double x = offset + i * scaler;
 							double tickLen = i == 0 ? getLongTick() : ((i == 4) ? getMediumTick() : getShortTick());
 	//						Line line = new Line(x, 0, x, tickLen);
 							double weight = i == 0 ? 1 : ((i == 4) ? .6 : .4);
@@ -222,7 +230,7 @@ public class BorderPaneRulers
 								getChildren().add(t);
 							}
 						}
-						offset += 10 * interval * scaleX;
+						offset += 10 * scaler;
 				}
 					ct++;
 				}
@@ -242,83 +250,84 @@ public class BorderPaneRulers
 //			        	clipRect.heightProperty().set((double) newVal);
 //			        }
 //			      });
-		
+//			ruleroffsetY.set(-rulerWidth);
 			getChildren().add(new Line(rulerWidth,-pageLengthPixels, rulerWidth, pageLengthPixels));
 			getChildren().add(new Line(0, -pageLengthPixels, 0, pageLengthPixels));
+			double scaler = interval * rulerscaleY.get();
 			for (int page=0; page<pageCount; page++)
 			{
-				double offset = offsetY;
+				double offset = ruleroffsetY.get();
 				int ct = 0;
-					int width = 30;
-					while (offset < pageLengthPixels)
+				int width = 30;
+				while (offset < pageLengthPixels)
+				{
+					if (useInches)
 					{
-						if (useInches)
+						for (double i = 0; i < 8; i++)
 						{
-							for (double i = 0; i < 8; i++)
+							double weight = i == 0 ? 1 : ((i == 4) ? .6 : .4);
+							double y = offset + i * scaler;
+							double tickLen = i == 0 ? getLongTick() : ((i == 4) ? getMediumTick() : getShortTick());
+							Line line = new Line(width - tickLen, y, width, y);
+							line.setStrokeWidth(weight);
+							Line negLine = new Line(width - tickLen, -y, width, -y);
+							negLine.setStrokeWidth(weight);
+							getChildren().addAll(line, negLine);
+							if (i == 0 && ct > 0)
 							{
-								double weight = i == 0 ? 1 : ((i == 4) ? .6 : .4);
-								double y = offset + i * interval * scaleY;
-								double tickLen = i == 0 ? getLongTick() : ((i == 4) ? getMediumTick() : getShortTick());
-								Line line = new Line(width - tickLen, y, width, y);
-								line.setStrokeWidth(weight);
-								Line negLine = new Line(width - tickLen, -y, width, -y);
-								negLine.setStrokeWidth(weight);
-								getChildren().addAll(line, negLine);
-								if (i == 0 && ct > 0)
-								{
-									Text t = new Text("" + ct);
-									Text negT = new Text("" + ct);
-									t.setLayoutY(y - 6);
-									t.setLayoutX(12);
-									negT.setLayoutY(-(y - 6));
-									negT.setLayoutX(12);
-									getChildren().addAll(t, negT);
-								}
+								Text t = new Text("" + ct);
+								Text negT = new Text("" + ct);
+								t.setLayoutY(y - 6);
+								t.setLayoutX(12);
+								negT.setLayoutY(-(y - 6));
+								negT.setLayoutX(12);
+								getChildren().addAll(t, negT);
 							}
-							offset += 8 * interval;
 						}
-						else if (useCM)
-						{
-							interval = Screen.getPrimary().getDpi() / 25.4;			// dots per mm
-							for (double i = 0; i < 10; i++)
-
-							{
-								double weight = i == 0 ? 1 : ((i == 4) ? .6 : .4);
-								double y = offset + i * interval * scaleY;
-								double tickLen = i == 0 ? getLongTick() : ((i == 5) ? getMediumTick() : getShortTick());
-								Line line = new Line(width - tickLen, y, width, y);
-								line.setStrokeWidth(weight);
-								Line negLine = new Line(width - tickLen, -y, width, -y);
-								negLine.setStrokeWidth(weight);
-								getChildren().addAll(line, negLine);
-								if (i == 0 && ct > 0)
-								{
-									Text t = new Text("" + ct);
-									t.setLayoutY(y - 6);
-									t.setLayoutX(12);
-									Text negT = new Text("" + ct);
-									negT.setLayoutY(-(y - 6));
-									negT.setLayoutX(12);
-									getChildren().addAll(t, negT);
-								}
-							}
-							offset += 10 * interval * scaleY;
-						
-						}
-							
-						ct++;
+						offset += 8 * scaler;
 					}
+					else if (useCM)
+					{
+						interval = Screen.getPrimary().getDpi() / 25.4;			// dots per mm
+						scaler = interval * rulerscaleY.get();
+						for (double i = 0; i < 10; i++)
+						{
+							double weight = i == 0 ? 1 : ((i == 4) ? .6 : .4);
+							double y = offset + i * scaler;
+							double tickLen = i == 0 ? getLongTick() : ((i == 5) ? getMediumTick() : getShortTick());
+							Line line = new Line(width - tickLen, y, width, y);
+							line.setStrokeWidth(weight);
+							Line negLine = new Line(width - tickLen, -y, width, -y);
+							negLine.setStrokeWidth(weight);
+							getChildren().addAll(line, negLine);
+							if (i == 0 && ct > 0)
+							{
+								Text t = new Text("" + ct);
+								t.setLayoutY(y - 6);
+								t.setLayoutX(12);
+								Text negT = new Text("" + ct);
+								negT.setLayoutY(-(y - 6));
+								negT.setLayoutX(12);
+								getChildren().addAll(t, negT);
+							}
+						}
+						offset += 10 * scaler;
+					}
+					ct++;
 				}
+			}
 		}
 	}
-
+	//------------------------------------------------------------------------------------
 	class RulerPane extends Region
 	{
 		protected int pageCount = 1;
 		protected double interval = Screen.getPrimary().getDpi() / 8;
-		protected double pageLengthPixels = 25000;
+		protected double pageLengthPixels = 2500;
 		protected boolean horizontal;
-		double scaleX, scaleY, offsetX, offsetY;
+		DoubleProperty rulerscaleX, rulerscaleY, ruleroffsetX, ruleroffsetY;
+		DoubleProperty rulerscaleXProperty()	{ return rulerscaleX;	}
+		DoubleProperty rulerscaleYProperty()	{ return rulerscaleY;	}
 		Node drawPane;
 		RulerPane(boolean horiz, Node content)
 		{
@@ -326,15 +335,63 @@ public class BorderPaneRulers
 //			Background backgd = new Background(new BackgroundFill(Color.LIGHTGRAY, null, null));
 			drawPane = content;
 			
-			scaleX = drawPane.getScaleX();
-			scaleY = drawPane.getScaleY();
-			offsetX = drawPane.getTranslateX();
-			offsetY = drawPane.getTranslateY();
+			rulerscaleX = new SimpleDoubleProperty(drawPane.getScaleX());
+			rulerscaleY = new SimpleDoubleProperty(drawPane.getScaleY());
+			ruleroffsetX = new SimpleDoubleProperty(drawPane.getTranslateX());
+			ruleroffsetY = new SimpleDoubleProperty(drawPane.getTranslateY());
 
 			Stop[] stops = { new Stop(0, Color.LIGHTGRAY), new Stop(1, Color.BLUE)};
 		    LinearGradient g= new LinearGradient(0,0,10,100,true, CycleMethod.REFLECT, stops);
 			Background backgd = new Background(new BackgroundFill(g, null, null));
 			setBackground(backgd);
+			setOnMousePressed((ev) -> 	{ 	startGuidelineDrag(ev); 	} );
+			setOnMouseDragged((ev) -> 	{ 	moveGuideline(ev); 	} );
+			setOnMouseReleased((ev) -> 	{ 	releasedGuideline(ev); } );
+		}
+		Line guideline = new Line();
+		private void startGuidelineDrag(MouseEvent ev)
+		{
+			if (horizontal) 
+			{
+				guideline.setStartX(0);
+				guideline.setStartY(0);
+				guideline.setEndX(1000);
+				guideline.setEndY(0);
+			}
+			else
+			{
+				guideline.setStartX(0);
+				guideline.setStartY(0);
+				guideline.setEndX(0);
+				guideline.setEndY(1000);
+			}
+//			System.out.println("startGuidelineDrag");		
+			content.getChildren().add(guideline);
+		}
+		public void moveGuideline(MouseEvent ev)
+		{
+//			System.out.println("moveGuideline");		
+			if (horizontal) 
+			{
+				double y = ev.getY() - rulerWidth;
+				guideline.setStartX(0);
+				guideline.setStartY(y);
+				guideline.setEndX(1000);
+				guideline.setEndY(y);
+			}
+			else
+			{
+				double x = ev.getX() - rulerWidth;
+				guideline.setStartX(x);
+				guideline.setStartY(0);
+				guideline.setEndX(x);
+				guideline.setEndY(1000);
+			}
+		}
+		private void releasedGuideline(MouseEvent ev)
+		{
+			content.getChildren().remove(guideline);
+//			System.out.println("releasedGuideline");		
 		}
 	}
 	
