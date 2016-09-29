@@ -25,7 +25,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.util.Duration;
 
-public class BorderPaneRulers
+public class BorderPaneRulers  // extends BorderPaneAnimator??
 {
 	Animation hider, shower;
 	double rulerWidth = 30;
@@ -195,8 +195,8 @@ public class BorderPaneRulers
 							{
 								Text t = new Text("" + ct);
 								Text negT = new Text("" + ct);
-								t.setLayoutX(x - (ct > 9 ? 18 : 12));		// extra 5 pixels for two digit numbers
-								negT.setLayoutX(-(x - (ct > 9 ? 18 : 12)));		// extra 5 pixels for two digit numbers
+								t.setLayoutX(x - (ct > 9 ? 18 : 12));			// extra 6 pixels for two digit numbers
+								negT.setLayoutX(-(x - (ct > 9 ? 18 : 12)));		// extra 6 pixels for two digit numbers
 								t.setLayoutY(20);
 								negT.setLayoutY(20);
 								getChildren().addAll(t, negT);

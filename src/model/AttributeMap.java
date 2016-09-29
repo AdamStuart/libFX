@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Scanner;
 
+import org.w3c.dom.NamedNodeMap;
+
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -18,6 +20,7 @@ public class AttributeMap extends HashMap<String, String>
 	 */
 	private static final long serialVersionUID = 1L;
 
+	//--------------------------------------------------------------------------------
 	public AttributeMap()
 	{
 	}
@@ -68,8 +71,6 @@ public class AttributeMap extends HashMap<String, String>
 		}
 	}
 	
-	
-	
 	public AttributeMap(String s, boolean asFx)
 	{
 		this();
@@ -88,7 +89,41 @@ public class AttributeMap extends HashMap<String, String>
 		}
         scan.close();
 	}
-	
+	//--------------------------------------------------------------------------------
+	public void add(NamedNodeMap map)
+	{
+		for (int i=0; i<map.getLength(); i++)
+		{
+			org.w3c.dom.Node a = map.item(i);
+			if (a != null)
+				put(a.getNodeName(), a.getNodeValue());
+		}
+	}
+	public void addGPML(String s)
+	{
+		String[] tokens = s.split(" ");
+		for (String token : tokens)
+		{
+			int eq = token.indexOf('=');
+			String attr = token.substring(0,eq);
+			String val = token.substring(eq+2);
+			int valEnd = val.indexOf('"');
+			val = val.substring(0,valEnd);
+			put(attr, val);
+		}
+	}
+	public void addGPMLEdgeInfo(String graphics)
+	{
+		int eol = graphics.indexOf(">/n");
+		addGPML(graphics.substring(10, eol));		// ZOrder and LineThickness
+		String nextLine = graphics.substring(eol+2, graphics.indexOf("/n"));
+		if (nextLine.startsWith("<Point"))
+		{
+			String line = nextLine.substring(7, nextLine.indexOf("/n"));
+		}
+		
+	}
+	//--------------------------------------------------------------------------------
 	void parseElement(String s)
 	{
 		String local = s.substring(s.indexOf(" "));		// first token is element name
@@ -116,7 +151,6 @@ public class AttributeMap extends HashMap<String, String>
 		if (Double.isNaN(val)) return dflt;
 		return val;	
 	}
-
 	
 	public boolean getBool(String key)
 	{
@@ -232,5 +266,5 @@ public class AttributeMap extends HashMap<String, String>
 		return trunc + " />\n";
 			
 	}
-	
+
 }
