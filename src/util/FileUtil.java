@@ -411,6 +411,7 @@ static public boolean hasXMLFiles(Dragboard db)	{	return db.getFiles().stream().
 	static public boolean isFCS(File f)		{ 		return fileEndsWith(f,".fcs", ".lmd");	}
 	static public boolean isZip(File f)		{ 		return fileEndsWith(f,".zip", ".gz", ".acs");	}
 	static public boolean isSVG(File f)		{ 		return fileEndsWith(f,".svg");	}
+	static public boolean isGPML(File f)		{ 		return fileEndsWith(f,".gpml");	}
 	static public boolean isOBO(File f)		{ 		return fileEndsWith(f,".obo");	}
 
 	static public FileChooser.ExtensionFilter zipFilter = new FileChooser.ExtensionFilter("Zip files (*.zip)", "*.zip", "*.gz", "*.acs");

@@ -30,7 +30,7 @@ public class BorderPaneRulers  // extends BorderPaneAnimator??
 	Animation hider, shower;
 	double rulerWidth = 30;
 	boolean useInches = true;
-	boolean useCM = false;
+	boolean useCM = !useInches;
 	BorderPane borderpane;
 	Pane content;
 	
@@ -355,7 +355,7 @@ public class BorderPaneRulers  // extends BorderPaneAnimator??
 			{
 				guideline.setStartX(0);
 				guideline.setStartY(0);
-				guideline.setEndX(1000);
+				guideline.setEndX(1000);			//TODO
 				guideline.setEndY(0);
 			}
 			else
@@ -363,7 +363,7 @@ public class BorderPaneRulers  // extends BorderPaneAnimator??
 				guideline.setStartX(0);
 				guideline.setStartY(0);
 				guideline.setEndX(0);
-				guideline.setEndY(1000);
+				guideline.setEndY(1000);		//TODO
 			}
 //			System.out.println("startGuidelineDrag");		
 			content.getChildren().add(guideline);

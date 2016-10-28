@@ -2,6 +2,7 @@ package model;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 import org.w3c.dom.NamedNodeMap;
@@ -24,21 +25,26 @@ public class AttributeMap extends HashMap<String, String>
 	public AttributeMap()
 	{
 	}
+	
 	public AttributeMap(StackPane sp)
 	{
 		this();
-		put("x", "" + sp.getLayoutX());
-		put("y", "" + + sp.getLayoutY());
-		put("width", "" + + sp.getLayoutY());
-		put("height", "" + + sp.getLayoutY());
+		put("Width", "" + sp.getLayoutBounds().getWidth());
+		put("Height", "" + sp.getLayoutBounds().getHeight());
+		put("X", "" + sp.getLayoutX());
+		put("Y", "" + + sp.getLayoutY());
+		put("CenterX", "" + sp.getLayoutX() +  sp.getLayoutBounds().getWidth() /2);
+		put("CenterY", "" + + sp.getLayoutY() +  sp.getLayoutBounds().getHeight() /2);
 	}
+	
 	public AttributeMap(File f, double x, double y)
 	{
 		this();
 		put("file", f.getAbsolutePath());
-		put("x", "" + x);
-		put("y", "" + y);
+		put("X", "" + x);
+		put("Y", "" + y);
 	}
+	
 	public AttributeMap(String s)
 	{
 		this();
@@ -65,13 +71,16 @@ public class AttributeMap extends HashMap<String, String>
 				String[] flds = line.split(":");
 				if (flds.length > 1)
 					put(flds[0].trim(), flds[1].trim());
-
 			}
-
 		}
 	}
+	public AttributeMap(AttributeMap orig)
+	{
+		this();
+		addAll(orig);
+	}	
 	
-	public AttributeMap(String s, boolean asFx)
+	public AttributeMap(String s, boolean asFx)		// second arg is just to disambiguate
 	{
 		this();
 		s = s.replaceAll(";", "\n");
@@ -90,6 +99,12 @@ public class AttributeMap extends HashMap<String, String>
         scan.close();
 	}
 	//--------------------------------------------------------------------------------
+	public void addAll(AttributeMap orig)
+	{
+		for (Map.Entry<String, String> entry : orig.entrySet())
+			put(entry.getKey(), entry.getValue());
+	}	
+
 	public void add(NamedNodeMap map)
 	{
 		for (int i=0; i<map.getLength(); i++)
@@ -99,6 +114,182 @@ public class AttributeMap extends HashMap<String, String>
 				put(a.getNodeName(), a.getNodeValue());
 		}
 	}
+	
+	//--------------------------------------------------------------------------------
+	void parseElement(String s)
+	{
+		String local = s.substring(s.indexOf(" "));		// first token is element name
+		local = local.replaceAll(",", "\n");			// convert commas to newlines  (sketchy!)
+		
+		Scanner scan = new Scanner(s);
+		while (scan.hasNextLine())
+		{
+			String line = scan.nextLine().trim();
+			String[] flds =  line.split("=");
+			if (flds.length < 2) continue;
+			put(flds[0].trim(), flds[1].trim());
+		}
+        scan.close();
+	
+	}
+
+	//-------------------------------------------------------------
+	public String getId()				{		return get("GraphId");	}
+	public double getDouble(String key)	{		return StringUtil.toDouble(get(key));	}
+
+	public double getDouble(String key, double dflt)	
+	{		
+		double val = StringUtil.toDouble(get(key));
+		if (Double.isNaN(val)) return dflt;
+		return val;	
+	}
+	
+	public boolean getBool(String key)
+	{
+		String s = get(key);
+		return s != null && s.toLowerCase().equals("true");
+	}
+	//-------------------------------------------------------------
+	public Rectangle getRect()	
+	{
+		Rectangle r = new Rectangle();
+		r.setWidth(getDouble("Width"));
+		r.setHeight(getDouble("Height"));
+		r.setX(getDouble("CenterX") - r.getWidth()/2);
+		r.setY(getDouble("CenterY") - r.getHeight()/2);
+		return r;
+	}
+	//-------------------------------------------------------------
+	public void putRect(Rectangle r)	
+	{
+		put("ShapeType", "Rectangle");
+		put("Width", "" + r.getWidth());
+		put("Height", "" + r.getHeight());
+		put("CenterX", "" + r.getX()+ r.getWidth()/2);
+		put("CenterY", "" + r.getY()+ r.getHeight()/2);
+	}
+	//-------------------------------------------------------------
+	public Circle getCircle()	
+	{
+		Circle circle = new Circle();
+		circle.setCenterX(getDouble("CenterX"));
+		circle.setCenterY(getDouble("CenterY"));
+		circle.setRadius(getDouble("Radius"));
+		return circle;
+	}
+	public void putCircle(Circle c)	
+	{
+		put("CenterX", "" + c.getCenterX());
+		put("CenterY", "" + c.getCenterY());
+		put("Radius", "" + c.getRadius());
+	}
+	
+	//-------------------------------------------------------------
+	public void putFillStroke(Color fill, Color stroke)	
+	{
+		put("-fx-fill", fill.toString());
+		put("-fx-stroke", stroke.toString());
+	}
+	public void putFillStroke(Color fill, Color stroke, double width)	
+	{
+		put("-fx-fill", fill.toString());
+		put("-fx-stroke", stroke.toString());
+		put("-fx-stroke-weight", ""  + width);
+	}
+	//-------------------------------------------------------------
+	//-------------------------------------------------------------
+	public Paint getPaint(String key)		{	return Paint.valueOf(get(key));	}
+	public void putPaint(String key, Color stroke)		{	put(key, stroke.toString());	}
+ 
+	 //-------------------------------------------------------------
+	public void putBool(String key, boolean b )		{	put(key, b ? "true" : "false");	}
+	public boolean getBool(String key, boolean b )	
+	{
+		String val = get(key);
+		return val != null && val.toLowerCase().equals("true");
+	}
+	 //-------------------------------------------------------------
+	public void putColor(String key, Color c )		{	put( key, c.toString());	}
+	
+	public Color getColor(String key )	
+	{	
+		String val = get( key);
+		if (StringUtil.isEmpty(val))	return Color.ORANGE;
+		try
+		{
+			return Color.web(val);	
+		}
+		catch (Exception e)
+		{
+			return Color.RED;
+		}
+	}
+	//-------------------------------------------------------------
+	public void putAll(String... strs )	
+	{
+		for (int i=0; i < strs.length-1; i+=2)
+			put(strs[i], strs[i+1]);
+	}
+	//-------------------------------------------------------------
+	public String getStyleString()
+	{
+		StringBuilder buff = new StringBuilder();
+		for (String key : keySet())
+			if (key.startsWith("-fx-"))
+				buff.append(key).append(": ").append(get(key)).append("; ");
+		return buff.toString();
+	}
+	//-------------------------------------------------------------
+	//  build a string that looks like this:  <name a="1" b="2" >\n
+	public String makeElementString(String name)
+	{
+		StringBuilder buff = new StringBuilder("<" + name + " ");
+		for (String key : keySet())
+			buff.append(key).append("=\"").append(get(key)).append("\" ");
+		return buff.toString() + " />\n";
+			
+	}
+	//-------------------------------------------------------------
+	//  build a string that looks like this:  <name a="1" b="2" >\n
+	public String makeElementStartString(String name)
+	{
+		StringBuilder buff = new StringBuilder("<" + name + " ");
+		for (String key : keySet())
+			buff.append(key).append("=\"").append(get(key)).append("\" ");
+		return buff.toString() + " >\n";
+			
+	}
+	
+	public String getSafe(String key)
+	{
+		String val = get(key);
+		return val == null ? "" : val.toString();
+	}
+	//-------------------------------------------------------------
+	// GPML
+	public void addDataNodeGPML(String gpml)
+	{
+		String txt = gpml.trim();
+		int nodeLen = "<DataNode ".length();
+		if (txt.startsWith("<DataNode "))
+		{
+			String attrs = txt.substring(nodeLen, txt.indexOf(">"));
+			addGPML(attrs);
+			int graphicsLen = "<Graphics ".length();
+			int graphicsStart = txt.indexOf("<Graphics ");
+			int graphicsEnd = txt.indexOf("/>", graphicsStart + graphicsLen);
+			String graphics =  txt.substring(graphicsLen + graphicsStart, graphicsEnd);
+			addGPML(graphics);
+			
+			int xrefLen = "<Xref ".length();
+			int xrefStart = txt.indexOf("<Xref ");
+			int xrefEnd = txt.indexOf("/>", xrefStart + xrefLen);
+			String xref =  txt.substring(xrefLen + xrefStart, xrefEnd);
+			addXref(xref);
+		}
+	}
+//	private void addXref(org.w3c.dom.Node n)	{	add(n.getAttributes());		}
+	private void addXref(String attr)			{	addGPML(attr);		}
 	public void addGPML(String s)
 	{
 		String[] tokens = s.split(" ");
@@ -119,152 +310,9 @@ public class AttributeMap extends HashMap<String, String>
 		String nextLine = graphics.substring(eol+2, graphics.indexOf("/n"));
 		if (nextLine.startsWith("<Point"))
 		{
-			String line = nextLine.substring(7, nextLine.indexOf("/n"));
+			String line = nextLine.substring(7, nextLine.indexOf("/n"));		
+			//TODO
 		}
 		
 	}
-	//--------------------------------------------------------------------------------
-	void parseElement(String s)
-	{
-		String local = s.substring(s.indexOf(" "));		// first token is element name
-		local = local.replaceAll(",", "\n");			// convert commas to newlines  (sketchy!)
-		
-		Scanner scan = new Scanner(s);
-		while (scan.hasNextLine())
-		{
-			String line = scan.nextLine().trim();
-			String[] flds =  line.split("=");
-			if (flds.length < 2) continue;
-			put(flds[0].trim(), flds[1].trim());
-		}
-        scan.close();
-	
-	}
-
-	//-------------------------------------------------------------
-	public String getId()				{		return get("id");	}
-	public double getDouble(String key)	{		return StringUtil.toDouble(get(key));	}
-
-	public double getDouble(String key, double dflt)	
-	{		
-		double val = StringUtil.toDouble(get(key));
-		if (Double.isNaN(val)) return dflt;
-		return val;	
-	}
-	
-	public boolean getBool(String key)
-	{
-		String s = get(key);
-		return s != null && s.toLowerCase().equals("true");
-	}
-	//-------------------------------------------------------------
-	public Rectangle getRect()	
-	{
-		Rectangle r = new Rectangle();
-		r.setX(getDouble("x"));
-		r.setY(getDouble("y"));
-		r.setWidth(getDouble("width"));
-		r.setHeight(getDouble("height"));
-		return r;
-	}
-	//-------------------------------------------------------------
-	public void putRect(Rectangle r)	
-	{
-		put("x", "" + r.getX());
-		put("y", "" + r.getY());
-		put("width", "" + r.getWidth());
-		put("height", "" + r.getHeight());
-	}
-	//-------------------------------------------------------------
-	public void putCircle(Circle c)	
-	{
-		put("centerX", "" + c.getCenterX());
-		put("centerY", "" + c.getCenterY());
-		put("radius", "" + c.getRadius());
-	}
-	public Circle getCircle()	
-	{
-		Circle r = new Circle();
-		r.setCenterX(getDouble("x"));
-		r.setCenterY(getDouble("y"));
-		r.setRadius(getDouble("radius"));
-		return r;
-	}
-	//-------------------------------------------------------------
-	public void putFillStroke(Color fill, Color stroke)	
-	{
-		put("-fx-fill", fill.toString());
-		put("-fx-stroke", stroke.toString());
-	}
-	//-------------------------------------------------------------
-	public void putFillStroke(Color fill, Color stroke, double width)	
-	{
-		put("-fx-fill", fill.toString());
-		put("-fx-stroke", stroke.toString());
-		put("-fx-stroke-weight", ""  + width);
-	}
-	//-------------------------------------------------------------
-	public void putPaint(String key, Color stroke)	
-	{
-		put(key, stroke.toString());
-	}
-	//-------------------------------------------------------------
-	public Paint getPaint(String key)	
-	{
-		return Paint.valueOf(get(key));
-	}
-	 
-	 //-------------------------------------------------------------
-	public void putBool(String key, boolean b )	
-	{
-		put(key, b ? "true" : "false");
-	}
-	//-------------------------------------------------------------
-	public boolean getBool(String key, boolean b )	
-	{
-		String val = get(key);
-		return val != null && val.toLowerCase().equals("true");
-	}
-	//-------------------------------------------------------------
-	public void putAll(String... strs )	
-	{
-		for (int i=0; i < strs.length-1; i+=2)
-			put(strs[i], strs[i+1]);
-	}
-	//-------------------------------------------------------------
-	public Color getColor(String key)
-	{
-		String s = get(key);
-		if (s == null) return Color.RED;
-		try
-		{
-			Color c = Color.web(s);
-			if (c != null) 
-				return c;
-		}
-		catch (Exception e) { } 		//e.printStackTrace();
-		return Color.RED;
-	}
-	
-	//-------------------------------------------------------------
-	public String getStyleString()
-	{
-		StringBuilder buff = new StringBuilder();
-		for (String key : keySet())
-			if (key.startsWith("-fx-"))
-				buff.append(key).append(": ").append(get(key)).append("; ");
-		return buff.toString();
-			
-	}
-	//-------------------------------------------------------------
-	public String makeElementString(String name)
-	{
-		StringBuilder buff = new StringBuilder("<" + name + " ");
-		for (String key : keySet())
-			buff.append(key).append("=").append(get(key)).append(", ");
-		String trunc =  StringUtil.chopLast2(buff.toString());
-		return trunc + " />\n";
-			
-	}
-
 }

@@ -57,7 +57,11 @@ public class Borders
 	static public Border emptyBorder = new Border(new BorderStroke(null, 
 					BorderStrokeStyle.NONE, CornerRadii.EMPTY, new BorderWidths(2))	);
 
-
+	static public Border coloredBorder(String webColor)
+	{
+		return new Border(new BorderStroke(Color.web(webColor), 
+					BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(2))	);
+	}
 	public static Border getValidationBorder(ValidationState validationState)
 	{
 		if (validationState == ValidationState.ERROR)		return thinRedBorder;

@@ -32,7 +32,12 @@ public class StringUtil
 		int idx2 = full.indexOf(until, idx1);
 		return full.substring(0,idx1) + insert + full.substring(idx2);
 	}
+	static public String insertAt(String full, int index, String insert)
+	{
+		return full.substring(0,index) + insert + full.substring(index);
+	}
 
+	
 	static public String chopExtension(String in)	{	int idx = in.lastIndexOf("."); return idx < 0 ? in : in.substring(0,idx);	}
 	static public String chopLast(String in)		{	return in.substring(0,in.length()-1);	}
 	static public String chopLast2(String in)		{	return in.substring(0,in.length()-2);	}
