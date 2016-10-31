@@ -33,9 +33,8 @@ public class DBUtil
 	    return DriverManager.getConnection("jdbc:h2:~/test", "sa", "");
 	  }  
 	 
-	  //------------------------------------------------------------------------------------
-		// ----------------------------------------------------
-	  public static	String createSchema(String tableName, String ... fields)
+	// ----------------------------------------------------
+	public static	String createSchema(String tableName, String ... fields)
 	{
 		 StringBuilder line = new StringBuilder(tableName + "\n(");
 		 line.append("id VARCHAR(100),\n");
@@ -49,12 +48,13 @@ public class DBUtil
 		 return outline;
 	}
 
-		// ----------------------------------------------------
-	  public static	String createSQL(String tableName, String ... fields)
+	// ----------------------------------------------------
+	public static	String createSQL(String tableName, String ... fields)
 	{
 		 return "CREATE TABLE " + createSchema(tableName, fields);
 	}
 
+	// ----------------------------------------------------
 	public static HBox makeCrudBar(DatabaseAccess db)
 	{
    		Button create = new Button("Create");
@@ -253,11 +253,11 @@ public class DBUtil
 		return buffer.toString();
 	}
 
-static char SQ =  '\'';
-static String SINGLEQUOTE(String s)
-{
-	if (s == null) return "''";
-	if (s.charAt(0) ==  SQ) return s;
-	return  SQ + s + SQ;
-}
+	static char SQ =  '\'';
+	static String SINGLEQUOTE(String s)
+	{
+		if (s == null) return "''";
+		if (s.charAt(0) ==  SQ) return s;
+		return  SQ + s + SQ;
+	}
 }
