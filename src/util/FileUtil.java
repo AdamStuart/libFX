@@ -4,8 +4,11 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -13,6 +16,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.StringReader;
+import java.nio.channels.FileChannel;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -94,20 +97,6 @@ public class FileUtil
 		}
 		return xmlOut.toString();
 	}
-
-//	
-//	static private Node peek(String[] path, NodeList kids, int idx)
-//	{
-//		int n1 = kids.getLength();
-//		for (int i=0; i<n1; i++)
-//		{
-//			Node child = kids.item(i);
-//			if (path[idx].equals(child.getNodeName()))
-//				return peek(path, child.getChildNodes(), idx+1);
-//		}
-//		return null;
-//	}
-
 	
 	//-------------------------------------------------------------
 	static public XMLTreeItem getXMLtree(File f)	{		return getXMLtree(f, null);	}
@@ -126,7 +115,6 @@ public class FileUtil
 		if (parseddoc != null)
 			addKids(root, parseddoc.getChildNodes(), suppressNames);
 		return root;
-		
 	}
 	
 	static private void addKids(XMLTreeItem parent, NodeList kids, String[] suppressNames)
@@ -155,9 +143,7 @@ public class FileUtil
 			addKids(kid,node.getChildNodes(), suppressNames);
 		}
 	}
-	//-------------------------------------------------------------
-	
-	
+	//-------------------------------------------------------------	
 	static public void findkeys(Node node, ObservableList<AttributeValue> list)
 	{
 		String type = node.getNodeName();
@@ -168,7 +154,6 @@ public class FileUtil
 		for (int i=0; i<sie; i++)
 			findkeys(kids.item(i), list);
 	}
-		
 	//-------------------------------------------------------------
 	//TODO ASSUMES INTS NOW -- move to CSVTableData
 	static public CSVTableData openCSVfile(String absPath, TableView<ObservableList<StringProperty>> table)
@@ -211,13 +196,6 @@ public class FileUtil
 				for (String s : row)
 					colData.add(new SimpleStringProperty(s));
 				list.add(colData);
-
-//				for (int i=0; i<nCols; i++)
-//				{
-//					data.get(i).add(row[i]);
-//					System.out.print(row[i] + "\t");
-//				}
-//				System.out.println();
 			}
 	        if (table != null) table.setItems(list);
 		} 
@@ -240,14 +218,9 @@ public class FileUtil
 		File extant = new File(targetZipPath);
 		if (extant.exists()) extant.delete();
        try 
-       {                    //Compress file
+       {              
            pack(source, targetZipPath);
-//
-//           
-//           GZIPOutputStream gZIPOutputStream = new GZIPOutputStream(new FileOutputStream(targetZipPath));
-//           	compressDeep(fileSrc, gZIPOutputStream);
-//            gZIPOutputStream.close();
-            return new File(targetZipPath);
+           return new File(targetZipPath);
        } 
        catch (FileAlreadyExistsException ex) 
        {   
@@ -261,30 +234,6 @@ public class FileUtil
        } 				// Logger.getLogger(null).log(Level.SEVERE, );    }
 
    }
-//	static public void compressDeep(File f, GZIPOutputStream gzip)
-//	{
-//	    String fileName = f.getName();
-//	    if (fileName.startsWith(".")) return ;
-//	    	int bufferSize = 10000;
-//		    
-//       byte[] buffer = new byte[bufferSize];
-//        try (FileInputStream fileInputStream = new FileInputStream(f.getAbsoluteFile())) 
-//        {
-//           int numberOfByte;
-//           while((numberOfByte = fileInputStream.read(buffer, 0, bufferSize)) != -1)
-//        	   gzip.write(buffer, 0, numberOfByte);
-//         }
-//        catch (IOException ex) 
-//        {   
-//     	   System.out.println("file compress failed: " + f.getName() + " " + ex.getMessage()); 
-//        } // Logger.getLogger(null).log(Level.SEVERE, );    }
-//	    
-//        if (f.isDirectory())
-//	    	for (File child : f.listFiles())
-//	    		compressDeep(child, gzip);
-//	   
-//
-//	}
 	
 	public static void pack(String sourceDirPath, String zipFilePath) throws IOException {
 	    Path p = Files.createFile(Paths.get(zipFilePath));
@@ -338,23 +287,16 @@ public class FileUtil
 						fileOutputStream.flush();
 						fileOutputStream.close();
 						entryList.append(unzippedFile + "\n");
-					} catch (Exception ex)	
-					{
-						ex.printStackTrace();		// TODO FileNotFoundExceptions seen here
-					}
+					} catch (Exception ex)	{	ex.printStackTrace();		}// TODO FileNotFoundExceptions seen here
+					
 				}
 				zipInputStream.close();
-			} catch (IOException ex)
-			{
-				Logger.getLogger(null).log(Level.SEVERE, null, "decompress failed");
-			}
+			} catch (IOException ex)			{	Logger.getLogger(null).log(Level.SEVERE, null, "decompress failed");	}
 		}
-		else
-			System.out.println("Failed to create directory.  Nothing unzipped.");
+		else 	System.out.println("Failed to create directory.  Nothing unzipped.");
 		return entryList.toString();
 	}
 //--------------------------------------------------------------------------------------
-	
 	static private void readNode(Node node, StringBuilder buff, int indent)
 	{
 //		Element elem = node.getOwnerDocument().getDocumentElement();  //ChildNodes();
@@ -378,7 +320,6 @@ public class FileUtil
 		if (indent > 12)  return "                                   ";
 		return "                                   ".substring(0, 2*indent);
 	}
-
 	//--------------------------------------------------------------------------------------
 	public static Document convertStringToDocument(String xmlStr) {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();  
@@ -411,14 +352,13 @@ static public boolean hasXMLFiles(Dragboard db)	{	return db.getFiles().stream().
 	static public boolean isFCS(File f)		{ 		return fileEndsWith(f,".fcs", ".lmd");	}
 	static public boolean isZip(File f)		{ 		return fileEndsWith(f,".zip", ".gz", ".acs");	}
 	static public boolean isSVG(File f)		{ 		return fileEndsWith(f,".svg");	}
-	static public boolean isGPML(File f)		{ 		return fileEndsWith(f,".gpml");	}
+	static public boolean isGPML(File f)	{ 		return fileEndsWith(f,".gpml");	}
 	static public boolean isOBO(File f)		{ 		return fileEndsWith(f,".obo");	}
+	public static boolean isDataFile(File f){		return fileEndsWith(f,".data");	}
 
 	static public FileChooser.ExtensionFilter zipFilter = new FileChooser.ExtensionFilter("Zip files (*.zip)", "*.zip", "*.gz", "*.acs");
 	static public FileChooser.ExtensionFilter fcsFilter = new FileChooser.ExtensionFilter("FCS files", "*.fcs", "*.lmd");
 	// @formatter:om
-
-	
 	
 	static private boolean fileEndsWith(File f, String ...extensions)
 	{
@@ -433,7 +373,6 @@ static public boolean hasXMLFiles(Dragboard db)	{	return db.getFiles().stream().
 		return fileEndsWith(p.toFile(), extensions);
 	}
 	
-	
 	static public String readFiles(Dragboard db)
 	{
 		StringBuilder buff = new StringBuilder();
@@ -447,15 +386,11 @@ static public boolean hasXMLFiles(Dragboard db)	{	return db.getFiles().stream().
 		{
 			for (File f : inFile.listFiles())
 				readFile(f, buff);
-		} else
-			readFileIntoBuffer(inFile, buff);
+		} else 	readFileIntoBuffer(inFile, buff);
 	}
 
 	
-	static public void readFileIntoBuffer(File f, StringBuilder buff)
-	{
-		readFileIntoBuffer(f.getAbsolutePath(), buff);
-	}
+	static public void readFileIntoBuffer(File f, StringBuilder buff) { 	readFileIntoBuffer(f.getAbsolutePath(), buff); 	}
 	
 	
 	static public String readFileIntoString(String absolutePath)
@@ -512,10 +447,7 @@ static public boolean hasXMLFiles(Dragboard db)	{	return db.getFiles().stream().
 			if (target.exists()) 		target.delete();
 			target = createFileFromByteArray(content.getBytes(), target);
 		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+		catch (Exception e)		{	e.printStackTrace();	}
 	}
 
 	public static File createFileFromByteArray(final byte[] data, final File target) throws IOException
@@ -523,20 +455,14 @@ static public boolean hasXMLFiles(Dragboard db)	{	return db.getFiles().stream().
 		final File parent = target.getParentFile();
 		if (parent != null && !parent.exists())
 		{
-			if (!parent.mkdirs())
-			{
-				throw new IOException("Unable to create directory '" + parent.getPath());
-			}
+			if (!parent.mkdirs())	throw new IOException("Unable to create directory '" + parent.getPath());
 		}
 		final OutputStream fos = new FileOutputStream(target);
 		try
 		{
 			fos.write(data);
 		}
-		finally
-		{
-			fos.close();
-		}
+		finally	{		fos.close();}
 		return target;
 	}
 
@@ -547,10 +473,7 @@ static public boolean hasXMLFiles(Dragboard db)	{	return db.getFiles().stream().
 		{
 			return inputStreamToByteArray(fis, 8192);
 		}
-		finally
-		{
-			fis.close();
-		}
+		finally		{	fis.close();	}
 	}
 
 	public static byte[] inputStreamToByteArray(final InputStream is, final int bufferSize) throws IOException
@@ -599,11 +522,9 @@ static public boolean hasXMLFiles(Dragboard db)	{	return db.getFiles().stream().
 		if (p >= 0) ext = fname.substring(p);
 		return ext.toLowerCase();
 	}
-
 	//--------------------------------------------------------------------------------
 	public static javax.swing.Icon getJSwingIconFromFileSystem(File file)
 	{
-
 		javax.swing.Icon icon = FileSystemView.getFileSystemView().getSystemIcon(file);
 		if (SystemInfo.isMacOSX())
 		{
@@ -664,6 +585,414 @@ static public boolean hasXMLFiles(Dragboard db)	{	return db.getFiles().stream().
 		
 	}
 
- 
+/* <p>
+	 * General file manipulation utilities.
+	 * <p>
+	 * Facilities are provided in the following areas:
+	 * <ul>
+	 * <li>writing to a file
+	 * <li>reading from a file
+	 * <li>make a directory including parent directories
+	 * <li>copying files and directories
+	 * <li>deleting files and directories
+	 * <li>converting to and from a URL
+	 * <li>listing files and directories by filter and extension
+	 * <li>comparing file content
+	 * <li>file last changed date
+	 * <li>calculating a checksum
+	 * </ul>
+	 * <p>
+	 * Origin of code: Excalibur, Alexandria, Commons-Utils
+*/
+	    private static final long ONE_KB = 1024;			//The number of bytes in a kilobyte.
+	    private static final long ONE_MB = ONE_KB * ONE_KB;  //The number of bytes in a megabyte.
+	    private static final long FILE_COPY_BUFFER_SIZE = ONE_MB * 30;		//The file copy buffer size (30 MB)
 
-}
+	    //-----------------------------------------------------------------------
+	    /**
+	     * Copies a file to a directory preserving the file date.
+	     */
+	    public static void copyFileToDirectory(File srcFile, File destDir) throws IOException {	   copyFileToDirectory(srcFile, destDir, true);	    }
+
+	    /**
+	     * Copies a file to a directory optionally preserving the file date.
+	     */
+	    private static void copyFileToDirectory(File srcFile, File destDir, boolean preserveFileDate) throws IOException {
+	        if (destDir == null) 	            throw new NullPointerException("Destination must not be null");
+	        if (destDir.exists() && destDir.isDirectory() == false)          throw new IllegalArgumentException("Destination '" + destDir + "' is not a directory");
+	        File destFile = new File(destDir, srcFile.getName());
+	        copyFile(srcFile, destFile, preserveFileDate);
+	    }
+
+	    /**
+	     * Copies a file to a new location preserving the file date.
+	     */
+	    public static void copyFile(File srcFile, File destFile) throws IOException {	        copyFile(srcFile, destFile, true);    }
+
+	    /**
+	     * Copies a file to a new location.
+	     */
+	    private static void copyFile(File srcFile, File destFile,
+	            boolean preserveFileDate) throws IOException {
+	        if (srcFile == null)             throw new NullPointerException("Source must not be null");
+	        if (destFile == null)            throw new NullPointerException("Destination must not be null");
+	        if (srcFile.exists() == false)   throw new FileNotFoundException("Source '" + srcFile + "' does not exist");
+	        
+	        if (srcFile.isDirectory())       throw new IOException("Source '" + srcFile + "' exists but is a directory");
+	      
+	        if (srcFile.getCanonicalPath().equals(destFile.getCanonicalPath())) 
+	            							throw new IOException("Source '" + srcFile + "' and destination '" + destFile + "' are the same");
+	        File parentFile = destFile.getParentFile();
+	        if (parentFile != null && !parentFile.mkdirs() && !parentFile.isDirectory()) 
+	                						throw new IOException("Destination '" + parentFile + "' directory cannot be created");
+	          
+	        if (destFile.exists() && destFile.canWrite() == false) 
+	            							throw new IOException("Destination '" + destFile + "' exists but is read-only");
+	        doCopyFile(srcFile, destFile, preserveFileDate);
+	    }
+	    
+	    /**
+	     * Internal copy file method.
+	     * 
+	     * @param srcFile  the validated source file, must not be <code>null</code>
+	     * @param destFile  the validated destination file, must not be <code>null</code>
+	     * @param preserveFileDate  whether to preserve the file date
+	     * @throws IOException if an error occurs
+	     */
+	    private static void doCopyFile(File srcFile, File destFile, boolean preserveFileDate) throws IOException {
+	        if (destFile.exists() && destFile.isDirectory()) 
+	            throw new IOException("Destination '" + destFile + "' exists but is a directory");
+
+	        FileInputStream fis = null;
+	        FileOutputStream fos = null;
+	        FileChannel input = null;
+	        FileChannel output = null;
+	        try {
+	            fis = new FileInputStream(srcFile);		 input  = fis.getChannel();
+	            fos = new FileOutputStream(destFile);	 output = fos.getChannel();
+		       long size = input.size();
+	            long pos = 0, count = 0;
+	            while (pos < size) {
+	                count = (size - pos) > FILE_COPY_BUFFER_SIZE ? FILE_COPY_BUFFER_SIZE : (size - pos);
+	                pos += output.transferFrom(input, pos, count);
+	            }
+	        } finally {
+	            closeQuietly(output);
+	            closeQuietly(fos);
+	            closeQuietly(input);
+	            closeQuietly(fis);
+	        }
+
+	        if (srcFile.length() != destFile.length()) 
+	            throw new IOException("Failed to copy full contents from '" + srcFile + "' to '" + destFile + "'");
+	        
+	        if (preserveFileDate) 
+	            destFile.setLastModified(srcFile.lastModified());
+	    }
+
+	    //-----------------------------------------------------------------------
+	    /**
+	     * Copies a directory to within another directory preserving the file dates.
+	     */
+	    public static void copyDirectoryToDirectory(File srcDir, File destDir) throws IOException {
+	        if (srcDir == null) 	            throw new NullPointerException("Source must not be null");
+	        if (srcDir.exists() && srcDir.isDirectory() == false) 	    throw new IllegalArgumentException("Source '" + destDir + "' is not a directory");
+	        
+	        if (destDir == null) 	            throw new NullPointerException("Destination must not be null");
+	        if (destDir.exists() && destDir.isDirectory() == false)      throw new IllegalArgumentException("Destination '" + destDir + "' is not a directory");
+	        copyDirectory(srcDir, new File(destDir, srcDir.getName()), true);
+	    }
+
+	    /**
+	     * Copies a whole directory to a new location preserving the file dates.
+	     */
+	    public static void copyDirectory(File srcDir, File destDir) throws IOException {
+	        copyDirectory(srcDir, destDir, true);
+	    }
+
+	    /**
+	     * Copies a whole directory to a new location.
+	     */
+	    private static void copyDirectory(File srcDir, File destDir, boolean preserveFileDate) throws IOException {
+	        copyDirectory(srcDir, destDir, null, preserveFileDate);
+	    }
+
+	    /**
+	     * Copies a filtered directory to a new location.
+  	     */
+	    private static void copyDirectory(File srcDir, File destDir, FileFilter filter, boolean preserveFileDate) throws IOException {
+	        if (srcDir == null) 	            throw new NullPointerException("Source must not be null");
+	        if (destDir == null) 	            throw new NullPointerException("Destination must not be null");
+	        if (!srcDir.exists())       		throw new FileNotFoundException("Source '" + srcDir + "' does not exist");
+	        if (!srcDir.isDirectory())         	throw new IOException("Source '" + srcDir + "' exists but is not a directory");
+	        if (srcDir.getCanonicalPath().equals(destDir.getCanonicalPath())) 
+	            								throw new IOException("Source '" + srcDir + "' and destination '" + destDir + "' are the same");
+	      
+
+	        // Cater for destination being directory within the source directory (see IO-141)
+	        List<String> exclusionList = null;
+	        if (destDir.getCanonicalPath().startsWith(srcDir.getCanonicalPath())) {
+	            File[] srcFiles = filter == null ? srcDir.listFiles() : srcDir.listFiles(filter);
+	            if (srcFiles != null && srcFiles.length > 0) {
+	                exclusionList = new ArrayList<String>(srcFiles.length);
+	                for (File srcFile : srcFiles) {
+	                    File copiedFile = new File(destDir, srcFile.getName());
+	                    exclusionList.add(copiedFile.getCanonicalPath());
+	                }
+	            }
+	        }
+	        doCopyDirectory(srcDir, destDir, filter, preserveFileDate, exclusionList);
+	    }
+
+	    /**
+	     * Internal copy directory method.
+	     * 
+	     * @param srcDir  the validated source directory, must not be <code>null</code>
+	     * @param destDir  the validated destination directory, must not be <code>null</code>
+	     * @param filter  the filter to apply, null means copy all directories and files
+	     * @param preserveFileDate  whether to preserve the file date
+	     * @param exclusionList  List of files and directories to exclude from the copy, may be null
+	     * @throws IOException if an error occurs
+	     */
+	    private static void doCopyDirectory(File srcDir, File destDir, FileFilter filter,
+	            boolean preserveFileDate, List<String> exclusionList) throws IOException {
+	        // recurse
+	        File[] srcFiles = filter == null ? srcDir.listFiles() : srcDir.listFiles(filter);
+	        if (srcFiles == null) {  // null if abstract pathname does not denote a directory, or if an I/O error occurs
+	            throw new IOException("Failed to list contents of " + srcDir);
+	        }
+	        if (destDir.exists()) {
+	            if (destDir.isDirectory() == false) 	                throw new IOException("Destination '" + destDir + "' exists but is not a directory");
+	           
+	        } else if (!destDir.mkdirs() && !destDir.isDirectory())     throw new IOException("Destination '" + destDir + "' directory cannot be created");
+	        if (!destDir.canWrite()) 	      						    throw new IOException("Destination '" + destDir + "' cannot be written to");
+	        
+	        for (File srcFile : srcFiles) {
+	            File dstFile = new File(destDir, srcFile.getName());
+	            if (exclusionList == null || !exclusionList.contains(srcFile.getCanonicalPath())) {
+	                if (srcFile.isDirectory())  doCopyDirectory(srcFile, dstFile, filter, preserveFileDate, exclusionList);
+	                 else 	                    doCopyFile(srcFile, dstFile, preserveFileDate);
+	            }
+	        }
+	        // Do this last, as the above has probably affected directory metadata
+	        if (preserveFileDate) 
+	            destDir.setLastModified(srcDir.lastModified());
+	    }
+
+	    //-----------------------------------------------------------------------
+	    /**
+	     * Deletes a directory recursively. 
+	     */
+	    public static void deleteDirectory(File directory) throws IOException {
+	        if (!directory.exists())          return;
+	        if (!directory.delete()) 
+	            throw new IOException("Unable to delete directory " + directory + ".");
+	    }
+
+	    /**
+	     * Deletes a file, never throwing an exception. If file is a directory, delete it and all sub-directories.
+	     * <p>
+	     * The difference between File.delete() and this method are:
+	     * <ul>
+	     * <li>A directory to be deleted does not have to be empty.</li>
+	     * <li>No exceptions are thrown when a file or directory cannot be deleted.</li>
+	     */
+	    public static boolean deleteQuietly(File file) {
+	        if (file == null)         return false;
+	        try {
+	            if (file.isDirectory())     cleanDirectory(file);
+	        } catch (Exception ignored) {    }
+
+	        try {
+	            return file.delete();
+	        } 
+	        catch (Exception ignored) {          return false;      }
+	    }
+
+	    /**
+	     * Cleans a directory without deleting it.
+	     *
+	     * @param directory directory to clean
+	     * @throws IOException in case cleaning is unsuccessful
+	     */
+	    private static void cleanDirectory(File directory) throws IOException {
+	        if (!directory.exists()) 	          throw new IllegalArgumentException(directory + " does not exist");
+	        
+
+	        if (!directory.isDirectory())        throw new IllegalArgumentException(directory + " is not a directory");
+	        File[] files = directory.listFiles();
+	        if (files == null)   throw new IOException("Failed to list contents of " + directory);  // null if security restricted
+	
+	        IOException exception = null;
+	        for (File file : files) {
+	            try {
+	                forceDelete(file);
+	            } catch (IOException ioe) {     exception = ioe;   }
+	        }
+	        if (null != exception) 	            throw exception;
+	     }
+
+	    //-----------------------------------------------------------------------
+	    /**
+	     * Deletes a file. If file is a directory, delete it and all sub-directories.
+	     * <p>
+	     * The difference between File.delete() and this method are:
+	     * <ul>
+	     * <li>A directory to be deleted does not have to be empty.</li>
+	     * <li>You get exceptions when a file or directory cannot be deleted.
+	     *      (java.io.File methods returns a boolean)</li>
+	     */
+	    public static void forceDelete(File file) throws IOException {
+	        if (file.isDirectory())           deleteDirectory(file);
+	       else {
+	            boolean filePresent = file.exists();
+	            if (!file.delete()) {
+	                if (!filePresent)      throw new FileNotFoundException("File does not exist: " + file);
+	                throw new IOException("Unable to delete file: " + file);
+	            }
+	        }
+	    }
+
+	    /**
+	     * Schedules a file to be deleted when JVM exits.
+	     * If file is directory delete it and all sub-directories.
+	     */
+	    public static void forceDeleteOnExit(File file) throws IOException {
+	        if (file.isDirectory())       deleteDirectoryOnExit(file);
+	         else          				  file.deleteOnExit();
+	    }
+
+	    /**
+	     * Schedules a directory recursively for deletion on JVM exit.
+	     */
+	    private static void deleteDirectoryOnExit(File directory) throws IOException {
+	        if (!directory.exists())          return;
+	         directory.deleteOnExit();
+	    }
+	    /**
+	     * Makes a directory, including any necessary but nonexistent parent
+	     * directories. If a file already exists with specified name but it is
+	     * not a directory then an IOException is thrown.
+	     * If the directory cannot be created (or does not already exist)
+	     * then an IOException is thrown.
+	     */
+	    public static void forceMkdir(File directory) throws IOException {
+	        if (directory.exists()) {
+	            if (!directory.isDirectory())         throw new IOException("File " + directory + " exists and is not a directory. Unable to create directory.");
+	            
+	        } else if (!directory.mkdirs())  // Double-check that some other thread or process hasn't made the directory in the background
+	                if (!directory.isDirectory())    throw new IOException("Unable to create directory " + directory);
+	    }
+	    /**
+	     * Moves a directory.
+	     * When the destination directory is on another file system, do a "copy and delete".
+		     */
+	    public static void moveDirectory(File srcDir, File destDir) throws IOException {
+	        if (srcDir == null)         throw new NullPointerException("Source must not be null");
+	        if (destDir == null)        throw new NullPointerException("Destination must not be null");
+	        if (!srcDir.exists())       throw new FileNotFoundException("Source '" + srcDir + "' does not exist");
+	        if (!srcDir.isDirectory())  throw new IOException("Source '" + srcDir + "' is not a directory");
+	        if (destDir.exists())       throw new IOException("Destination '" + destDir + "' already exists");
+
+	        boolean rename = srcDir.renameTo(destDir);
+	        if (!rename) {
+	            copyDirectory( srcDir, destDir );
+	            deleteDirectory( srcDir );
+	            if (srcDir.exists())    throw new IOException("Failed to delete original directory '" + srcDir + "' after copy to '" + destDir + "'");
+	        }
+	    }
+
+	    /**
+	     * Moves a directory to another directory.
+	     */
+	    private static void moveDirectoryToDirectory(File src, File destDir, boolean createDestDir) throws IOException {
+	        if (src == null) 			throw new NullPointerException("Source must not be null");
+	        if (destDir == null)    	throw new NullPointerException("Destination directory must not be null");
+	        
+	        if (!destDir.exists() && createDestDir) 
+	            destDir.mkdirs();
+	        
+	        if (!destDir.exists())       throw new FileNotFoundException("Destination directory '" + destDir + "' does not exist [createDestDir=" + createDestDir +"]");
+	        if (!destDir.isDirectory())  throw new IOException("Destination '" + destDir + "' is not a directory");
+	        moveDirectory(src, new File(destDir, src.getName()));
+	    }
+
+	    /**
+	     * Moves a file.
+	     * When the destination file is on another file system, do a "copy and delete".
+	     */
+	    public static void moveFile(File srcFile, File destFile) throws IOException {
+	        if (srcFile == null) 	   throw new NullPointerException("Source must not be null");
+	        if (destFile == null)      throw new NullPointerException("Destination must not be null");
+	        if (!srcFile.exists())     throw new FileNotFoundException("Source '" + srcFile + "' does not exist");
+	        if (srcFile.isDirectory()) throw new IOException("Source '" + srcFile + "' is a directory");
+	        if (destFile.exists())     throw new IOException("Destination '" + destFile + "' already exists");
+	        if (destFile.isDirectory()) throw new IOException("Destination '" + destFile + "' is a directory");
+	       
+	        boolean rename = srcFile.renameTo(destFile);
+	        if (!rename) {
+	            copyFile( srcFile, destFile );
+	            if (!srcFile.delete()) {
+	                deleteQuietly(destFile);
+	                throw new IOException("Failed to delete original file '" + srcFile + "' after copy to '" + destFile + "'");
+	            }
+	        }
+	    }
+
+	    /**
+	     * Moves a file to a directory.
+	     */
+	    private static void moveFileToDirectory(File srcFile, File destDir, boolean createDestDir) throws IOException {
+	        if (srcFile == null)           throw new NullPointerException("Source must not be null");
+	        if (destDir == null)           throw new NullPointerException("Destination directory must not be null");
+	        if (!destDir.exists() && createDestDir)           destDir.mkdirs();
+	        if (!destDir.exists()) 
+	            throw new FileNotFoundException("Destination directory '" + destDir + "' does not exist [createDestDir=" + createDestDir +"]");
+	        if (!destDir.isDirectory()) 
+	            throw new IOException("Destination '" + destDir + "' is not a directory");
+	        moveFile(srcFile, new File(destDir, srcFile.getName()));
+	    }
+
+	    /**
+	     * Moves a file or directory to the destination directory.
+	     * <p>
+	     * When the destination is on another file system, do a "copy and delete".
+	     */
+	    public static void moveToDirectory(File src, File destDir, boolean createDestDir) throws IOException {
+	        if (src == null)        throw new NullPointerException("Source must not be null");
+	        if (destDir == null)    throw new NullPointerException("Destination must not be null");
+	        if (!src.exists())      throw new FileNotFoundException("Source '" + src + "' does not exist");
+	        
+	        if (src.isDirectory())  moveDirectoryToDirectory(src, destDir, createDestDir);
+	         else 		            moveFileToDirectory(src, destDir, createDestDir);
+	    }
+
+	    /**
+	     * Unconditionally close an <code>InputStream</code>.
+	     * <p>
+	     * Equivalent to {@link InputStream#close()}, except any exceptions will be ignored.
+	     * This is typically used in finally blocks.
+	     *
+	     * @param input  the InputStream to close, may be null or already closed
+	     */
+	    public static void closeQuietly(InputStream input) {	        closeQuietly((Closeable)input);	    }
+
+	    /**
+	     * Unconditionally close an <code>OutputStream</code>.
+	     * <p>
+	     * Equivalent to {@link OutputStream#close()}, except any exceptions will be ignored.
+	     * This is typically used in finally blocks.
+	     * @param output  the OutputStream to close, may be null or already closed
+	     */
+	    public static void closeQuietly(OutputStream output) {       closeQuietly((Closeable)output);   }
+	    
+	    /**
+	     * Unconditionally close a <code>Closeable</code>.
+	     */
+	    private static void closeQuietly(Closeable closeable) {
+	        try {
+	            if (closeable != null) 
+	                closeable.close();
+	        } catch (IOException ioe) { }
+	    }
+	}

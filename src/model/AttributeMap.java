@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 
 import javafx.scene.layout.StackPane;
@@ -12,6 +13,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import util.FileUtil;
 import util.StringUtil;
 
 public class AttributeMap extends HashMap<String, String>
@@ -44,7 +46,11 @@ public class AttributeMap extends HashMap<String, String>
 		put("X", "" + x);
 		put("Y", "" + y);
 	}
-	
+	public AttributeMap(String s, String val)
+	{
+		this();
+		put(s, val);
+	}	
 	public AttributeMap(String s)
 	{
 		this();
@@ -118,6 +124,8 @@ public class AttributeMap extends HashMap<String, String>
 	//--------------------------------------------------------------------------------
 	void parseElement(String s)
 	{
+		Document doc = FileUtil.convertStringToDocument(s);
+		
 		String local = s.substring(s.indexOf(" "));		// first token is element name
 		local = local.replaceAll(",", "\n");			// convert commas to newlines  (sketchy!)
 		
@@ -129,7 +137,7 @@ public class AttributeMap extends HashMap<String, String>
 			if (flds.length < 2) continue;
 			put(flds[0].trim(), flds[1].trim());
 		}
-        scan.close();
+        scan.close(); 
 	
 	}
 
@@ -183,6 +191,9 @@ public class AttributeMap extends HashMap<String, String>
 		put("CenterY", "" + c.getCenterY());
 		put("Radius", "" + c.getRadius());
 	}
+	
+	public void setTool(String t)	{		put("ShapeType", t);	}
+	public String getToolName()		{		return get("ShapeType");	}
 	
 	//-------------------------------------------------------------
 	public void putFillStroke(Color fill, Color stroke)	
@@ -313,6 +324,13 @@ public class AttributeMap extends HashMap<String, String>
 			String line = nextLine.substring(7, nextLine.indexOf("/n"));		
 			//TODO
 		}
+		
+	}
+
+	public void addPoint(double x, double y)
+	{
+		put("X", "" + x);
+		put("Y", "" + y);
 		
 	}
 }

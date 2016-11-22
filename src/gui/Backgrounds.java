@@ -22,8 +22,9 @@ public class Backgrounds
 	public static Background tan = colored(Color.TAN);
 	public static Background white = colored(Color.WHITE);
 	public static Background whitesmoke = colored(Color.WHITESMOKE);
+	public static Background colored(String s) { return  colored(Color.valueOf(s));  }
 	public static Background colored(Color c) { return  new Background(new BackgroundFill(c, CornerRadii.EMPTY, Insets.EMPTY));  }
-
+	
 	public static Paint lightPaint = Color.WHITESMOKE;
 	public static Paint darkPaint = Color.STEELBLUE;
 	public static Paint sand = Color.TAN;

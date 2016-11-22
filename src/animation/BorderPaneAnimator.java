@@ -36,6 +36,7 @@ public class BorderPaneAnimator
         protected void interpolate(double frac) 
         {
           final double curWidth = expandedWidth * (1.0 - frac);
+          if (sidebar == null) return;
 //          System.out.println("" + curWidth);
           if (isBottom)
           {
@@ -43,10 +44,9 @@ public class BorderPaneAnimator
               sidebar.setPrefHeight(curWidth);
               sidebar.setMaxHeight(curWidth);
               sidebar.setMinHeight(curWidth);
-         } else
-        	  
-         {    if (isLeft)
-        	  sidebar.setTranslateX( curWidth - expandedWidth);
+         } else 
+         {   
+        	 if (isLeft)  sidebar.setTranslateX( curWidth - expandedWidth);
 	         sidebar.setPrefWidth(curWidth);
 	         sidebar.setMaxWidth(curWidth);
 	         sidebar.setMinWidth(curWidth);
@@ -56,6 +56,7 @@ public class BorderPaneAnimator
       };
       hider.onFinishedProperty().set(new EventHandler<ActionEvent>() {
           @Override public void handle(ActionEvent actionEvent) {
+        	  if (sidebar == null) return;
         	  sidebar.setVisible(false);
         	  if (showText) togl.setText("Show");
         	  togl.getStyleClass().remove(isBottom ? "hide-bottom" : (isLeft ? "hide-left" : "hide-right"));
