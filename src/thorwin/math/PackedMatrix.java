@@ -17,9 +17,9 @@
 
 package thorwin.math;
 
-import java.util.Arrays;
-
 import static java.lang.Integer.min;
+
+import java.util.Arrays;
 
 
 /**

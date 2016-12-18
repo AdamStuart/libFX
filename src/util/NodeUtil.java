@@ -34,7 +34,7 @@ public class NodeUtil
 		forceHeight(n, h);
 	}
 	
-    static public void invalOnActionOrFocusLost(Node n, Binding b)
+    static public void invalOnActionOrFocusLost(Node n, Binding<?> b)
     {
     	n.addEventHandler(ActionEvent.ACTION, evt -> b.invalidate());
         n.focusedProperty().addListener((obs, old, isFocused)-> {   if (! isFocused) {	b.invalidate(); }  });

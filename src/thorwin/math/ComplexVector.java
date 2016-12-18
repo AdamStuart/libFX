@@ -17,11 +17,11 @@
 
 package thorwin.math;
 
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
 import static java.lang.Math.abs;
 import static java.lang.Math.max;
+
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 
 /**

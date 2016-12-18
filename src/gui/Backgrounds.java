@@ -24,6 +24,7 @@ public class Backgrounds
 	public static Background whitesmoke = colored(Color.WHITESMOKE);
 	public static Background colored(String s) { return  colored(Color.valueOf(s));  }
 	public static Background colored(Color c) { return  new Background(new BackgroundFill(c, CornerRadii.EMPTY, Insets.EMPTY));  }
+	public static Background transparent() { return  colored(Color.TRANSPARENT);  }
 	
 	public static Paint lightPaint = Color.WHITESMOKE;
 	public static Paint darkPaint = Color.STEELBLUE;

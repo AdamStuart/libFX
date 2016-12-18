@@ -78,7 +78,7 @@ public class FXUtils {
      * @return the ancestor node if any.
      */
     @SuppressWarnings("unchecked")
-    public static Node findAncestor(Node node, Class classToFind, Class classToStop) {
+    public static Node findAncestor(Node node, Class<?> classToFind, Class<?> classToStop) {
         node = node.getParent();
         while (node != null) {
             if (classToStop != null && classToStop.isAssignableFrom(node.getClass()))    return null;

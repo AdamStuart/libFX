@@ -17,10 +17,10 @@
 
 package thorwin.math.geo;
 
+import java.io.Serializable;
+
 import thorwin.math.Affine2D;
 import thorwin.math.Vector2D;
-
-import java.io.Serializable;
 
 /**
  * Triangle in 2-dimensional space

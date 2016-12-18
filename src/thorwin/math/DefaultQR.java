@@ -17,9 +17,9 @@
 
 package thorwin.math;
 
-import java.util.Optional;
-
 import static java.lang.Math.hypot;
+
+import java.util.Optional;
 
 
 /**

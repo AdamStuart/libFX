@@ -17,9 +17,18 @@
 
 package thorwin.math.geo;
 
-import thorwin.math.*;
+import static java.lang.Math.PI;
+import static java.lang.Math.abs;
+import static java.lang.Math.acos;
+import static java.lang.Math.asin;
+import static java.lang.Math.atan2;
+import static java.lang.Math.sqrt;
 
-import static java.lang.Math.*;
+import thorwin.math.Affine3D;
+import thorwin.math.Matrix;
+import thorwin.math.Matrix3x3;
+import thorwin.math.Vector;
+import thorwin.math.Vector3D;
 
 /**
  * Quaternion

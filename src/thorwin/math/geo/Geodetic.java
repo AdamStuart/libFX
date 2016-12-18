@@ -17,10 +17,19 @@
 
 package thorwin.math.geo;
 
+import static java.lang.Math.PI;
+import static java.lang.Math.abs;
+import static java.lang.Math.asin;
+import static java.lang.Math.atan2;
+import static java.lang.Math.cos;
+import static java.lang.Math.floor;
+import static java.lang.Math.hypot;
+import static java.lang.Math.sin;
+import static java.lang.Math.sqrt;
+import static java.lang.Math.toDegrees;
+
 import java.io.Serializable;
 import java.util.Locale;
-
-import static java.lang.Math.*;
 
 
 /**

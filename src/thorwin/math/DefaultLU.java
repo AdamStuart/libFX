@@ -17,10 +17,10 @@
 
 package thorwin.math;
 
-import java.util.Optional;
-
 import static java.lang.Math.abs;
 import static java.lang.Math.min;
+
+import java.util.Optional;
 
 
 /**

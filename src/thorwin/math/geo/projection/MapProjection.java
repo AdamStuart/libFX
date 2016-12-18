@@ -17,11 +17,11 @@
 
 package thorwin.math.geo.projection;
 
-import thorwin.math.Vector2D;
-import thorwin.math.geo.Geodetic;
-
 import java.io.Serializable;
 import java.util.Optional;
+
+import thorwin.math.Vector2D;
+import thorwin.math.geo.Geodetic;
 
 /**
  * Map projection of a spheroid on a 2D surface.

@@ -10,7 +10,7 @@ import model.bio.Species;
 
 public enum MappingSource {
 
-//	Unspecified ("Unspecified", "", "", "^[A-Za-z0-9]+", "" ),
+	Unspecified ("Unspecified", "", "", "^[A-Za-z0-9]+", "" ),
 	HGNC ("HGNC", "H", "Homo sapiens", "^[A-Za-z0-9]+", "DAPK1" ),
 	ENSEMBL ("Ensembl", "En", "", "^ENS[A-Z]*[FPTG]\\d{11}$", "ENSG00000139618"),
 	Entrez_Gene ("Entrez Gene", "L", "", "^\\d+$", "11234"),
@@ -110,16 +110,25 @@ public enum MappingSource {
 	private boolean patternMatch(String id) 
 	{		
 		if (pattern == null)
+		{	
 			System.out.println("pattern == null");
-		else if (pattern.matcher(id) == null)
+			return false;
+		}
+		if (pattern.matcher(id) == null)
+		{
 			System.out.println("pattern.matcher(id) == null");
-		else return pattern.matcher(id).matches();	
-		return false;
-		
+			return false;
+		}
+		return pattern.matcher(id).matches();	
 	}
 
 	private static boolean VERBOSE = false;
-
+	public static MappingSource guessSource(Species inSpecies, String name) {
+	List<String > strs = new ArrayList<String>();
+	strs.add(name);
+	return guessSource(inSpecies,strs);
+	}
+	
 	public static MappingSource guessSource(Species inSpecies, List<String> names) {
 
 		Map<MappingSource, Integer> counter = new HashMap<MappingSource, Integer>();
@@ -149,6 +158,19 @@ public enum MappingSource {
 		if (VERBOSE) 
 			System.out.println(maxSrc.descriptor +  " is maximum with  " + counter.get(maxSrc) + " matches");
 		return maxSrc;
+	}
+	
+	public static String getDescriptor(String sys)
+	{
+		MappingSource src = systemLookup(sys);
+		if (src == null) return "Empty";
+		return src.descriptor;
+	}
+	public static String nameToSystem(String colName)
+	{
+		MappingSource src = nameLookup(colName);
+		if (src == null) return "Empty";
+		return src.system;
 	}
 
 }

@@ -17,11 +17,14 @@
 
 package thorwin.math;
 
+import static java.lang.Math.abs;
+import static java.lang.Math.hypot;
+import static java.lang.Math.max;
+import static java.lang.Math.pow;
+
 import java.util.Optional;
 import java.util.Random;
 import java.util.StringTokenizer;
-
-import static java.lang.Math.*;
 
 
 /**

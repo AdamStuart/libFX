@@ -17,10 +17,10 @@
 
 package thorwin.math;
 
-import java.util.Optional;
-
 import static java.lang.Math.max;
 import static java.lang.Math.sqrt;
+
+import java.util.Optional;
 
 /**
  * Cholesky Decomposition.

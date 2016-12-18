@@ -52,8 +52,8 @@ import javafx.scene.image.Image;
 import javafx.scene.input.Dragboard;
 import javafx.stage.FileChooser;
 import model.AttributeValue;
-import model.CSVTableData;
-import model.IntegerDataRow;
+import model.dao.CSVTableData;
+import model.dao.IntegerDataRow;
 import services.SystemInfo;
 import xml.XMLTreeItem;
 
@@ -77,38 +77,45 @@ public class FileUtil
 		catch (Exception e){}
 	}
 
-	static public Document openXML(File f)
+	static public Document openXML(File f) 
 	{
+		try{
 		StringBuilder buff = new StringBuilder();
 		readFileIntoBuffer(f, buff);
 		return convertStringToDocument(buff.toString());
+		}
+		catch (Exception e) {	return null;	}
 	}
 	
 	static public String openXMLfile(File f)
 	{
-		Document parseddoc = openXML(f);
-		StringBuilder xmlOut = new StringBuilder();
-		if (parseddoc != null)
-		{
-			NodeList nodes = parseddoc.getChildNodes();
-			int z = nodes.getLength();
-			for (int i=0; i<z; i++) 
-				readNode(nodes.item(i), xmlOut, 0);
+		try{
+			Document parseddoc = openXML(f);
+			StringBuilder xmlOut = new StringBuilder();
+			if (parseddoc != null)
+			{
+				NodeList nodes = parseddoc.getChildNodes();
+				int z = nodes.getLength();
+				for (int i=0; i<z; i++) 
+					readNode(nodes.item(i), xmlOut, 0);
+			}
+			return xmlOut.toString();
 		}
-		return xmlOut.toString();
+		catch (Exception e) {	return "";	}
+		
 	}
 	
 	//-------------------------------------------------------------
-	static public XMLTreeItem getXMLtree(File f)	{		return getXMLtree(f, null);	}
+	static public XMLTreeItem getXMLtree(File f) throws Exception	{		return getXMLtree(f, null);	}
 	//-------------------------------------------------------------
-	static public XMLTreeItem getXMLtree(File f, String[] suppressNames)
+	static public XMLTreeItem getXMLtree(File f, String[] suppressNames) throws Exception
 	{
 		StringBuilder buff = new StringBuilder();
 		readFileIntoBuffer(f, buff);
 		return getXMLtree(buff.toString(), suppressNames);
 	}
 	//-------------------------------------------------------------
-	static public XMLTreeItem getXMLtree(String rawtext, String[] suppressNames)
+	static public XMLTreeItem getXMLtree(String rawtext, String[] suppressNames) throws Exception
 	{
 		XMLTreeItem root = new XMLTreeItem();
 		Document parseddoc = convertStringToDocument(rawtext);
@@ -321,7 +328,7 @@ public class FileUtil
 		return "                                   ".substring(0, 2*indent);
 	}
 	//--------------------------------------------------------------------------------------
-	public static Document convertStringToDocument(String xmlStr) {
+	public static Document convertStringToDocument(String xmlStr) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();  
         DocumentBuilder builder;  
         try 
@@ -330,9 +337,9 @@ public class FileUtil
             Document doc = builder.parse( new InputSource( new StringReader( xmlStr ) ) ); 
             return doc;
         } catch (Exception e) {  
-            e.printStackTrace();  
+//            e.printStackTrace();  
+        	throw e;
         } 
-        return null;
     }
 	//--------------------------------------------------------------------------------------
 	// @formatter:off
@@ -355,6 +362,7 @@ static public boolean hasXMLFiles(Dragboard db)	{	return db.getFiles().stream().
 	static public boolean isGPML(File f)	{ 		return fileEndsWith(f,".gpml");	}
 	static public boolean isOBO(File f)		{ 		return fileEndsWith(f,".obo");	}
 	public static boolean isDataFile(File f){		return fileEndsWith(f,".data");	}
+	public static boolean isCDT(File f)		{		return fileEndsWith(f,".cdt");	}
 
 	static public FileChooser.ExtensionFilter zipFilter = new FileChooser.ExtensionFilter("Zip files (*.zip)", "*.zip", "*.gz", "*.acs");
 	static public FileChooser.ExtensionFilter fcsFilter = new FileChooser.ExtensionFilter("FCS files", "*.fcs", "*.lmd");

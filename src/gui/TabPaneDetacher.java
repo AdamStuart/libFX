@@ -42,7 +42,6 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Pane;
 import javafx.scene.transform.Transform;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 /**
  * A simple Utility to make all {@link Tab}s of a {@link TabPane} detachable.

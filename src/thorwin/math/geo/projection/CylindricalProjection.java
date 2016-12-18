@@ -17,10 +17,10 @@
 
 package thorwin.math.geo.projection;
 
+import java.util.Optional;
+
 import thorwin.math.Vector2D;
 import thorwin.math.geo.Geodetic;
-
-import java.util.Optional;
 
 /**
  * A cylindrical projection is a specific map projection in which meridians are mapped

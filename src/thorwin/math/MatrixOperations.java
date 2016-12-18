@@ -13,11 +13,11 @@
 
 package thorwin.math;
 
-import thorwin.math.spi.MatrixOperationsProvider;
-
 import java.util.ServiceLoader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import thorwin.math.spi.MatrixOperationsProvider;
 
 
 /**

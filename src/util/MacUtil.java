@@ -38,17 +38,21 @@ public class MacUtil
 		ObservableList<String> list = FXCollections.observableArrayList();
 		StringBuilder buff = new StringBuilder();
 		FileUtil.readFileIntoBuffer(f, buff);
-		Document parseddoc = FileUtil.convertStringToDocument(buff.toString());
-		Node strList = XMLTools.getChildByPath(parseddoc, "plist", "dict", "key", "string");
-		int nodeLen = strList.getChildNodes().getLength();
-		for (int l=0; l< nodeLen; l++)
-		{	
-			Node key = strList.getChildNodes().item(l);
-			String val = key.getNodeValue();
-			if (val.startsWith("http"))
-				list.add(val);
-			System.out.println(key.getNodeName() + " = " + key.getNodeValue());
+		try
+		{
+			Document parseddoc = FileUtil.convertStringToDocument(buff.toString());
+			Node strList = XMLTools.getChildByPath(parseddoc, "plist", "dict", "key", "string");
+			int nodeLen = strList.getChildNodes().getLength();
+			for (int l=0; l< nodeLen; l++)
+			{	
+				Node key = strList.getChildNodes().item(l);
+				String val = key.getNodeValue();
+				if (val.startsWith("http"))
+					list.add(val);
+				System.out.println(key.getNodeName() + " = " + key.getNodeValue());
+			}
 		}
+		catch (Exception e ){}
 		return list;
 	}
 //		if (parseddoc != null)

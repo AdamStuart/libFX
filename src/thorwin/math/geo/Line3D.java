@@ -17,11 +17,11 @@
 
 package thorwin.math.geo;
 
-import thorwin.math.Vector3D;
-
 import java.io.Serializable;
 import java.util.Optional;
 import java.util.OptionalDouble;
+
+import thorwin.math.Vector3D;
 
 /**
  * A line in 3-dimensional space

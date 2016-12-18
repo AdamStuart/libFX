@@ -7,9 +7,9 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
-import model.IValueUnitSetter;
-import model.Unit;
-import model.ValueUnitRecord;
+import model.stat.IValueUnitSetter;
+import model.stat.Unit;
+import model.stat.ValueUnitRecord;
 import util.NodeUtil;
 import util.StringUtil;
 

@@ -14,6 +14,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import util.StringUtil;
+
 /**
  * An client for the Id Mapping service BridgeDB.
  *
@@ -183,20 +185,20 @@ public class BridgeDbIdMapper implements IdMapper {
      * @return the response as List of String
      * @throws IOException
      */
-    private static final List<String> post(final String url_str,
+    public static final List<String> post(final String url_str,
                                            final String species,
                                            final String command,
                                            final String database,
                                            final String query) throws IOException {
         
-    	String link = url_str + "/" + species + "/" + command;
-    	if (!"Unspecified".equals(database))
-			link += "/" + database;
+    	String link = url_str + species + "/" + command;
+//    	if (!"Unspecified".equals(database))
+//			link += "/" + database;
     	final URL url = new URL(link);
         
 
-//System.out.println("POSTING:  " + url.toString());
-//System.out.println(query + "\n\n\n");
+System.out.println("POSTING:  " + url.toString());
+System.out.println(query + "\n\n\n");
         final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setDoOutput(true);
         conn.setRequestMethod("POST");
@@ -280,5 +282,14 @@ public class BridgeDbIdMapper implements IdMapper {
 //        }
 
     }
+
+	public static String getEnsembl(String allrefs)
+	{
+		if (StringUtil.isEmpty(allrefs)) return "";
+		int idx = allrefs.indexOf("En:");
+		if (idx < 0) return "";
+		int end = allrefs.indexOf(",", idx);
+		return allrefs.substring(idx + 3, end);
+	}
 
 }

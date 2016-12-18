@@ -17,10 +17,10 @@
 
 package thorwin.math;
 
+import static java.lang.Integer.min;
+
 import java.util.Arrays;
 import java.util.stream.IntStream;
-
-import static java.lang.Integer.min;
 
 
 /**

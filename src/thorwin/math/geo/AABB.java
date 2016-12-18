@@ -17,12 +17,12 @@
 
 package thorwin.math.geo;
 
-import thorwin.math.Vector3D;
+import static java.lang.Math.min;
+import static java.lang.StrictMath.max;
 
 import java.util.Iterator;
 
-import static java.lang.Math.min;
-import static java.lang.StrictMath.max;
+import thorwin.math.Vector3D;
 
 
 /**

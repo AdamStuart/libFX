@@ -17,13 +17,13 @@
 
 package thorwin.math.geo;
 
-import thorwin.math.Matrix;
-import thorwin.math.Vector3D;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
 
 import java.io.Serializable;
 
-import static java.lang.Math.cos;
-import static java.lang.Math.sin;
+import thorwin.math.Matrix;
+import thorwin.math.Vector3D;
 
 /**
  * East, North, Up coordinate system. This coordinate system defines a position

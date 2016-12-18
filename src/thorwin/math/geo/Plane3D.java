@@ -17,10 +17,10 @@
 
 package thorwin.math.geo;
 
-import thorwin.math.Vector3D;
-
 import java.io.Serializable;
 import java.util.Optional;
+
+import thorwin.math.Vector3D;
 
 /**
  * A plane in 3-dimensional space

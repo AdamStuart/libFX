@@ -17,10 +17,14 @@
 
 package thorwin.math.geo;
 
-import thorwin.math.Vector2D;
-
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import thorwin.math.Vector2D;
 
 /**
  * A line segment between two points in 2-dimensional space.

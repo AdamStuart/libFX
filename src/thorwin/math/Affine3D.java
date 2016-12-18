@@ -17,11 +17,11 @@
 
 package thorwin.math;
 
+import java.util.Optional;
+
 import thorwin.math.geo.AxisAngle;
 import thorwin.math.geo.Euler;
 import thorwin.math.geo.Quaternion;
-
-import java.util.Optional;
 
 
 /**

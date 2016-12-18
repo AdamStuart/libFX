@@ -18,6 +18,8 @@ import org.apache.commons.validator.routines.UrlValidator;
 
 import gui.Forms.ValidationState;
 import gui.Forms.ValidationType;
+import javafx.geometry.Bounds;
+import javafx.geometry.Point2D;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
@@ -67,7 +69,8 @@ public class StringUtil
 				buffer.append(strTemp).append(eol);  //
 		} catch (Exception ex)
 		{
-			ex.printStackTrace();
+//			ex.printStackTrace();
+			System.err.println(ex.getMessage());
 			System.out.println(urlString + " failed to load");
 		}
 		return buffer.toString();
@@ -531,5 +534,20 @@ public class StringUtil
 			result = markup.substring(start, end);
 		}
 		return result;
+	}
+	public static String asString(Point2D pt)
+	{
+		String s = String.format("(%.2f,  %.2f )", pt.getX(), pt.getY());  
+		return s;
+	}
+	public static String asString(Bounds b)
+	{
+		String s = String.format("@ %.2f, %.2f [ %.2f x %.2f ]", b.getMinX(), b.getMinY(), b.getWidth(), b.getHeight());  
+		return s;
+	}
+	public static String spaces(int indent)
+	{
+		if (indent > 25) indent = 25;
+		return "                           ".substring(0, indent);
 	}
 }

@@ -17,11 +17,19 @@
 
 package thorwin.math.geo;
 
+import static java.lang.Math.abs;
+import static java.lang.Math.atan;
+import static java.lang.Math.atan2;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+import static java.lang.Math.sinh;
+import static java.lang.Math.sqrt;
+import static java.lang.Math.tan;
+import static java.lang.Math.tanh;
+import static thorwin.math.Math.TWO_PI;
+
 import thorwin.math.ConvergeException;
 import thorwin.math.Vector3D;
-
-import static java.lang.Math.*;
-import static thorwin.math.Math.TWO_PI;
 
 
 /**

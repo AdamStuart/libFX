@@ -17,8 +17,6 @@
 
 package thorwin.math.geo;
 
-import thorwin.math.Vector2D;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +24,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import thorwin.math.Vector2D;
 
 /**
  * A closed polygon in 2-dimensional space

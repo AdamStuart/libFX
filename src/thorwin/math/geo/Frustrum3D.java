@@ -17,9 +17,9 @@
 
 package thorwin.math.geo;
 
-import thorwin.math.Vector3D;
-
 import java.io.Serializable;
+
+import thorwin.math.Vector3D;
 
 
 /**

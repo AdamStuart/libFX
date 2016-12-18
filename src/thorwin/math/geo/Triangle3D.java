@@ -17,12 +17,12 @@
 
 package thorwin.math.geo;
 
-import thorwin.math.Vector3D;
-
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import thorwin.math.Vector3D;
 
 /**
  * Triangle in 3-dimensional space

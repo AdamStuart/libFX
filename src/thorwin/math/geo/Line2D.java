@@ -17,10 +17,10 @@
 
 package thorwin.math.geo;
 
-import thorwin.math.Vector2D;
-
 import java.io.Serializable;
 import java.util.Optional;
+
+import thorwin.math.Vector2D;
 
 /**
  * A line in 2-dimensional space.

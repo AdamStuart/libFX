@@ -8,6 +8,7 @@ import java.util.Map;
 // this is a partial list of the most commonly studied species
 // see http://webservice.bridgedb.org/contents for full list supported in BridgeDB
 public enum Species {
+	   Unspecified("Unspecified", "Unspecified"),
 	   Human("Human", "Homo sapiens") ,
 	   Mouse("Mouse", "Mus musculus") ,
 	   Rat("Rat", "Rattus norvegicus") ,
@@ -50,10 +51,12 @@ public enum Species {
 	
 	public String common()		{ return name;		}
 	public String latin()		{ return latin;		}
+	public String latin1token()		{ return latin.replace(" ", "+");		}
 	public String fullname() 	{ return name + " (" + latin + ")";	}
 	//--------------------------------------------------------------------
 	public static Species lookup(String input)
 	{
+		if (input == null) return null;
 		int idx = input.indexOf(" (");
 		if (idx > 0) input = input.substring(0,idx);
 		for (Species s : values())

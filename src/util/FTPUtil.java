@@ -9,8 +9,6 @@ import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 //http://www.codejava.net/java-se/networking/ftp/how-to-upload-a-directory-to-a-ftp-server
 
-import javafx.concurrent.Task;
-
 public class FTPUtil
 {
 	static boolean SKIP_INVISIBLES = true;

@@ -17,9 +17,9 @@
 
 package thorwin.math.geo;
 
-import thorwin.math.Vector2D;
-
 import java.io.Serializable;
+
+import thorwin.math.Vector2D;
 
 /**
  * Interface to objects that can transforms 2D coordinates.

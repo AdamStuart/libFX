@@ -8,6 +8,7 @@ import java.util.Scanner;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 
+import javafx.geometry.Point2D;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -26,6 +27,22 @@ public class AttributeMap extends HashMap<String, String>
 	//--------------------------------------------------------------------------------
 	public AttributeMap()
 	{
+	}
+	
+	public AttributeMap(NamedNodeMap xmlAttributes)
+	{
+		this();
+		for (int i=0; i<xmlAttributes.getLength(); i++)
+		{
+			org.w3c.dom.Node child = xmlAttributes.item(i);
+			put(child.getNodeName(), child.getNodeValue());
+		}
+	}
+	
+	public AttributeMap(NamedNodeMap xmlAttributes, String key, String val)
+	{
+		this(xmlAttributes);
+		if (key != null && val != null) put(key,val);
 	}
 	
 	public AttributeMap(StackPane sp)
@@ -57,7 +74,13 @@ public class AttributeMap extends HashMap<String, String>
 		String trimmed = s.trim();
 		
 		if (trimmed.startsWith("<")) 
-			parseElement(trimmed);
+		{
+			try
+			{
+				parseElement(trimmed);
+			}
+			catch (Exception e)	{}
+		}
 		else if (trimmed.startsWith("["))
 		{
 			String insideBrackets = trimmed.substring(1,s.length()-1);
@@ -122,7 +145,7 @@ public class AttributeMap extends HashMap<String, String>
 	}
 	
 	//--------------------------------------------------------------------------------
-	void parseElement(String s)
+	void parseElement(String s) throws Exception
 	{
 		Document doc = FileUtil.convertStringToDocument(s);
 		
@@ -144,6 +167,9 @@ public class AttributeMap extends HashMap<String, String>
 	//-------------------------------------------------------------
 	public String getId()				{		return get("GraphId");	}
 	public double getDouble(String key)	{		return StringUtil.toDouble(get(key));	}
+	public void putDouble(String key, double d)	{		put(key, String.format("%5.3f", d));	}
+	public int getInteger(String key)	{		return StringUtil.toInteger(get(key));	}
+	public void putInteger(String key, int i)	{		put(key, "" + i);	}
 
 	public double getDouble(String key, double dflt)	
 	{		
@@ -225,7 +251,7 @@ public class AttributeMap extends HashMap<String, String>
 	public Color getColor(String key )	
 	{	
 		String val = get( key);
-		if (StringUtil.isEmpty(val))	return Color.ORANGE;
+		if (StringUtil.isEmpty(val))	return Color.PINK;
 		try
 		{
 			return Color.web(val);	
@@ -331,6 +357,34 @@ public class AttributeMap extends HashMap<String, String>
 	{
 		put("X", "" + x);
 		put("Y", "" + y);
+		put("Width", "85");
+		put("Height", "65");
 		
+	}
+
+	public int incrementZOrder()
+	{
+		int z = getInteger("ZOrder");
+		putInteger("ZOrder", z + 1);
+		return z+1;
+	}
+
+	public void setPosition(Point2D pt)
+	{
+		putDouble("CenterX", pt.getX());
+		putDouble("CenterY", pt.getY());
+	}
+	
+	public Point2D getPosition()
+	{
+		double centerX = getDouble("CenterX");
+		double centerY = getDouble("CenterY");
+		if (!Double.isNaN(centerX) && !Double.isNaN(centerY))
+			return new Point2D(centerX, centerY);
+		double x = getDouble("X");
+		double y = getDouble("Y");
+		if (Double.isNaN(x) || Double.isNaN(y))
+			return new Point2D(0,0);
+		return new Point2D(x,y);
 	}
 }

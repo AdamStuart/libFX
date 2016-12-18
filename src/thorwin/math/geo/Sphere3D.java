@@ -17,11 +17,14 @@
 
 package thorwin.math.geo;
 
-import thorwin.math.Vector3D;
+import static java.lang.Math.atan2;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+import static java.lang.Math.sqrt;
 
 import java.io.Serializable;
 
-import static java.lang.Math.*;
+import thorwin.math.Vector3D;
 
 
 /**

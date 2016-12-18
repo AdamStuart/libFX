@@ -13,11 +13,13 @@
 
 package thorwin.math;
 
-import java.util.Arrays;
-
 import static java.lang.Integer.min;
 import static java.lang.Math.multiplyExact;
-import static thorwin.math.BlockMatrix.*;
+import static thorwin.math.BlockMatrix.SUBMATRIX_DIMENSION;
+import static thorwin.math.BlockMatrix.SUBMATRIX_INDEX_MASK;
+import static thorwin.math.BlockMatrix.SUBMATRIX_ORDER;
+
+import java.util.Arrays;
 
 
 /**

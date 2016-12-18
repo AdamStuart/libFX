@@ -17,9 +17,9 @@
 
 package thorwin.math.geo;
 
-import thorwin.math.Vector2D;
-
 import java.io.Serializable;
+
+import thorwin.math.Vector2D;
 
 /**
  * Axis aligned rectangle in 2-dimensional space.

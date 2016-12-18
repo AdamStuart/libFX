@@ -17,15 +17,15 @@
 
 package thorwin.math.geo;
 
-import thorwin.math.Matrix3x3;
-import thorwin.math.Vector3D;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 import java.io.Serializable;
 import java.util.Optional;
 import java.util.OptionalDouble;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
+import thorwin.math.Matrix3x3;
+import thorwin.math.Vector3D;
 
 /**
  * A ray consists of an origin and a direction.

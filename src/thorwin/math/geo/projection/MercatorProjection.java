@@ -17,9 +17,13 @@
 
 package thorwin.math.geo.projection;
 
-import thorwin.math.geo.Geodetic;
+import static java.lang.Math.PI;
+import static java.lang.Math.atan;
+import static java.lang.Math.log;
+import static java.lang.Math.sinh;
+import static java.lang.Math.tan;
 
-import static java.lang.Math.*;
+import thorwin.math.geo.Geodetic;
 
 /**
  * Mercator projection implementation.

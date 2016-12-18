@@ -9,8 +9,8 @@ import icon.GlyphsDude;
 import javafx.scene.control.Button;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
-import model.DataItem;
-import model.DataItemDao.FileFormat;
+import model.dao.DataItem;
+import model.dao.DataItemDao.FileFormat;
 
 public class DialogUtil {
 

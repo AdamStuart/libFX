@@ -107,13 +107,16 @@ public class LineUtil
 		double y = y1 + d * dy;
 		return new Point2D(x,y);
 	}
-	
-	   public static Point2D getIntersection(Line line, Node node)
+	public static Point2D getIntersection(Line line, Node node)
+	{
+		return getIntersection(line, node, 5);
+	}	
+	public static Point2D getIntersection(Line line, Node node, double padding)
 	{
 	    if (node == null) return new Point2D(line.getEndX(), line.getEndY());
-	   Bounds b = node.getBoundsInLocal();
-	   double padding = 8;
-	   Rectangle r = new Rectangle(b.getMinX() - padding, b.getMinY() - padding, b.getWidth() + 2 * padding, b.getHeight() + 2 * padding);
+	   Bounds b = node.getBoundsInParent();
+	   double halfpadding =  padding / 2;
+	   Rectangle r = new Rectangle(b.getMinX() - halfpadding, b.getMinY() - padding, b.getWidth() + padding, b.getHeight() + 2 * padding);
 	   return getIntersection(line, r);
 	}
 	   

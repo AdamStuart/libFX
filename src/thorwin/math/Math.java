@@ -17,9 +17,9 @@
 
 package thorwin.math;
 
-import java.util.Arrays;
-
 import static java.lang.Math.abs;
+
+import java.util.Arrays;
 
 /**
  * This class contains very general math functions. Usually these functions are

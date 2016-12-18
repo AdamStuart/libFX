@@ -17,11 +17,11 @@
 
 package thorwin.math.geo;
 
+import java.io.Serializable;
+
 import thorwin.math.Affine3D;
 import thorwin.math.Matrix3x3;
 import thorwin.math.Vector3D;
-
-import java.io.Serializable;
 
 
 /**

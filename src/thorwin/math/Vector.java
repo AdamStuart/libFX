@@ -17,12 +17,14 @@
 
 package thorwin.math;
 
+import static java.lang.Math.abs;
+import static java.lang.Math.min;
+import static java.lang.Math.sqrt;
+
 import java.util.Random;
 import java.util.StringTokenizer;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
-
-import static java.lang.Math.*;
 
 
 /**
