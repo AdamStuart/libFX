@@ -73,6 +73,7 @@ public class PathwayRecord
 	public void setRevision(String s)  { revision.set(s);}
 
 	public String toString()	{		return id.get() + ": " + species.get() + ": " + name.get();	}
+	public String getPngUrl()  { return  "http://webservice.wikipathways.org/getPathwayAs?fileType=png&pwId="  +getId() +  "&revision=0";		}
 
 
 }

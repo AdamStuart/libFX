@@ -18,7 +18,7 @@ public class Histogram1D
 	private int size;		// the number of bins
 	private int[] counts;
 	private Range range;
-	boolean isLog = true;
+	boolean isLog = false;
 	private String name;
 	private List<Peak> peaks = FXCollections.observableArrayList();
 	public List<Peak> getPeaks()	{  if (peaks.isEmpty()) scanPeaks(null); return peaks;	}
@@ -96,6 +96,15 @@ public class Histogram1D
 //	int counter = 0;
 	// ----------------------------------------------------------------------------------------------------
 	int GUTTER_WIDTH = 5;
+	
+	public void count(double[] vals)
+	{
+		for (double d : vals) count(d);
+	}
+	public void count(List<Double> vals)
+	{
+		for (Double d : vals) count(d);
+	}
 	
 	public void count(double x)
 	{
@@ -256,7 +265,7 @@ public class Histogram1D
 		double scale = range.width() / size;
 		XYChart.Series<Number, Number> series = new XYChart.Series<Number, Number>();
 		for (int i = 0; i < size; i++)
-			series.getData().add(new XYChart.Data<Number, Number>(i * scale, counts[i]));
+			series.getData().add(new XYChart.Data<Number, Number>(range.min() + i * scale, counts[i]));
 		return series;
 	}
 
@@ -509,6 +518,9 @@ public class Histogram1D
 		NumberAxis  xAxis = new NumberAxis();	
 		NumberAxis  yAxis = new NumberAxis();
 		LineChart<Number, Number>  chart = new LineChart<Number, Number>(xAxis, yAxis);
+		Range xRange = getRange();
+		xAxis.setLowerBound(xRange.min);
+		xAxis.setUpperBound(xRange.max);
 		chart.setTitle(getName());
 		chart.setCreateSymbols(false);
 		chart.getData().add( rawDataSeries());	

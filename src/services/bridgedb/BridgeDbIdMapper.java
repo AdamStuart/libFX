@@ -289,6 +289,8 @@ System.out.println(query + "\n\n\n");
 		int idx = allrefs.indexOf("En:");
 		if (idx < 0) return "";
 		int end = allrefs.indexOf(",", idx);
+		if (end < 0)
+			return allrefs.substring(idx + 3);
 		return allrefs.substring(idx + 3, end);
 	}
 

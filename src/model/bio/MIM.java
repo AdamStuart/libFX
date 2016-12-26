@@ -7,6 +7,7 @@ import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
+import util.StringUtil;
 
 public enum MIM
 {
@@ -33,6 +34,11 @@ public enum MIM
 		type = arrow;
 	}
 
+	public String getDescription()
+	{
+		String cleaner = id.substring(4).replace("-", " ");
+		return StringUtil.capitalize(cleaner);
+	}
 	public MIM lookup(String name)
 	{
 		for (MIM m : values())
@@ -42,6 +48,7 @@ public enum MIM
 
 	public Shape getShape()
 	{
+		if (type.equals("Arrow"))						return getMIMCatalysis ();
 		if (type.equals("mim-necessary-stimulation"))	return getMIMNecessary ();
 		if (type.equals("mim-conversion"))				return getMIMConversion ();
 		if (type.equals("mim-binding"))					return getMIMBinding ();
@@ -133,6 +140,15 @@ public enum MIM
 	        return path;
 	    }
 	    
+		static private Shape getArrow () {
+			Path path = new Path();
+			path.getElements().add(new MoveTo(0, 0));
+			path.getElements().add(new LineTo(-ARROWWIDTH, -ARROWHEIGHT));
+			path.getElements().add(new LineTo(-ARROWWIDTH / 2, 0));
+			path.getElements().add(new LineTo(-ARROWWIDTH, ARROWHEIGHT));
+			return path;
+		}
+
 		static private Shape getMIMBinding () {
 			Path path = new Path();
 			path.getElements().add(new MoveTo(0, 0));

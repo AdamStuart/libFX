@@ -4,7 +4,7 @@ import org.w3c.dom.NamedNodeMap;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-public class BiopaxRef {
+public class BiopaxRef  {
 
 	private SimpleStringProperty xrefid = new SimpleStringProperty();
 	public StringProperty  xrefidProperty()  { return xrefid;}
@@ -43,7 +43,9 @@ public class BiopaxRef {
 	
 
 	public String getFirstAuthor()  {
-		return authors.get();
+		String auths = authors.get();
+		if (auths == null) return "";
+		return auths.split(" ")[0];
 	}
 	
 	
@@ -86,7 +88,12 @@ public class BiopaxRef {
 	public String toString()
 	{
 		String firstAuthor =  getFirstAuthor(); 
-		return db.get() + ": " + id.get() + ", " + firstAuthor + ", [" + year.get() + ", " + source.get() + ", " + title.get() + "].";
+		return db.get() + " " +  id.get() + ": " + firstAuthor + ", [" + year.get() + ", " + source.get() + ", " + title.get() + "].";
+	}
+	public String toGPML()		// TODO --save original text so we can pass external fields thru
+	{
+		return toString();
+		
 	}
 
 }

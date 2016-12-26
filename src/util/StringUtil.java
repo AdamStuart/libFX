@@ -39,10 +39,10 @@ public class StringUtil
 		return full.substring(0,index) + insert + full.substring(index);
 	}
 
-	
+	public static String chop(String string, int i) { 	return string.substring(0,string.length()-i);	}
+	static public String chopLast(String s)			{	return chop(s,1);	}
+	static public String chopLast2(String s)		{	return chop(s,2);	}
 	static public String chopExtension(String in)	{	int idx = in.lastIndexOf("."); return idx < 0 ? in : in.substring(0,idx);	}
-	static public String chopLast(String in)		{	return in.substring(0,in.length()-1);	}
-	static public String chopLast2(String in)		{	return in.substring(0,in.length()-2);	}
 //	static public ObservableList<String> lines(String in)
 //	{
 //		ObservableList<String> strs = FXCollections.observableArrayList();
@@ -537,11 +537,13 @@ public class StringUtil
 	}
 	public static String asString(Point2D pt)
 	{
+		if (pt == null) return "";
 		String s = String.format("(%.2f,  %.2f )", pt.getX(), pt.getY());  
 		return s;
 	}
 	public static String asString(Bounds b)
 	{
+		if (b == null) return "";
 		String s = String.format("@ %.2f, %.2f [ %.2f x %.2f ]", b.getMinX(), b.getMinY(), b.getWidth(), b.getHeight());  
 		return s;
 	}
@@ -549,5 +551,9 @@ public class StringUtil
 	{
 		if (indent > 25) indent = 25;
 		return "                           ".substring(0, indent);
+	}
+	public static boolean isXML(String s)
+	{
+		return s.trim().startsWith("<?xml ");
 	}
 }
