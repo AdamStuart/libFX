@@ -1,7 +1,8 @@
 package model.bio;
 
 
-import javafx.scene.shape.Ellipse;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
@@ -48,20 +49,20 @@ public enum MIM
 
 	public Shape getShape()
 	{
-		if (type.equals("Arrow"))						return getMIMCatalysis ();
-		if (type.equals("mim-necessary-stimulation"))	return getMIMNecessary ();
-		if (type.equals("mim-conversion"))				return getMIMConversion ();
-		if (type.equals("mim-binding"))					return getMIMBinding ();
-		if (type.equals("mim-stimulation"))				return getMIMStimulation ();
-		if (type.equals("mim-modification"))			return getMIMConversion ();
-		if (type.equals("mim-catalysis"))				return getMIMCatalysis ();
-		if (type.equals("mim-inhibition"))				return getMIMInhibition ();
-		if (type.equals("mim-cleavage"))				return getMIMCleavage ();
-		if (type.equals("mim-gap"))						return getMIMGap();
-		if (type.equals("mim-covalent-bond"))			return getMIMCovalentBond ();
-		if (type.equals("mim-branching-left"))			return getMIMBranching (LEFT);
-		if (type.equals("mim-branching-right"))			return getMIMBranching (RIGHT);
-		if (type.equals("mim-transcription-translation"))	return getMIMTranslation ();
+//		if (id.equals("Arrow"))						return getMIMCatalysis ();
+		if (id.equals("mim-necessary-stimulation"))		return getMIMNecessary ();
+		if (id.equals("mim-conversion"))				return getMIMConversion ();
+		if (id.equals("mim-binding"))					return getMIMBinding ();
+		if (id.equals("mim-stimulation"))				return getMIMStimulation ();
+		if (id.equals("mim-modification"))				return getMIMConversion ();
+		if (id.equals("mim-catalysis"))					return getMIMCatalysis ();
+		if (id.equals("mim-inhibition"))				return getMIMInhibition ();
+		if (id.equals("mim-cleavage"))					return getMIMCleavage ();
+		if (id.equals("mim-gap"))						return getMIMGap();
+		if (id.equals("mim-covalent-bond"))				return getMIMCovalentBond ();
+		if (id.equals("mim-branching-left"))			return getMIMBranching (LEFT);
+		if (id.equals("mim-branching-right"))			return getMIMBranching (RIGHT);
+		if (id.equals("mim-transcription-translation"))	return getMIMTranslation ();
 		
 		return null;
 	}
@@ -80,12 +81,19 @@ public enum MIM
 		 private static final int BRANCH_LOCATION = 8;
 		 private static final int BRANCHTHICKNESS = 1;
 
-		static final int CATALYSIS_DIAM = 8;
-		static final int CATALYSIS_GAP = CATALYSIS_DIAM/4;
-		static final int CATALYSIS_GAP_HEIGHT = 6;
+		static final int CATALYSIS_RADIUS = 3;
+		static final int CATALYSIS_GAP = CATALYSIS_RADIUS + 2;
+//		static final int CATALYSIS_GAP_HEIGHT = 6;
 		//create the ellipse for catalysis line ending
 
-		static private Shape getMIMCatalysis () 	{ 	return new Ellipse(	0, -CATALYSIS_DIAM/2,CATALYSIS_DIAM, CATALYSIS_DIAM); 	}
+		static private Shape getMIMCatalysis () 	
+		{ 	
+			Circle c = new Circle(0, 0,CATALYSIS_RADIUS);
+			c.setFill(Color.WHITE);
+			c.setStroke(Color.BLACK);
+			c.setStrokeWidth(0.66);
+			return c; 	
+		}
 		static private Shape getMIMStimulation () 	{	return getArrowShapedPath();		}
 		static private Shape getMIMConversion () 	{	return getArrowShapedPath();		}
 	    static private Shape getMIMInhibition() 	{ 	return new Rectangle(0, -TBARHEIGHT / 2,TBARWIDTH, TBARHEIGHT	); 	}

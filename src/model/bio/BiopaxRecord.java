@@ -1,15 +1,18 @@
 package model.bio;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.w3c.dom.NamedNodeMap;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-public class BiopaxRef  {
+public class BiopaxRecord  {
 
-	private SimpleStringProperty xrefid = new SimpleStringProperty();
-	public StringProperty  xrefidProperty()  { return xrefid;}
-	public String getXrefid()  { return xrefid.get();}
-	public void setXrefid(String s)  { xrefid.set(s);}
+	private SimpleStringProperty rdfid = new SimpleStringProperty();
+	public StringProperty  rdfidProperty()  { return rdfid;}
+	public String getRdfid()  { return rdfid.get();}
+	public void setRdfid(String s)  { rdfid.set(s);}
 	
 	private SimpleStringProperty id = new SimpleStringProperty();
 	public StringProperty  idProperty()  { return id;}
@@ -36,20 +39,19 @@ public class BiopaxRef  {
 	public String getYear()  { return year.get();}
 	public void setYear(String s)  { year.set(s);}
 	
-	private SimpleStringProperty authors = new SimpleStringProperty();
-	public StringProperty  authorsProperty()  { return authors;}
-	public String getAuthors()  { return authors.get();}
-	public void setAuthors(String s)  { authors.set(s);}
+	private List<String> authors = new ArrayList<String>();
+	public List<String> getAuthors()  { return authors;}
+	public void addAuthors(String s)  { authors.add(s);}
 	
 
 	public String getFirstAuthor()  {
-		String auths = authors.get();
+		String auths = authors.get(0);
 		if (auths == null) return "";
 		return auths.split(" ")[0];
 	}
 	
 	
-	public BiopaxRef(org.w3c.dom.Node elem) {
+	public BiopaxRecord(org.w3c.dom.Node elem) {
 		
 //		for (int i=0; i<elem.getChildNodes().getLength(); i++)
 //		{
@@ -59,7 +61,7 @@ public class BiopaxRef  {
 //			if ("bp:PublicationXref".equals(name))
 //			{
 				NamedNodeMap attrs = elem.getAttributes();
-				xrefid.set(attrs.getNamedItem("rdf:id").getNodeValue());
+				setRdfid(attrs.getNamedItem("rdf:id").getNodeValue());
 				for (int j=0; j<elem.getChildNodes().getLength(); j++)
 				{
 					org.w3c.dom.Node grandchild = elem.getChildNodes().item(j);
@@ -74,17 +76,14 @@ public class BiopaxRef  {
 					else if ("bp:TITLE".equals(subname))	title.set(kid.getTextContent());
 					else if ("bp:SOURCE".equals(subname))	source.set(kid.getTextContent());
 					else if ("bp:YEAR".equals(subname))		year.set(kid.getTextContent());
-					else if ("bp:AUTHORS".equals(subname))	
-						{
-							String current = authors.get();
-							if (current == null) current = "";
-							if (current.length() > 0) current += ", ";
-							authors.set(current + kid.getTextContent());
-						}
+					else if ("bp:AUTHORS".equals(subname))	authors.add(kid.getTextContent());
 				}
 //			}
 //		}
 	}
+	static String pubHeaderCtrl = "<bp:PublicationXref xmlns:bp=\"http://www.biopax.org/release/biopax-level3.owl#\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" rdf:id=\"%s\">\n";
+	static String pubHeaderClose = "</bp:PublicationXref>\n";
+	
 	public String toString()
 	{
 		String firstAuthor =  getFirstAuthor(); 
@@ -92,8 +91,44 @@ public class BiopaxRef  {
 	}
 	public String toGPML()		// TODO --save original text so we can pass external fields thru
 	{
-		return toString();
+		StringBuilder bldr = new StringBuilder();
+		String s = String.format(pubHeaderCtrl, getRdfid());
+		bldr.append(s);
+		addTag(bldr, "bp:ID", id.get());
+		addTag(bldr, "bp:DB", db.get());
+		addTag(bldr, "bp:TITLE", title.get());
+		addTag(bldr, "bp:SOURCE", source.get());
+		addTag(bldr, "bp:YEAR", year.get());
+		for (String auth : getAuthors())
+			addTag(bldr, "bp:AUTHORS", auth);
 		
+		bldr.append(pubHeaderClose);
+		return bldr.toString();
 	}
+	
+	void addTag(StringBuilder bldr, String key, String val)
+	{
+		bldr.append("<").append(key).append(">");
+		bldr.append(val);
+		bldr.append("</").append(key).append(">\n");
+	}
+	
+
+//
+//<bp:ID >16374s430</bp:ID>
+//<bp:DB >PubMed</bp:DB>
+//<bp:TITLE >Renin increases mesangial cell transforming growth factor-beta1 and matrix proteins through receptor-mediated, angiotensin II-independent mechanisms.</bp:TITLE>
+//<bp:SOURCE >Kidney Int</bp:SOURCE>
+//<bp:YEAR >2006</bp:YEAR>
+//<bp:AUTHORS >Huang Y</bp:AUTHORS>
+//<bp:AUTHORS >Wongamorntham S</bp:AUTHORS>
+//<bp:AUTHORS >Kasting J</bp:AUTHORS>
+//<bp:AUTHORS >McQuillan D</bp:AUTHORS>
+//<bp:AUTHORS >Owens RT</bp:AUTHORS>
+//<bp:AUTHORS >Yu L</bp:AUTHORS>
+//<bp:AUTHORS >Noble NA</bp:AUTHORS>
+//<bp:AUTHORS >Border W</bp:AUTHORS>
+
+
 
 }

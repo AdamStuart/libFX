@@ -6,7 +6,10 @@ import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Paint;
+import javafx.scene.paint.Stop;
 
 public class Backgrounds
 {
@@ -29,5 +32,10 @@ public class Backgrounds
 	public static Paint lightPaint = Color.WHITESMOKE;
 	public static Paint darkPaint = Color.STEELBLUE;
 	public static Paint sand = Color.TAN;
+	
+	public static Paint stdBackground = Color.TAN;
+
+	public static Stop[] stops = new Stop[] { new Stop(0, Color.WHITESMOKE), new Stop(1, Color.LIGHTGRAY)};
+	public static LinearGradient whiteGradient = new LinearGradient(0, 0, 225, 200, false, CycleMethod.REFLECT, stops);
 
 }

@@ -243,7 +243,8 @@ public class AttributeMap extends HashMap<String, String>
 	public boolean getBool(String key, boolean b )	
 	{
 		String val = get(key);
-		return val != null && val.toLowerCase().equals("true");
+		if (val == null) return b;
+		return val.toLowerCase().equals("true");
 	}
 	 //-------------------------------------------------------------
 	public void putColor(String key, Color c )		{	put( key, c.toString());	}
@@ -281,8 +282,7 @@ public class AttributeMap extends HashMap<String, String>
 	public String makeElementString(String name)
 	{
 		StringBuilder buff = new StringBuilder("<" + name + " ");
-		for (String key : keySet())
-			buff.append(key).append("=\"").append(get(key)).append("\" ");
+		buff.append(getAttributes(false));
 		return buff.toString() + " />\n";
 			
 	}
@@ -290,11 +290,18 @@ public class AttributeMap extends HashMap<String, String>
 	//  build a string that looks like this:  <name a="1" b="2" >\n
 	public String makeElementStartString(String name)
 	{
-		StringBuilder buff = new StringBuilder("<" + name + " ");
+		return "<" + name + " " + getAttributes(false) + " >\n";
+	}
+	
+	public String getAttributes(boolean lineBreaks)
+	{
+		StringBuilder buff = new StringBuilder();
 		for (String key : keySet())
+		{
 			buff.append(key).append("=\"").append(get(key)).append("\" ");
-		return buff.toString() + " >\n";
-			
+			if (lineBreaks) buff.append("\n");
+		}
+		return buff.toString();
 	}
 	
 	public String getSafe(String key)
