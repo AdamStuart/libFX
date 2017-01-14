@@ -1,6 +1,7 @@
 package model.bio;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javafx.beans.property.SimpleStringProperty;
@@ -10,18 +11,24 @@ import javafx.scene.control.Alert.AlertType;
 import model.AttributeMap;
 import util.StringUtil;
 
-public class Gene implements Comparable<Gene> {
+public class Gene extends HashMap<String, String> implements Comparable<Gene> {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public static String URL_BASE = "http://";
+	private GeneListRecord geneListRecord;
 	private List<Double> values = new ArrayList<Double>();
-	public double getValue(int i)	{ return i < values.size() ? values.get(i) : Double.NaN;	}
-	
-	public Gene(String inName)
+	public double getValue(int i)	{ return i >= 0 && i < size() ? values.get(i) : Double.NaN;	}
+
+	public Gene(GeneListRecord record, String inName)
 	{
-		this(inName, null, "Human", URL_BASE + "");
+		this(record, inName, null, "Human", URL_BASE + "");
 	}
-	public Gene(String inName, String ensm, String spec, String link)
+	public Gene(TableRecord record, String inName, String ensm, String spec, String link)
 	{
+		geneListRecord = (GeneListRecord) record;
 		name.set(inName);
 		ensembl.set(ensm);			// this is also called id
 		species.set(spec);
@@ -59,10 +66,10 @@ public class Gene implements Comparable<Gene> {
 	public String getDatabase()  { return database.get();}
 	public void setDatabase(String s)  { database.set(s);}
 
-	private SimpleStringProperty location = new SimpleStringProperty("23");
-	public StringProperty  locationProperty()  { return location;}
-	public String getLocation()  { return location.get();}
-	public void setLocation(String s)  { location.set(s);}
+//	private SimpleStringProperty location = new SimpleStringProperty("23");
+//	public StringProperty  locationProperty()  { return location;}
+//	public String getLocation()  { return location.get();}
+//	public void setLocation(String s)  { location.set(s);}
 
 	private SimpleStringProperty dbid = new SimpleStringProperty("db");
 	public StringProperty  dbidProperty()  { return dbid;}
@@ -74,6 +81,11 @@ public class Gene implements Comparable<Gene> {
 	public String getFlag()  { return flag.get();}
 	public void setFlag(String s)  { flag.set(s);}
 
+	private SimpleStringProperty chromosome = new SimpleStringProperty("chromosome");
+	public StringProperty  chromosomeProperty()  { return chromosome;}
+	public String getChromosome()  { return chromosome.get();}
+	public void setChromosome(String s)  { chromosome.set(s);}
+
 	private SimpleStringProperty data = new SimpleStringProperty("data");
 	public StringProperty  dataProperty()  { return data;}
 	public String getData()  { return data.get();}
@@ -81,6 +93,7 @@ public class Gene implements Comparable<Gene> {
 	{ 
 		data.set(s);
 		String[] tokens = s.split("\t");
+		if (tokens.length < 3) return;
 		String nameDesc = tokens[2];
 		String[] parts = nameDesc.split(" ");
 		String firstWord = parts[0];
@@ -88,15 +101,53 @@ public class Gene implements Comparable<Gene> {
 			firstWord = firstWord.substring(1);
 		
 		String remnant = nameDesc.substring(firstWord.length()).trim();
-						if (parts.length > 1)
-		readTerms(remnant);
+		if (parts.length > 1)
+			readTerms(remnant);
 		description.set(remnant);
 		System.out.println(description.get());
 		name.set(firstWord);
-		for (int i = 3; i < tokens.length; i++)
+		for (int i = 8; i < tokens.length; i++)
 			values.add(StringUtil.toDouble(tokens[i]));
 	}
-	
+	public void setData2(String s)  
+	{ 
+		data.set(s);
+		String[] tokens = s.split("\t");
+		if (tokens.length < 3) return;
+		String nameDesc = tokens[2];
+		ensembl.set( tokens[0]);
+		name.set( tokens[1]);
+//		String[] parts = nameDesc.split(" ");
+//		String firstWord = parts[0];
+//		if (firstWord.startsWith("\""))
+//			firstWord = firstWord.substring(1);
+		
+//		String remnant = nameDesc.substring(firstWord.length()).trim();
+//		if (parts.length > 1)
+//			readTerms(remnant);
+		int start = nameDesc.indexOf("[");
+		if (start >= 0)
+		{
+			String firstname = nameDesc.substring(0, start);
+			int end = nameDesc.indexOf("]");
+			if (end > 0)
+			{
+				String source = nameDesc.substring(start+1, end-1);
+				if (source.contains("Source"))
+				{
+					int semi = source.indexOf(";");
+					database.set(source.substring(7, semi));
+					dbid.set(source.substring(semi+1));
+				}
+			}
+		}
+		
+		description.set(nameDesc);
+		System.out.println(description.get());
+		for (int i = 8; i < tokens.length; i++)
+			values.add(StringUtil.toDouble(tokens[i]));
+	}
+
 	private SimpleStringProperty description = new SimpleStringProperty();
 	public StringProperty  descriptionProperty()  { return description;}
 	public String getDescription()  		{ 	return description.get();}
@@ -147,6 +198,16 @@ public class Gene implements Comparable<Gene> {
 	{
 		return getName().compareToIgnoreCase(other.getName());
 	}
+	
+	public boolean match(String upperCaseKeyword)
+	{
+		String NAME = getName().toUpperCase();
+		if (NAME.contains(upperCaseKeyword)) return true;
+		String DATA = getData().toUpperCase();
+		if (DATA.contains(upperCaseKeyword)) return true;
+		return false;
+	}
+	
 	public void getInfo()
 	{
 		   String text = getIdlist();	
@@ -161,5 +222,12 @@ public class Gene implements Comparable<Gene> {
 		   }
 
 		
+	}
+
+	public double getValueByName(String fld) 
+	{
+		int index = geneListRecord.getValueIndex(fld);
+		if (index < 0) return Double.NaN;
+		return getValue(index);
 	}
 }

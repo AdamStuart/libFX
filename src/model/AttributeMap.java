@@ -252,7 +252,7 @@ public class AttributeMap extends HashMap<String, String>
 	public Color getColor(String key )	
 	{	
 		String val = get( key);
-		if (StringUtil.isEmpty(val))	return Color.PINK;
+		if (StringUtil.isEmpty(val))	return Color.WHITE;
 		try
 		{
 			return Color.web(val);	

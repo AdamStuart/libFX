@@ -1,5 +1,6 @@
 package model.bio;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.w3c.dom.NamedNodeMap;
@@ -7,7 +8,7 @@ import org.w3c.dom.NamedNodeMap;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-public class BiopaxRecord  {
+public class BiopaxRecord extends HashMap<String, String> {
 
 	private SimpleStringProperty rdfid = new SimpleStringProperty();
 	public StringProperty  rdfidProperty()  { return rdfid;}
@@ -45,6 +46,7 @@ public class BiopaxRecord  {
 	
 
 	public String getFirstAuthor()  {
+		if (authors.isEmpty()) return "";
 		String auths = authors.get(0);
 		if (auths == null) return "";
 		return auths.split(" ")[0];
