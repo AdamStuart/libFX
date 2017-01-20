@@ -425,7 +425,10 @@ static public boolean hasXMLFiles(Dragboard db)	{	return db.getFiles().stream().
                 try {   br.close();   } catch (Exception e) {}
         }
 	}
-
+	static public List<String> readFileIntoStringList(File f)
+	{
+		return readFileIntoStringList(f.getAbsolutePath());
+	}
 	static public List<String> readFileIntoStringList(String absolutePath)
 	{
         BufferedReader br = null;

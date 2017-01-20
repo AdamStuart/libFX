@@ -29,6 +29,12 @@ public class AttributeMap extends HashMap<String, String>
 	{
 	}
 	
+	public AttributeMap(HashMap<String, String> input)
+	{
+		for (String s : input.keySet())
+			put(s, input.get(s));
+	}
+	
 	public AttributeMap(NamedNodeMap xmlAttributes)
 	{
 		this();

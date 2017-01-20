@@ -17,7 +17,7 @@ import javafx.util.Callback;
 public class TableRecord<ROWTYPE extends Map>
 {
 	protected List<TableColumn<ROWTYPE, ?>> allColumns;
-	public List<TableColumn<ROWTYPE, ?>> getAllColumns() { return allColumns;	}
+	public List<TableColumn<ROWTYPE, ?>> getAllColumns() 			{ 	return allColumns;	}
 	public void addColumn(TableColumn<ROWTYPE, ?> col, String name) { 	allColumns.add(col); 	}// columnNames.add(name);
 
 	//	protected List<String> columnNames;
@@ -28,8 +28,7 @@ public class TableRecord<ROWTYPE extends Map>
 	StringProperty name = new SimpleStringProperty();
 	BooleanProperty visible = new SimpleBooleanProperty();
 	BooleanProperty editable = new SimpleBooleanProperty();
-	StringProperty header1 = new SimpleStringProperty();
-	StringProperty header2 = new SimpleStringProperty();
+	List<String> headers = new ArrayList<String>();
 
 	public TableRecord(String n)
 	{
@@ -38,15 +37,15 @@ public class TableRecord<ROWTYPE extends Map>
 //		columnNames = new ArrayList<String>();
 	}
 	
-	public TableRecord(TableRecord parent)
-	{
-		this(parent.getName());
-		allColumns.addAll(parent.getAllColumns());
-//		columnNames.addAll(parent.getColumnNames());
-		header1.set(parent.getHeader1());
-		header2.set(parent.getHeader2());
-
-	}
+//	public TableRecord(TableRecord parent)
+//	{
+//		this(parent.getName());
+//		allColumns.addAll(parent.getAllColumns());
+////		columnNames.addAll(parent.getColumnNames());
+//		header1.set(parent.getHeader1());
+//		header2.set(parent.getHeader2());
+//
+//	}
 	public String toString()
 	{
 		return id + ":" + name +  ":" + type +  ":"; // + allColumns.size() + " cols, " + getRowCount() + " rows";
@@ -68,7 +67,7 @@ public class TableRecord<ROWTYPE extends Map>
 		}
 	}
 	
-	private TableColumn findByText(List<TableColumn<ROWTYPE, ?>> cols, String txt)
+	public TableColumn findByText(List<TableColumn<ROWTYPE, ?>> cols, String txt)
 	{
 		if (txt == null) return null;
 		for (TableColumn t : cols)
@@ -100,7 +99,7 @@ public class TableRecord<ROWTYPE extends Map>
 //
 	int getValueIndex(String colName)
 	{
-		String header = header1.get();
+		String header = headers.get(0);
 		String[] fields = header.split("\t");
 		for (int i=0; i<fields.length; i++)
 			if (fields[i].equals(colName))
@@ -128,13 +127,8 @@ public class TableRecord<ROWTYPE extends Map>
 	public Boolean getEditable()  { return editable.get();}
 	public void setEditable(Boolean s)  { editable.set(s);}
 
-	public StringProperty  header1Property()  { return header1;}
-	public String getHeader1()  { return header1.get();}
-	public void setHeader1(String s)  { header1.set(s);}
-
-	public StringProperty  header2Property()  { return header2;}
-	public String getHeader2()  { return header2.get();}
-	public void setHeader2(String s)  { header2.set(s);}
+	public String getHeader(int i)  { return headers.get(i);}
+	public void addHeader(String s)  { headers.add(s);}
 
 //	public void setColumnList() {
 //		String header = header1.get();

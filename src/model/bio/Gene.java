@@ -9,6 +9,7 @@ import javafx.beans.property.StringProperty;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import model.AttributeMap;
+import model.TableType;
 import util.StringUtil;
 
 public class Gene extends HashMap<String, String> implements Comparable<Gene> {
@@ -22,6 +23,10 @@ public class Gene extends HashMap<String, String> implements Comparable<Gene> {
 	private List<Double> values = new ArrayList<Double>();
 	public double getValue(int i)	{ return i >= 0 && i < size() ? values.get(i) : Double.NaN;	}
 
+	public Gene(GeneListRecord record, TableType type, String line)
+	{
+		this(record, line.split(type.getDelimiter())[0], null, "Human", "");
+	}
 	public Gene(GeneListRecord record, String inName)
 	{
 		this(record, inName, null, "Human", URL_BASE + "");
@@ -89,11 +94,16 @@ public class Gene extends HashMap<String, String> implements Comparable<Gene> {
 	private SimpleStringProperty data = new SimpleStringProperty("data");
 	public StringProperty  dataProperty()  { return data;}
 	public String getData()  { return data.get();}
-	public void setData(String s)  
+	public void setData(String s, TableType type)  
 	{ 
 		data.set(s);
-		String[] tokens = s.split("\t");
-		if (tokens.length < 3) return;
+		String[] tokens = s.split(type.getDelimiter());
+		if (tokens.length < 3) 
+		{
+			if (tokens.length == 1) 
+				name.set(tokens[0]);
+			return;
+		}
 		String nameDesc = tokens[2];
 		String[] parts = nameDesc.split(" ");
 		String firstWord = parts[0];
@@ -109,12 +119,13 @@ public class Gene extends HashMap<String, String> implements Comparable<Gene> {
 		for (int i = 8; i < tokens.length; i++)
 			values.add(StringUtil.toDouble(tokens[i]));
 	}
+	
+
 	public void setData2(String s)  
 	{ 
 		data.set(s);
 		String[] tokens = s.split("\t");
-		if (tokens.length < 3) return;
-		String nameDesc = tokens[2];
+		String nameDesc = (tokens.length < 3) ? "" : tokens[2];
 		ensembl.set( tokens[0]);
 		name.set( tokens[1]);
 //		String[] parts = nameDesc.split(" ");
