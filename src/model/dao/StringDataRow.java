@@ -13,10 +13,15 @@ public class StringDataRow
     private ObservableList<SimpleStringProperty> vals = FXCollections.observableArrayList();
 	
     public StringDataRow(int nCols)
-	{
-        for(int i=0; i<nCols; ++i)
-        	vals.add(new SimpleStringProperty(""));
-	}
+ 	{
+         for(int i=0; i<nCols; ++i)
+         	vals.add(new SimpleStringProperty(""));
+ 	}
+    public StringDataRow(String[] strs)
+ 	{
+         for(String s : strs)
+         	vals.add(new SimpleStringProperty(s));
+ 	}
     public int getRowNum()				{	return rowNum.get();		}
 	public void setRowNum(int row)		{ 	rowNum.set(row); } 
 	public void set(int i, String s)	{ 	vals.get(i).set(s);	} 

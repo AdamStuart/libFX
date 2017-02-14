@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
+import gui.DropUtil;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -18,6 +20,7 @@ import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
+import javafx.scene.input.DragEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -67,37 +70,51 @@ public class GeneListRecord extends TableRecord<Gene> {
 	private void copyColumns(GeneListRecord parent)
 	{
 		List<TableColumn<Gene, ?>> parentColumns = parent.getAllColumns();
+		boolean separatorSeen = false;
 		for (TableColumn<Gene, ?> col : parentColumns)
 		{
+			String text = col.getText();
+			if (text.startsWith("---") )  separatorSeen = true;
+			
 			TableColumn<Gene, ?> newColumn = new TableColumn(col.getText());
 			newColumn.setEditable(col.isEditable());
-			newColumn.setGraphic(col.getGraphic());
 			newColumn.setVisible(col.isVisible());
 			newColumn.setMinWidth(col.getMinWidth());
 			newColumn.setMaxWidth(col.getMaxWidth());
-//			newColumn.setCellFactory(col.getCellFactory());
-//			newColumn.setCellValueFactory(col.getCellValueFactory());
-			allColumns.add(newColumn);
-		}
+			newColumn.setPrefWidth(col.getWidth());
 
-		
+			boolean numeric = "TRUE".equals(col.getProperties().get("Numeric"));  
+			if (numeric)
+				setupNumericColumn(col.getText());
+			else //if (typ.equals("T"))
+				setupTextColumn(col.getText());
+			
+		}
+		if (!separatorSeen) 
+			makeSeparator();
+	}
+	private void makeSeparator()
+	{
+		TableColumn<Gene, String> separatorColumn = new TableColumn<Gene, String>();
+		separatorColumn.setPrefWidth(0);  
+		separatorColumn.setVisible(false);  
+		separatorColumn.setMaxWidth(0);  
+		separatorColumn.setText("--------");
+		allColumns.add(separatorColumn); 
 	}
 
 	DoubleProperty score = new SimpleDoubleProperty(0);
 	DoubleProperty size = new SimpleDoubleProperty(0);
 	StringProperty comments = new SimpleStringProperty();
-	StringProperty history = new SimpleStringProperty();
-	StringProperty species = new SimpleStringProperty();
 	StringProperty tissue = new SimpleStringProperty();
 
-	public DoubleProperty  scoreProperty()  { return score;}
-	public Double getScore()  { return score.get();}
-	public void setScore(Double s)  { score.set(s);}
 
+	StringProperty history = new SimpleStringProperty();
 	public StringProperty  historyProperty()  { return history;}
 	public String getHistory()  { return history.get();}
 	public void setHistory(String s)  { history.set(s);}
 
+	StringProperty species = new SimpleStringProperty();
 	public StringProperty  speciesProperty()  { return species;}
 	public String getSpecies()  { return species.get();}
 	public void setSpecies(String s)  { species.set(s);}
@@ -185,25 +202,69 @@ public class GeneListRecord extends TableRecord<Gene> {
 	}
 	public void setColumnList() {
 		String header = headers.get(0);
-		int skipColumns = 4;
+		boolean separatorSeen = false;
+		int skipColumns = 0;
 		String[] fields = header.split("\t");
 		for (int i=skipColumns; i<fields.length; i++)
 		{
 			String fld = fields[i];
-			String format =  "%4.2f";
-			TableColumn<Gene, Double> column = new TableColumn<Gene, Double>(fld);
-			column.getProperties().put("Numeric", "TRUE");
-			column.getProperties().put("Format", format);
-			column.setCellValueFactory(new Callback<CellDataFeatures<Gene, Double>, ObservableValue<Double>>() {
-			     public ObservableValue<Double> call(CellDataFeatures<Gene, Double> p) {
-			         Gene gene = p.getValue();
-			         double d = gene.getValueByName(fld);
-			         return new ReadOnlyObjectWrapper(String.format(format, d));
-			     }
-			  });
-			addColumn(column, fld);  //TODO
+			if (fld.startsWith("---"))
+			{
+				makeSeparator();
+				separatorSeen = true;
+			}
+			else if (isNumeric(fld))
+				setupNumericColumn(fld);
+			else setupTextColumn(fld);
 		}
+		if (!separatorSeen) 
+			makeSeparator();
 	}
+	
+	private void setupTextColumn(String fld)
+	{
+		TableColumn<Gene, String> column = new TableColumn<Gene, String>(fld);
+		column.setUserData("T");
+		column.getProperties().put("Numeric", "FALSE");
+		column.setPrefWidth(200);
+		column.setCellValueFactory(new Callback<CellDataFeatures<Gene, String>, ObservableValue<String>>() {
+		     public ObservableValue<String> call(CellDataFeatures<Gene, String> p) {
+		         Gene gene = p.getValue();
+		         String str = gene.getValue(fld);
+		         return new ReadOnlyObjectWrapper(str);
+		     }
+		  });
+		addColumn(column, fld); 
+	}
+
+	private void setupNumericColumn(String fld)
+	{
+		String format =  "%4.2f";
+		TableColumn<Gene, Double> column = new TableColumn<Gene, Double>(fld);
+		column.setUserData("N");
+		column.getProperties().put("Numeric", "TRUE");
+		column.getProperties().put("Format", format);
+		column.setCellValueFactory(new Callback<CellDataFeatures<Gene, Double>, ObservableValue<Double>>() {
+		     public ObservableValue<Double> call(CellDataFeatures<Gene, Double> p) {
+		         Gene gene = p.getValue();
+		         double d = gene.getValueByName(fld);
+		         if (Double.isNaN(d))
+		        	 return new ReadOnlyObjectWrapper(gene.getValue(fld));
+		         return new ReadOnlyObjectWrapper(String.format(format, d));
+		     }
+		  });
+		addColumn(column, fld);  //TODO
+
+	}
+
+	private boolean isNumeric(String fld)
+	{
+		if ("logFC".equals(fld)) return true;
+		if ("P.Value".equals(fld)) return true;
+		if ("adj.P.Val".equals(fld)) return true;
+		return false;
+	}
+
 	static String TAB = "\t";
 	static String NL = "\n";
 	public static String BDB = "http://webservice.bridgedb.org/";
@@ -228,10 +289,11 @@ public class GeneListRecord extends TableRecord<Gene> {
 				String [] flds = line.split("\t");
 				String name = flds[0];
 				String allrefs = flds[2];
+				int ct = 0;
 				for (Gene g : geneList)
 				{
 					if (!g.getName().equals(name)) continue;
-					System.out.println("setting ids for " + name );	
+//					System.out.println(ct++ + ": setting ids for " + name );	
 					g.setIdlist(allrefs);
 					g.setEnsembl(BridgeDbIdMapper.getEnsembl(allrefs));
 				}

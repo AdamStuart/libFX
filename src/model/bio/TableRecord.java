@@ -13,6 +13,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.util.Callback;
+import util.StringUtil;
 
 public class TableRecord<ROWTYPE extends Map>
 {
@@ -99,6 +100,8 @@ public class TableRecord<ROWTYPE extends Map>
 //
 	int getValueIndex(String colName)
 	{
+		if (StringUtil.isEmpty(colName)) return -1;
+//		colName = colName.replace(".",  "");
 		String header = headers.get(0);
 		String[] fields = header.split("\t");
 		for (int i=0; i<fields.length; i++)
@@ -142,7 +145,7 @@ public class TableRecord<ROWTYPE extends Map>
 //			addColumn(column, fld);
 //		}
 //	}
-	private TableColumn<ROWTYPE, Object> makeNumericColumn(String fld, String format)
+	protected TableColumn<ROWTYPE, Object> makeNumericColumn(String fld, String format)
 	{
 		TableColumn<ROWTYPE, Object> column = new TableColumn<ROWTYPE, Object>(fld);
 		column.getProperties().put("Numeric", "TRUE");

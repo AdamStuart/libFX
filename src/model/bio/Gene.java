@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.control.Alert;
@@ -23,9 +25,30 @@ public class Gene extends HashMap<String, String> implements Comparable<Gene> {
 	private List<Double> values = new ArrayList<Double>();
 	public double getValue(int i)	{ return i >= 0 && i < size() ? values.get(i) : Double.NaN;	}
 
+	public Gene(GeneListRecord record, TableType type, String[] line)
+	{
+		this(record, line[0], null, "Human", "");
+		if (line.length == 10)
+		{
+			geneListRecord = (GeneListRecord) record;
+			id.set(line[0]);
+			adjPval.set(StringUtil.toDouble(line[1]));
+			pval.set(StringUtil.toDouble(line[2]));
+			foldChange.set(StringUtil.toDouble(line[3]));
+			symbol.set(line[4]);		
+			title.set(line[5]);		
+			entrez.set(line[6]);
+			goFunction.set(line[7]);
+			goProcess.set(line[8]);
+			goComponent.set(line[9]);
+		}
+		
+	}
+
 	public Gene(GeneListRecord record, TableType type, String line)
 	{
 		this(record, line.split(type.getDelimiter())[0], null, "Human", "");
+		
 	}
 	public Gene(GeneListRecord record, String inName)
 	{
@@ -52,9 +75,9 @@ public class Gene extends HashMap<String, String> implements Comparable<Gene> {
 	private SimpleStringProperty ensembl = new SimpleStringProperty("ensembl");
 	public StringProperty  ensemblProperty()  { return ensembl;}
 	public String getEnsembl()  { return ensembl.get();}
-	public void setEnsembl(String s)  { ensembl.set(s);  System.out.println(s);	}
-	public String getId()  { return ensembl.get();}
-	public void setIdl(String s)  { ensembl.set(s);}
+	public void setEnsembl(String s)  { ensembl.set(s); 	}
+//	public String getId()  { return ensembl.get();}
+//	public void setIdl(String s)  { ensembl.set(s);}
 
 	private SimpleStringProperty species = new SimpleStringProperty("species");
 	public StringProperty  speciesProperty()  { return species;}
@@ -91,6 +114,75 @@ public class Gene extends HashMap<String, String> implements Comparable<Gene> {
 	public String getChromosome()  { return chromosome.get();}
 	public void setChromosome(String s)  { chromosome.set(s);}
 
+	StringProperty symbol = new SimpleStringProperty();
+	StringProperty title = new SimpleStringProperty();
+	StringProperty id = new SimpleStringProperty();
+
+	public StringProperty symbolProperty()  { return symbol;}
+	public String getSymbol()  { return symbol.get();}
+	public void setSymbol(String s)  { symbol.set(s);}
+
+	public StringProperty  titleProperty()  { return title;}
+	public String getTitle()  { return title.get();}
+	public void setTitle(String s)  { title.set(s);}
+
+	public StringProperty  idProperty()  { return id;}
+	public String getId()  { return id.get();}
+	public void setId(String s)  { id.set(s);}
+
+
+	DoubleProperty pval = new SimpleDoubleProperty();
+	DoubleProperty adjPval = new SimpleDoubleProperty();
+	DoubleProperty foldChange = new SimpleDoubleProperty();
+	StringProperty entrez = new SimpleStringProperty();
+	StringProperty goFunction = new SimpleStringProperty();
+	StringProperty goProcess = new SimpleStringProperty();
+	StringProperty goComponent = new SimpleStringProperty();
+
+	public DoubleProperty  pvalProperty()  { return pval;}
+	public Double getPval()  { return pval.get();}
+	public void setPval(Double s)  { pval.set(s);}
+
+	public DoubleProperty  adjPvalProperty()  { return adjPval;}
+	public Double getAdjPval()  { return adjPval.get();}
+	public void setAdjPval(Double s)  { adjPval.set(s);}
+
+	public DoubleProperty  foldChangeProperty()  { return foldChange;}
+	public Double getFoldChange()  { return foldChange.get();}
+	public void setFoldChange(Double s)  { foldChange.set(s);}
+
+	public StringProperty  entrezProperty()  { return entrez;}
+	public String getEntrez()  { return entrez.get();}
+	public void setEntrez(String s)  { entrez.set(s);}
+
+	public StringProperty  goFunctionProperty()  { return goFunction;}
+	public String getGoFunction()  { return goFunction.get();}
+	public void setGoFunction(String s)  { goFunction.set(s);}
+
+	public StringProperty goProcessProperty()  { return goProcess;}
+	public String getGoProcess()  { return goProcess.get();}
+	public void setGoProcess(String s)  { goProcess.set(s);}
+
+	public StringProperty  goComponentProperty()  { return goComponent;}
+	public String getGoComponent()  { return goComponent.get();}
+	public void setGoComponent(String s)  { goComponent.set(s);}
+
+	public String getValue(String fld) 
+	{
+		if ("GO.Component".equals(fld))	return getGoComponent();
+		if ("GO.Process".equals(fld))	return getGoProcess();
+		if ("GO.Function".equals(fld))	return getGoFunction();
+		if ("EntrezGene".equals(fld))	return getEntrez();
+		if ("Gene.symbol".equals(fld))	return getSymbol();
+		if ("Gene.title".equals(fld))	return getTitle();
+		if ("ID".equals(fld))	return getId();
+		double d = getValueByName(fld) ;
+		if (Double.isNaN(d))
+			return get(fld);
+		return String.format("%5.2f", d);
+//		return"";
+	}
+	
 	private SimpleStringProperty data = new SimpleStringProperty("data");
 	public StringProperty  dataProperty()  { return data;}
 	public String getData()  { return data.get();}
@@ -114,7 +206,7 @@ public class Gene extends HashMap<String, String> implements Comparable<Gene> {
 		if (parts.length > 1)
 			readTerms(remnant);
 		description.set(remnant);
-		System.out.println(description.get());
+//		System.out.println(description.get());
 		name.set(firstWord);
 		for (int i = 8; i < tokens.length; i++)
 			values.add(StringUtil.toDouble(tokens[i]));
@@ -154,7 +246,7 @@ public class Gene extends HashMap<String, String> implements Comparable<Gene> {
 		}
 		
 		description.set(nameDesc);
-		System.out.println(description.get());
+//		System.out.println(description.get());
 		for (int i = 8; i < tokens.length; i++)
 			values.add(StringUtil.toDouble(tokens[i]));
 	}
@@ -204,7 +296,7 @@ public class Gene extends HashMap<String, String> implements Comparable<Gene> {
 	{
 		return null; 
 	}
-	public String toString() {				return getId() + ": " + getName();	}
+	public String toString() {				return getId() + ": " + getTitle() + " " + getSymbol();	}
 	public int compareTo(Gene other)
 	{
 		return getName().compareToIgnoreCase(other.getName());
@@ -212,10 +304,24 @@ public class Gene extends HashMap<String, String> implements Comparable<Gene> {
 	
 	public boolean match(String upperCaseKeyword)
 	{
-		String NAME = getName().toUpperCase();
-		if (NAME.contains(upperCaseKeyword)) return true;
-		String DATA = getData().toUpperCase();
-		if (DATA.contains(upperCaseKeyword)) return true;
+		String name = getTitle();
+		if (name != null)
+		{
+			String NAME = name.toUpperCase();
+			if (NAME.contains(upperCaseKeyword)) return true;
+		}
+		String data = getData();
+		if (data != null)
+		{
+			String DATA = data.toUpperCase();
+			if (DATA.contains(upperCaseKeyword)) return true;
+		}
+		String title = getTitle();
+		if (title != null)
+		{
+			String TITLE = title.toUpperCase();
+			if (TITLE.contains(upperCaseKeyword)) return true;
+		}
 		return false;
 	}
 	
@@ -237,8 +343,15 @@ public class Gene extends HashMap<String, String> implements Comparable<Gene> {
 
 	public double getValueByName(String fld) 
 	{
+		if ("logFC".equals(fld)) return getFoldChange();
+		if ("P.Value".equals(fld)) return getPval();
+		if ("adj.P.Val".equals(fld)) return getAdjPval();
+		
 		int index = geneListRecord.getValueIndex(fld);
 		if (index < 0) return Double.NaN;
 		return getValue(index);
+	
 	}
 }
+
+

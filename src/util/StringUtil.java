@@ -556,4 +556,10 @@ public class StringUtil
 	{
 		return s.trim().startsWith("<?xml ");
 	}
+	public static boolean anyNumbers(String[] strs)
+	{
+		for (String s : strs)
+			if (isNumber(s)) return true;
+		return false;
+	}
 }

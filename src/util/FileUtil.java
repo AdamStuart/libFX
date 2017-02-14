@@ -322,10 +322,11 @@ public class FileUtil
 			readNode(kids.item(i), buff, indent+1);
 	}
 	//--------------------------------------------------------------------------------------
+	static public String spaces = "                                   ";
 	static public String doublespaced(int indent)
 	{
-		if (indent > 12)  return "                                   ";
-		return "                                   ".substring(0, 2*indent);
+		if (indent > 12)  return spaces;
+		return spaces.substring(0, 2*indent);
 	}
 	//--------------------------------------------------------------------------------------
 	public static Document convertStringToDocument(String xmlStr) throws Exception {
@@ -427,18 +428,25 @@ static public boolean hasXMLFiles(Dragboard db)	{	return db.getFiles().stream().
 	}
 	static public List<String> readFileIntoStringList(File f)
 	{
-		return readFileIntoStringList(f.getAbsolutePath());
+		return readFileIntoStringList(f.getAbsolutePath(), 1000000);
 	}
+	
 	static public List<String> readFileIntoStringList(String absolutePath)
 	{
+		return readFileIntoStringList(absolutePath, 1000000);
+	}
+	
+	static public List<String> readFileIntoStringList(String absolutePath, int maxLines)
+	{
         BufferedReader br = null;
+        int lineCt = 0;
         List<String> strs = new ArrayList<String>();
         try {
             br = new BufferedReader(new InputStreamReader(new FileInputStream(absolutePath)));
             String line = null;
             String nl = System.getProperty("line.separator", "\n");
 
-            while((line = br.readLine()) != null)
+            while((line = br.readLine()) != null && lineCt++ < maxLines)
             	strs.add(line);
 
         } catch (Exception e) {          System.err.println("Error while reading content from selected file");      } 
