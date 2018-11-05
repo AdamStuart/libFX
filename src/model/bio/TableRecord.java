@@ -130,6 +130,7 @@ public class TableRecord<ROWTYPE extends Map>
 	public Boolean getEditable()  { return editable.get();}
 	public void setEditable(Boolean s)  { editable.set(s);}
 
+	public boolean hasHeaders()  { return headers != null && headers.size() > 0;}
 	public String getHeader(int i)  { return headers.get(i);}
 	public void addHeader(String s)  { headers.add(s);}
 

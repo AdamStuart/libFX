@@ -53,7 +53,7 @@ import javafx.scene.input.Dragboard;
 import javafx.stage.FileChooser;
 import model.AttributeValue;
 import model.dao.CSVTableData;
-import model.dao.IntegerDataRow;
+import model.dao.MixedDataRow;
 import services.SystemInfo;
 import xml.XMLTreeItem;
 
@@ -132,7 +132,7 @@ public class FileUtil
 			Node node = kids.item(i);
 			if (node == null)  continue;
 			String nodeName = node.getNodeName();
-			String text = node.getTextContent();
+//			String text = node.getTextContent();
 			if (nodeName == null || nodeName.startsWith("#"))  continue;
 		
 //			System.out.println("adding: " + nodeName);
@@ -162,7 +162,8 @@ public class FileUtil
 			findkeys(kids.item(i), list);
 	}
 	//-------------------------------------------------------------
-	//TODO ASSUMES INTS NOW -- move to CSVTableData
+	//
+	@SuppressWarnings("unchecked") @Deprecated  // use CSVTableData.readCSVFile
 	static public CSVTableData openCSVfile(String absPath, TableView<ObservableList<StringProperty>> table)
 	{
 		if (absPath == null) return null;				// || table == null
@@ -172,7 +173,7 @@ public class FileUtil
 			String[] row = null;
 			CSVReader csvReader = new CSVReader(new FileReader(absPath));
 			List<String[]> content = csvReader.readAll();
-			ObservableList<StringProperty> props = FXCollections.observableArrayList();
+//			ObservableList<StringProperty> props = FXCollections.observableArrayList();
 			csvReader.close();
 			int nCols = -1;
 			 
@@ -180,14 +181,14 @@ public class FileUtil
 			nCols = row.length;
 			System.out.println(nCols + " columns");
 			boolean isHeader = true;
-			List<IntegerDataRow> data = output.getData();
+			List<MixedDataRow> data = output.getData();
 			int idx = 0;
 			for (String fld : row)
 			{
 				StringUtil.TYPES type = StringUtil.inferType(fld);
 				isHeader &= StringUtil.isString(type) || StringUtil.isEmpty(type);  
 				output.getColumnNames().add(fld);
-				data.add(new IntegerDataRow(nCols));
+				data.add(new MixedDataRow(nCols));
 				System.out.println("Column Name: " + fld);
 			    if (table != null) table.getColumns().add(TableUtil.createColumn(idx++, fld));
 			}
@@ -294,7 +295,10 @@ public class FileUtil
 						fileOutputStream.flush();
 						fileOutputStream.close();
 						entryList.append(unzippedFile + "\n");
-					} catch (Exception ex)	{	ex.printStackTrace();		}// TODO FileNotFoundExceptions seen here
+					} catch (Exception ex)	
+					{	
+						ex.printStackTrace();		//  FileNotFoundExceptions seen here
+					}
 					
 				}
 				zipInputStream.close();
@@ -444,7 +448,7 @@ static public boolean hasXMLFiles(Dragboard db)	{	return db.getFiles().stream().
         try {
             br = new BufferedReader(new InputStreamReader(new FileInputStream(absolutePath)));
             String line = null;
-            String nl = System.getProperty("line.separator", "\n");
+//            String nl = System.getProperty("line.separator", "\n");
 
             while((line = br.readLine()) != null && lineCt++ < maxLines)
             	strs.add(line);

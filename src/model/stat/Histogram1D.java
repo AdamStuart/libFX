@@ -95,7 +95,7 @@ public class Histogram1D
 	}
 //	int counter = 0;
 	// ----------------------------------------------------------------------------------------------------
-	int GUTTER_WIDTH = 5;
+	int GUTTER_WIDTH = 0;
 	
 	public void count(double[] vals)
 	{
@@ -124,7 +124,7 @@ public class Histogram1D
 	{
 		double binWidth = range.width() / size;
 		if (isLog)
-			return Math.log(range.min + bin  * binWidth) - 5;   // TODO Transform fn subtracts 5 log  -- asymmetric!!!
+			return Math.log(range.min + bin  * binWidth);  
 
 		return range.min + (bin  * binWidth);
 	}
@@ -289,7 +289,7 @@ public class Histogram1D
 			for (int i = 0; i < size; i++)
 			{
 				double x = range.min + (i * scale);			//valToBin(i);  //   
-				x =  (x > 0) ? (Math.log(x) - 5) : 0;		// resolve this with valtobin
+//				x =  (x > 0) ? Math.log(x) : 0;		// resolve this with valtobin
 
 				double y = smoothed[i] / area + yOffset;
 				series.getData().add(new XYChart.Data<Number, Number>(x,y));

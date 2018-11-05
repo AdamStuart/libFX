@@ -4,10 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,31 +20,26 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
-import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
-import model.chart.LogHistogram2D;
 import model.chart.OverlaidLineChart;
 import model.chart.OverlaidScatterChart;
 import model.stat.GraphRequest;
 import model.stat.Histogram1D;
-import model.stat.Peak;
 import model.stat.Range;
-import util.FileUtil;
 import util.StringUtil;
 
 public class CSVTableData
 {
 	private String name;
 	private List<StringUtil.TYPES> types;
-	private List<String> columnNames;
-	private List<IntegerDataRow> rows;
+	private List< String> columnNames;
+	private List<MixedDataRow> rows;
 	private List<Range> ranges;
 	private Map<String, Histogram1D> histograms;
 	private Map<String, Map<String, Histogram1D>> gatedHistogramMap;
@@ -62,7 +55,7 @@ public class CSVTableData
 		name = id;
 		types = new ArrayList<StringUtil.TYPES>();
 		columnNames = FXCollections.observableArrayList();
-		rows = new ArrayList<IntegerDataRow>();
+		rows = new ArrayList<MixedDataRow>();
 		ranges = new ArrayList<Range>();
 		histograms = new HashMap<String,Histogram1D>();
 //		histogram2Ds = new ArrayList<Histogram2D>();
@@ -72,29 +65,39 @@ public class CSVTableData
 	}
 	//--------------------------------------------------------------------------------
 	static final String TAB = "\t";
-	static public  CSVTableData readZKWfile(Path p)
+	static final String COMMA = ",";
+	static public  CSVTableData readCSVfile(String path)
 	{
-		CSVTableData tableData = new CSVTableData(p.toString());
+		CSVTableData tableData = new CSVTableData(path);
 		
 		int lineCt = 0;
 		try
 		{
-			FileInputStream fis = new FileInputStream(p.toFile());
+			FileInputStream fis = new FileInputStream(new File(path));
 			BufferedReader br = new BufferedReader(new InputStreamReader(fis));
 			String line = null;
 			
 			line = br.readLine();		// first line is text labels, but not in columns
-			String[] columns = line.split(TAB); 
-			tableData.setColumnNames(Arrays.asList(line.split(TAB)));
+			String[] columns = line.split(COMMA); 
+			String[] strs = line.split(COMMA);
+			for (int i=0; i<strs.length; i++)
+				strs[i] = StringUtil.stripQuotes(strs[i]);
+			tableData.setColumnNames(Arrays.asList(strs));
+	
 			int len = columns.length;
 			line = br.readLine();
 
 			while (line != null) {
-				String[] row = line.split(TAB);  
-				if (row.length != len)	throw new IllegalArgumentException();		// there must be the same number of tabs in every row
-				IntegerDataRow dataRow = new IntegerDataRow(row.length); 
+				String[] row = line.split(COMMA);  
+				if (row.length != len)	throw new IllegalArgumentException();		// there must be the same number of fields in every row
+				MixedDataRow dataRow = new MixedDataRow(row.length); 
 				for (int i = 0; i< row.length; i++)
-					dataRow.set(i, StringUtil.readClosestInt(row[i]));
+				{
+					String txt = StringUtil.stripQuotes(row[i]);
+					dataRow.set(i, txt);
+					if (StringUtil.isNumber(txt))
+						dataRow.set(i, StringUtil.toDouble(txt));
+				}
 				tableData.getData().add(dataRow);
 				line = br.readLine();
 				lineCt++;
@@ -109,7 +112,7 @@ public class CSVTableData
 		System.out.println( lineCt + " lines");
 		
 		tableData.calculateRanges();
-//		tableData.generateHistograms();				just building a unit file here.  Segment.java has the full code 
+		tableData.generateHistograms();			////	just building a unit file here.  Segment.java has the full code 
 //		tableData.calculateStats();
 		System.out.println(tableData.getName() + " has row count: " + tableData.getCount());
 		return tableData;
@@ -137,18 +140,19 @@ public class CSVTableData
 				return i;
 		return -1;
 	}
-	private int getIndex(String name)			{ return columnNames.indexOf(name); }
+	private String getIndex(int i)			{ return columnNames.get(i); }
 	private int gateIndex(String name)			{ return name == null ? null : gateNames.get(name); }
 	public  String getName() 					{ return name; }
 	public  List<StringUtil.TYPES> getTypes() 	{ return types; }
-	public  List<Range> getRanges() 			{ return ranges; }
+	public  List<Range> getRanges() 				{ return ranges; }
 	public  Map<String,Image> getImages() 		{ return images; }
 	public  Range getRange(int i) 				{ return ranges.get(i); }
 	public  Map<String,Histogram1D> getHistograms() 	{ return histograms; }
-	public  Histogram1D getHistogram(int i) 
+	public  Histogram1D getHistogram(String name) 
 	{ 
-		if (histograms.isEmpty()) generateHistograms(); 
-		return histograms.get(i); 
+		if (histograms.isEmpty()) 
+			generateHistograms(); 
+		return histograms.get(name); 
 	}
 	
 	public  Map<String,Histogram1D> getGatedHistograms(String popname) 	
@@ -158,13 +162,13 @@ public class CSVTableData
 	public  List<String> getColumnNames() 	{ 	return columnNames; }
 	public 	int getCount()					{ 	return rows.size();	}
 	public 	int getWidth()					{	return (rows.size() == 0) ? 0 : rows.get(0).getWidth();	}
-	public  List<IntegerDataRow> getData() 	{ 	return rows; }
-	public  IntegerDataRow getDataRow(int i) { 	return rows.get(i); }
+	public  List<MixedDataRow> getData() 	{ 	return rows; }
+	public  MixedDataRow getDataRow(int i) { 	return rows.get(i); }
 
 	public  void  setTypes(List<StringUtil.TYPES> t) { types = t; }
-	public  void  setColumnNames(List<String> c) { columnNames = c; }
+	public  void  setColumnNames(List<String> c) { for (String s : c) columnNames.add(s); }
 	public  void  addColumnName(String n) 		{ columnNames.add(n); }
-	public  void  setData(List<IntegerDataRow> d) {  rows = d; }
+	public  void  setData(List<MixedDataRow> d) {  rows = d; }
 	
 
 //	public  List<OverlaidScatterChart> getScatters() 
@@ -178,25 +182,24 @@ public class CSVTableData
 	public void calculateRanges()
 	{
 		if (!ranges.isEmpty())	return;
-		int nRows = rows.size() - 2;			// skip the last row, as it's all 0
+		int nRows = rows.size() - 1;	
 		if (nRows <= 0) return ;
-//		IntegerDataRow row0 = rows.get(0);
 		int nCols = getWidth();
 	
-		int[] mins = new int[nCols];
-		int[] maxs = new int[nCols];
+		double[] mins = new double[nCols];
+		double[] maxs = new double[nCols];
 		for (int i=0;i<nCols;i++)
 		{
-			mins[i] = Integer.MAX_VALUE;
-			maxs[i] = Integer.MIN_VALUE;
+			mins[i] = Double.MAX_VALUE;
+			maxs[i] = Double.MIN_VALUE;
 		}
 		for (int row=0; row < nRows; row++)		// scan for ranges of all columns
 		{
-			IntegerDataRow aRow = rows.get(row);
+			MixedDataRow aRow = rows.get(row);
 			for (int i=0;i<nCols;i++)
 			{
-				Integer s = aRow.get(i).get();
-				if (s <= 0) continue;	// ONLY POSITIVE NUMBERS ALLOWED
+				Double s = aRow.get(i).get();
+//				if (s <= 0) continue;	// ONLY POSITIVE NUMBERS ALLOWED
 //				{
 //					System.out.println("STOP");
 //					break;
@@ -208,8 +211,9 @@ public class CSVTableData
 		
 		for (int i=0;i<nCols;i++)
 		{
-			int min = Math.max(10,  mins[i]);
-			ranges.add(new Range(min, maxs[i]));
+			Range r = mins[i] <  maxs[i] ? new Range(mins[i], maxs[i]) : null;
+			ranges.add(r);
+			System.out.println("Range for " + columnNames.get(i) + " is " + r.toString());
 		}
 	}
 	//--------------------------------------------------------------------------------
@@ -217,24 +221,24 @@ public class CSVTableData
 	{
 		if (!histograms.isEmpty())	return;
 		
-		int nRows = rows.size() - 2;			// skip the last row of the file, as it's all 0
+		int nRows = rows.size() - 1;	
 		if (nRows <= 0) return ;
 //		IntegerDataRow row0 = rows.get(0);
 		int nCols = columnNames.size();
-		for (int i=5;i<nCols; i++)
-//		for (int i=0;i<nCols; i++)
+		Histogram1D hist = null;
+		for (int i=0;i<nCols; i++)
 		{
-			Histogram1D hist = null;		// put null in the first five slots
-//			if (i >= 5) 		// first five columns are position and size,		skip them
-//			{
-				hist = new Histogram1D(columnNames.get(i) , ranges.get(i-5));
-				for (int row=0; row<nRows; row++)		// first pass to calculate tails
+			Range r = ranges.get(i);
+			if (r != null)
+			{	
+				hist = new Histogram1D(columnNames.get(i) , ranges.get(i));
+				for (int row=0; row<nRows; row++)	
 				{
-					IntegerDataRow aRow = rows.get(row);
-					Integer s = aRow.get(i).get();
-					hist.count(s);			// we ignore the bottom 5 bins here!!		<<================
+					MixedDataRow aRow = rows.get(row);
+					Double s = aRow.get(i).get();
+					hist.count(s);
 				}
-//			}
+			}
 			if (hist != null)
 			{	
 				histograms.put(hist.getName(), hist);
@@ -250,15 +254,15 @@ public class CSVTableData
 		if (index >= 0)
 		{
 //			IntegerDataRow row0 = rows.get(0);
-			for (int i=5;i<columnNames.size(); i++)
+			for (int i=3;i<columnNames.size(); i++)
 			{
 				Histogram1D hist = new Histogram1D(columnNames.get(i) , ranges.get(i));
-				for (IntegerDataRow aRow : rows)		
+				for (MixedDataRow aRow : rows)		
 				{
-					Integer gate = aRow.get(index).get();
+					Double gate = aRow.get(index).get();
 					if (gate == 1)
 					{
-						Integer val = aRow.get(i).get();
+						Double val = aRow.get(i).get();
 						hist.count(val);	
 					}
 				}
@@ -292,9 +296,9 @@ public class CSVTableData
 		{
 			int xIdx = indexOf(xDim);
 			int yIdx = indexOf(yDim);
-			for (IntegerDataRow aRow : rows)		
+			for (MixedDataRow aRow : rows)		
 			{
-				Integer gate = aRow.get(index).get();
+				Double gate = aRow.get(index).get();
 				if (gate == 1)
 				{
 					Point2D pt = new Point2D(aRow.get(xIdx).doubleValue(), aRow.get(yIdx).doubleValue());
@@ -308,27 +312,27 @@ public class CSVTableData
 
 	//--------------------------------------------------------------------------------
 	//move to app specific subclass 
-	
-	public void generateScatters(VBox container)
-	{
-		images.put("CD3/CD4", getImage( "CD3", "CD4"));
-		images.put("CD3/CD19", getImage( "CD3", "CD19"));
-		images.put("CD25/CD38", getImage( "CD25", "CD38"));
-		images.put("CD39/CD38", getImage( "CD39", "CD38"));
-		images.put("CD25/CD27", getImage("CD25", "CD27"));
-		images.put("CD4/CD161", getImage("CD4", "CD161"));
-
-		for (String label : images.keySet())
-		{
-			Image img = getImages().get(label);
-			ImageView view = new ImageView(img);
-			view.setFitWidth(200);
-			view.setFitHeight(200);
-			view.setScaleY(-1);
-			container.getChildren().add(view);
-			container.getChildren().add(new Label(label));
-		}
-}
+//	
+//	public void generateScatters(VBox container)
+//	{
+//		images.put("CD3/CD4", getImage( "CD3", "CD4"));
+//		images.put("CD3/CD19", getImage( "CD3", "CD19"));
+//		images.put("CD25/CD38", getImage( "CD25", "CD38"));
+//		images.put("CD39/CD38", getImage( "CD39", "CD38"));
+//		images.put("CD25/CD27", getImage("CD25", "CD27"));
+//		images.put("CD4/CD161", getImage("CD4", "CD161"));
+//
+//		for (String label : images.keySet())
+//		{
+//			Image img = getImages().get(label);
+//			ImageView view = new ImageView(img);
+//			view.setFitWidth(200);
+//			view.setFitHeight(200);
+//			view.setScaleY(-1);
+//			container.getChildren().add(view);
+//			container.getChildren().add(new Label(label));
+//		}
+//}
 	//--------------------------------------------------------------------------------
 	public OverlaidScatterChart<Number, Number> getGatedScatterChart(GraphRequest req)
 	{
@@ -373,169 +377,170 @@ public class CSVTableData
 //		images.add(img);
 //	
 	}
-	private Image getImage(String xName, String yName)
-	{
-		int xIdx = getIndexByStart(xName);
-		int yIdx = getIndexByStart(yName);
-		if (xIdx < 0 || yIdx < 0)
-			return null;		// error;
-		Range xRange = ranges.get(xIdx);
-		Range yRange = ranges.get(yIdx);
-		
-		LogHistogram2D histo2D = new LogHistogram2D(100, xRange, yRange);
-		for (IntegerDataRow row : rows)
-		{
-			int x = row.get(xIdx).get();
-			int y = row.get(yIdx).get();
-			if (insideGates(xIdx, x, yIdx, y))		// stub
-				histo2D.count(x, y);
-		}
-		Image img = histo2D.asImage();
-		return img;
-	}
-	
-	//--------------------------------------------------------------------------------
-	private boolean insideGates(int xIdx, int x, int yIdx, int y)
-	{
-		return (x > 0 && y > 0);		// TODO
-	}
+//	private Image getImage(String xName, String yName)
+//	{
+//		int xIdx = getIndexByStart(xName);
+//		int yIdx = getIndexByStart(yName);
+//		if (xIdx < 0 || yIdx < 0)
+//			return null;		// error;
+//		Range xRange = ranges.get(xIdx);
+//		Range yRange = ranges.get(yIdx);
+//		
+//		LogHistogram2D histo2D = new LogHistogram2D(100, xRange, yRange);
+//		for (MixedDataRow row : rows)
+//		{
+//			double x = row.get(xIdx).get();
+//			double y = row.get(yIdx).get();
+//			if (insideGates(xIdx, x, yIdx, y))		// stub
+//				histo2D.count(x, y);
+//		}
+//		Image img = histo2D.asImage();
+//		return img;
+//	}
+//	
+//	//--------------------------------------------------------------------------------
+//	private boolean insideGates(int xIdx, double x, int yIdx, double y)
+//	{
+//		return (x > 0 && y > 0);		// TODO
+//	}
 	int xIndex = 0;
 	int yIndex = 1; 
 	int nDimensions = 8;
 	
 	int indexOf(String s)
 	{
+		if (s == null) return -1;
 		for (int i=0; i< columnNames.size(); i++)
 			if (s.equals(columnNames.get(i)))	return i;
 		return -1;
 	}
 	
-	int findColumnName(String s)
-	{
-		for (int i=0; i<columnNames.size(); i++)
-		{ 
-			String name = columnNames.get(i);
-			if (name.equals(s))return i;
-		}
-		return -1;
-		
-	}
+//	int findColumnName(String s)
+//	{
+//		for (int i=0; i<columnNames.size(); i++)
+//		{ 
+//			String name = columnNames.get(i);
+//			if (name.equals(s))return i;
+//		}
+//		return -1;
+//		
+//	}
 	boolean inRange(double x, double a, double b)	{ return x >= a && x < b;	}
 	
-	public void makeUnitFile(Path f)
-	{
-		if (FileUtil.isCSV(f))
-		{
-			String fName = f.toString().replace(".csv", ".unit");
-			File unitFile = new File(fName);
-			if (unitFile.exists()) unitFile.delete();
-			
-			try
-			{
-				FileOutputStream fileOutputStream = new FileOutputStream(unitFile);
-				for (IntegerDataRow row : rows)		
-				{
-					for (int i=0;i<nColumns();i++)
-					{
-						double d = transform(i, row.get(i).get());
-						byte[] bytes = convertDoubleToBytes(d);
-						fileOutputStream.write(bytes);
-					}
-				}
-				fileOutputStream.flush();
-				fileOutputStream.close();
-			}
-			catch (Exception e) {	e.printStackTrace();	}
-		}
-	}
+//	public void makeUnitFile(Path f)
+//	{
+//		if (FileUtil.isCSV(f))
+//		{
+//			String fName = f.toString().replace(".csv", ".unit");
+//			File unitFile = new File(fName);
+//			if (unitFile.exists()) unitFile.delete();
+//			
+//			try
+//			{
+//				FileOutputStream fileOutputStream = new FileOutputStream(unitFile);
+//				for (MixedDataRow row : rows)		
+//				{
+//					for (int i=0;i<nColumns();i++)
+//					{
+//						double d = transform(i, row.get(i).get());
+//						byte[] bytes = convertDoubleToBytes(d);
+//						fileOutputStream.write(bytes);
+//					}
+//				}
+//				fileOutputStream.flush();
+//				fileOutputStream.close();
+//			}
+//			catch (Exception e) {	e.printStackTrace();	}
+//		}
+//	}
 
-	private byte[] convertDoubleToBytes(double d)
-	{
-		byte[] output = new byte[8];
-		long lng = Double.doubleToLongBits(d);
-		for(int i = 0; i < 8; i++) 
-			output[i] = (byte)((lng >> ((7 - i) * 8)) & 0xff);		
-		return output;
-	}
+//	private byte[] convertDoubleToBytes(double d)
+//	{
+//		byte[] output = new byte[8];
+//		long lng = Double.doubleToLongBits(d);
+//		for(int i = 0; i < 8; i++) 
+//			output[i] = (byte)((lng >> ((7 - i) * 8)) & 0xff);		
+//		return output;
+//	}
 
-	double transform(int colIndex, int value)
-	{
-		return Math.log(value) - 4;
-	}
+//	double transform(int colIndex, double value)
+//	{
+//		return Math.log(value) - 4;
+//	}
 	//--------------------------------------------------------------------------------
-	public int addPColumn(String parent, String pop)	{		return addPColumn(parent, pop, pop);	}
-	
-	public int addPColumn(String parent, String pop, String name)
-	{
-		Map<String, Histogram1D> dataset = getGatedHistograms(parent);
-		if (dataset == null) return -1;
-//for (String key : dataset.keySet())
-//	System.out.println("Area in " + key + ": " + dataset.get(key).getArea());
-		
-		boolean positivePop = pop.endsWith("+");
-		boolean negativePop = pop.endsWith("-");
-		if (positivePop == negativePop) return -1;
-		if (StringUtil.isEmpty(name))	 name = pop;
-		String dim = StringUtil.chopLast(pop);
-		Histogram1D histo = dataset.get(dim);
-		if (histo == null)  return -1;
-		List<Peak> peaks = histo.getPeaks();
-		int parentIdx = ("All".equals(parent) || "^".equals(parent)) ? -1 : gateNames.get(parent);
-		if (peaks.size() == 1)
-		{
-			if (negativePop) addPColumnPeakIndex(name, parentIdx, histo, 0);
-			if (positivePop) addPColumnAbove(name, parentIdx, histo, peaks.get(0).getMax());
-		}
-		if (peaks.size() >= 2)
-		{
-			if (negativePop) addPColumnPeakIndex(name, parentIdx, histo, 0);
-			if (positivePop) addPColumnPeakIndex(name, parentIdx, histo, peaks.size()-1);
-		}
-	
-		return -1;
-	}
-
-	//--------------------------------------------------------------------------------
-	public void addPColumnPeakIndex(String id, int parentIdx, Histogram1D histogram, int peakNum)
-	{
-		Peak peak = histogram.getPeaks().get(peakNum);
-		double minVal = peak.getMin();
-		double maxVal = peak.getMax();
-		int index = indexOf(histogram.getName());
-		int ct = 0;
-		for (IntegerDataRow row : rows)
-		{
-			int x = histogram.valToBin(row.get(index).get());
-			int parentVal = parentIdx < 0 ? 1 : row.get(parentIdx).get();
-			int val = parentVal == 0 ? 0 : (inRange(x, minVal, maxVal) ? 1 : 0);
-			if (val == 1) ct++;
-			row.addPColumn(val);
-		}
-		gateNames.put(id, rows.get(0).getWidth()-1);
-		generateGatedHistograms(id);
-		System.out.println(ct + " events were in gate " + id);
-//		Thread th = new Thread(() -> Platform.runLater(() -> { addColumnName(id);  }) );  
-//		columnNames.add(id);
-	}
+//	public int addPColumn(String parent, String pop)	{		return addPColumn(parent, pop, pop);	}
+//	
+//	public int addPColumn(String parent, String pop, String name)
+//	{
+//		Map<String, Histogram1D> dataset = getGatedHistograms(parent);
+//		if (dataset == null) return -1;
+////for (String key : dataset.keySet())
+////	System.out.println("Area in " + key + ": " + dataset.get(key).getArea());
+//		
+//		boolean positivePop = pop.endsWith("+");
+//		boolean negativePop = pop.endsWith("-");
+//		if (positivePop == negativePop) return -1;
+//		if (StringUtil.isEmpty(name))	 name = pop;
+//		String dim = StringUtil.chopLast(pop);
+//		Histogram1D histo = dataset.get(dim);
+//		if (histo == null)  return -1;
+//		List<Peak> peaks = histo.getPeaks();
+//		int parentIdx = ("All".equals(parent) || "^".equals(parent)) ? -1 : gateNames.get(parent);
+//		if (peaks.size() == 1)
+//		{
+//			if (negativePop) addPColumnPeakIndex(name, parentIdx, histo, 0);
+//			if (positivePop) addPColumnAbove(name, parentIdx, histo, peaks.get(0).getMax());
+//		}
+//		if (peaks.size() >= 2)
+//		{
+//			if (negativePop) addPColumnPeakIndex(name, parentIdx, histo, 0);
+//			if (positivePop) addPColumnPeakIndex(name, parentIdx, histo, peaks.size()-1);
+//		}
+//	
+//		return -1;
+//	}
 
 	//--------------------------------------------------------------------------------
-	public void addPColumnAbove(String id, int parentIdx, Histogram1D histogram, double floor)
-	{
-		double minVal = floor;
-		int index = indexOf(histogram.getName());
-		int ct = 0;
-		for (IntegerDataRow row : rows)
-		{
-			int x = histogram.valToBin(row.get(index).get());
-			int parentVal = parentIdx < 0 ? 1 : row.get(parentIdx).get();
-			int val= (parentVal == 0) ? 0 : ((x >= minVal) ? 1 : 0);
-			if (val == 1) ct++;
-			row.addPColumn(val);
-		}
-		gateNames.put(id, rows.get(0).getWidth()-1);
-		generateGatedHistograms(id);
-		System.out.println(ct + " events were in gate " + id);
-	}
+//	public void addPColumnPeakIndex(String id, int parentIdx, Histogram1D histogram, int peakNum)
+//	{
+//		Peak peak = histogram.getPeaks().get(peakNum);
+//		double minVal = peak.getMin();
+//		double maxVal = peak.getMax();
+//		int index = indexOf(histogram.getName());
+//		int ct = 0;
+//		for (DoubleDataRow row : rows)
+//		{
+//			int x = histogram.valToBin(row.get(index).get());
+//			double parentVal = parentIdx < 0 ? 1 : row.get(parentIdx).get();
+//			int val = parentVal == 0 ? 0 : (inRange(x, minVal, maxVal) ? 1 : 0);
+//			if (val == 1) ct++;
+//			row.addPColumn("", "" + val);
+//		}
+//		gateNames.put(id, rows.get(0).getWidth()-1);
+//		generateGatedHistograms(id);
+//		System.out.println(ct + " events were in gate " + id);
+////		Thread th = new Thread(() -> Platform.runLater(() -> { addColumnName(id);  }) );  
+////		columnNames.add(id);
+//	}
+
+	//--------------------------------------------------------------------------------
+//	public void addPColumnAbove(String id, int parentIdx, Histogram1D histogram, double floor)
+//	{
+//		double minVal = floor;
+//		int index = indexOf(histogram.getName());
+//		int ct = 0;
+//		for (DoubleDataRow row : rows)
+//		{
+//			int x = histogram.valToBin(row.get(index).get());
+//			double parentVal = parentIdx < 0 ? 1 : row.get(parentIdx).get();
+//			int val= (parentVal == 0) ? 0 : ((x >= minVal) ? 1 : 0);
+//			if (val == 1) ct++;
+//			row.addPColumn(val);
+//		}
+//		gateNames.put(id, rows.get(0).getWidth()-1);
+//		generateGatedHistograms(id);
+//		System.out.println(ct + " events were in gate " + id);
+//	}
 
 	//--------------------------------------------------------------------------------
 	// done implicitly by sending parent to addPColumn calls above
@@ -611,17 +616,17 @@ public class CSVTableData
 
 
 	//--------------------------------------------------------------------------------
-	public void populateCSVTable(TableView<IntegerDataRow> csvtable)
+	public void populateCSVTable(TableView<MixedDataRow> csvtable)
 	{
 		csvtable.getColumns().clear();
-		TableColumn<IntegerDataRow, Integer> rowNumColumn = new TableColumn<>("#");  
-        rowNumColumn.setCellValueFactory(cellData -> cellData.getValue().getRowNum().asObject());
+		TableColumn<MixedDataRow, Integer> rowNumColumn = new TableColumn<>("#");  
+//        rowNumColumn.setCellValueFactory(cellData -> new Integer(cellData.getValue().getRowNum()));
 		csvtable.getColumns().add(rowNumColumn);
-		for (int i=0;i<getColumnNames().size();i++)
+		int idx = 0;
+		for (String name : getColumnNames())
 		{
-            String name = getColumnNames().get(i);
-            TableColumn<IntegerDataRow, Integer> newColumn = new TableColumn<>(name);  
-            final int j = i;
+            TableColumn<MixedDataRow, Double> newColumn = new TableColumn<>(name);  
+            final int j = idx++;
             newColumn.setCellValueFactory(cellData -> cellData.getValue().get(j).asObject());
 			csvtable.getColumns().add(newColumn);
 		}
@@ -631,11 +636,11 @@ public class CSVTableData
 		int nRows = getData().size();  
 		for (int row=0; row<nRows; row++)
 		{
-			IntegerDataRow newRow = new IntegerDataRow(nCols);
+			MixedDataRow newRow = new MixedDataRow(nCols);
 			newRow.setRowNum(row);
 			for (int i=1;i<nCols;i++)
 			{
-				Integer k = getDataRow(row).get(i-1).get();
+				Double k = getDataRow(row).get(i-1).get();
 				newRow.set(i-1, k);
 			}
 			csvtable.getItems().add(newRow);
@@ -702,8 +707,8 @@ public class CSVTableData
 		chart.getData().add( parentHisto.getDataSeries(parent, 0, parentHisto.getArea()));	
 		chart.getData().add( childHisto.getDataSeries(child, 0, parentHisto.getArea()));		// scale child to parent area -- not working!!
 		chart.setLegendVisible(false);
-		chart.getXAxis().setTickLabelsVisible(false);		// use CSS
-		chart.getYAxis().setTickLabelsVisible(false);
+		chart.getXAxis().setTickLabelsVisible(true);		// use CSS
+		chart.getYAxis().setTickLabelsVisible(true);
 //		chart.setPrefHeight(100);
 		VBox.setVgrow(chart, Priority.ALWAYS);
 		chart.setId(parent + "/" + child);
@@ -729,11 +734,7 @@ public class CSVTableData
 		}
 	}
 	//--------------------------------------------------------------------------------
-	// DEAD CODE
-	public OverlaidScatterChart<Number, Number> generateScatter(GraphRequest req)
-	{
-		return generateScatter(req.getX(), req.getY());
-	}
+
 	public OverlaidScatterChart<Number, Number> generateScatter(String xParm, String yParm)
 	{
 		final NumberAxis xAxis = new NumberAxis();
@@ -753,7 +754,7 @@ public class CSVTableData
 //			else				nextYParm(scatter);
 //		});
 //
-		scatter.setTitle("Ten Bin Gutter");
+		scatter.setTitle("Scatter Plot");
 		Node chartPlotArea = scatter.lookup(".chart-plot-background");
 		if (chartPlotArea != null)
 		{

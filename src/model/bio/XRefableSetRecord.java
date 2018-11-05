@@ -33,32 +33,62 @@ import services.bridgedb.MappingSource;
 import util.FileUtil;
 import util.StringUtil;
 
-public class GeneListRecord extends TableRecord<Gene> {
+public class XRefableSetRecord extends TableRecord<XRefable> {
 	
-	public GeneListRecord(String n)
+	public XRefableSetRecord(String n, List<TableColumn<XRefable, String>> cols)
+	{
+		this(n);
+		allColumns.addAll(cols);
+	}
+	public XRefableSetRecord(String n)
 	{
 		super(n);
-		geneList = new ArrayList<Gene>();
+		xrefSet = new ArrayList<XRefable>();
 	}
-	
-	public GeneListRecord(File f)
-	{
-		this(f.getName());
-		
-		List<String> strs = FileUtil.readFileIntoStringList(f);
-		int sz = strs.size();
-		String DELIM = "\t";
-		String firstRow = strs.get(0);
-		int nCols = firstRow.split(DELIM).length;
-		for (int i = 1; i< sz; i++)
-		{
-			String row = strs.get(i);
-			String[] tokens = row.split(DELIM);
-			geneList.add(new Gene(this, tokens[0]));
-		}
-	}
-	
-	public GeneListRecord(GeneListRecord parent)
+//	
+//	public XRefableSetRecord(File f)
+//	{
+//		this(f.getName());
+//		
+//		List<String> lines = FileUtil.readFileIntoStringList(f);
+//		int sz = lines.size();
+//		String DELIM = "\t";
+//		String firstRow = lines.get(0);
+//		if (firstRow.startsWith("[GeneSet]"))
+//		{
+//			TableColumn<Gene, String> primary = new TableColumn<Gene, String>("Name");
+//			getAllColumns().add(primary);
+//			int size = lines.size();
+//			int parserState = 0;
+//			for (int i=0; i<size; i++)	// iterator.next()	
+//			{
+//				String line = lines.get(i).trim();
+//				if (StringUtil.isEmpty(line)) continue;
+//				if (line.startsWith("[")) 
+//				{
+//					if (line.startsWith("[GeneSet]"))	parserState = 1;
+////					if (line.startsWith("[Columns"))	addColumns(line);	
+//					if (line.startsWith("[Genes]"))		parserState = 2;
+//					continue;
+//				}
+//				if (parserState == 1) addHeader(line);
+//				else if (parserState == 2) addGene(line);
+//				else System.err.println("bad parser state: " + line);
+//			}
+//
+//		}
+//		else
+//		{
+//			int nCols = firstRow.split(DELIM).length;
+//			for (int i = 1; i< sz; i++)
+//			{
+//				String row = lines.get(i);
+//				String[] tokens = row.split(DELIM);
+//				geneSet.add(new Gene(this, tokens[0], ""));
+//			}
+//		}
+//	}
+	public XRefableSetRecord(XRefableSetRecord parent)
 	{
 		this("Subset of " + parent.getName());
 		type.set(parent.getType());
@@ -67,16 +97,16 @@ public class GeneListRecord extends TableRecord<Gene> {
 		copyColumns(parent);
 	}
 
-	private void copyColumns(GeneListRecord parent)
+	private void copyColumns(XRefableSetRecord parent)
 	{
-		List<TableColumn<Gene, ?>> parentColumns = parent.getAllColumns();
+		List<TableColumn<XRefable, ?>> parentColumns = parent.getAllColumns();
 		boolean separatorSeen = false;
-		for (TableColumn<Gene, ?> col : parentColumns)
+		for (TableColumn<XRefable, ?> col : parentColumns)
 		{
 			String text = col.getText();
 			if (text.startsWith("---") )  separatorSeen = true;
 			
-			TableColumn<Gene, ?> newColumn = new TableColumn(col.getText());
+			TableColumn<XRefable, ?> newColumn = new TableColumn(col.getText());
 			newColumn.setEditable(col.isEditable());
 			newColumn.setVisible(col.isVisible());
 			newColumn.setMinWidth(col.getMinWidth());
@@ -95,7 +125,7 @@ public class GeneListRecord extends TableRecord<Gene> {
 	}
 	private void makeSeparator()
 	{
-		TableColumn<Gene, String> separatorColumn = new TableColumn<Gene, String>();
+		TableColumn<XRefable, String> separatorColumn = new TableColumn<XRefable, String>();
 		separatorColumn.setPrefWidth(0);  
 		separatorColumn.setVisible(false);  
 		separatorColumn.setMaxWidth(0);  
@@ -107,8 +137,10 @@ public class GeneListRecord extends TableRecord<Gene> {
 	DoubleProperty size = new SimpleDoubleProperty(0);
 	StringProperty comments = new SimpleStringProperty();
 	StringProperty tissue = new SimpleStringProperty();
-
-
+	boolean windowState = false;
+	public void setWindowState(boolean b)	{ windowState =b; }
+	public boolean getWindowState()	{ return windowState; }
+	
 	StringProperty history = new SimpleStringProperty();
 	public StringProperty  historyProperty()  { return history;}
 	public String getHistory()  { return history.get();}
@@ -119,9 +151,10 @@ public class GeneListRecord extends TableRecord<Gene> {
 	public String getSpecies()  { return species.get();}
 	public void setSpecies(String s)  { species.set(s);}
 
-	private List<Gene> geneList ;		// observableList created in Doc.readCDT or GPML.readGeneList
-	public void setGeneList(List<Gene> g) {  geneList = g; 	}
-	public List<Gene>  getGeneList() {	return geneList; }
+	private List<XRefable> xrefSet ;		// observableList created in Doc.readCDT or GPML.readXRefableList
+
+	public void setXRefableSet(List<XRefable> g) {  xrefSet = g; 	}
+	public List<XRefable>  getXRefableSet() {	return xrefSet; }
 
 	Map<String, DimensionRecord> dimensions = new HashMap<String, DimensionRecord>();
 	public VBox buildHypercube(List<String> headers)
@@ -136,8 +169,8 @@ public class GeneListRecord extends TableRecord<Gene> {
 				int index = getValueIndex(title);
 				if (index < 0) continue;
 				List<Double> vals = new ArrayList<Double>();
-				for (Gene g : getGeneList())
-					vals.add(new Double(g.getValue(index-8)));		// TODO
+				for (XRefable g : getXRefableSet())
+					vals.add(new Double(g.getValue()));		// TODO
 				DimensionRecord rec = new DimensionRecord(title, vals);
 				dimensions.put(title, rec);
 				rec.build1DChart();
@@ -180,7 +213,7 @@ public class GeneListRecord extends TableRecord<Gene> {
 		scatter.setTitle(xRec.getTitle() + " x " + yRec.getTitle());
 		XYChart.Series<Number, Number> dataSeries = new XYChart.Series<Number, Number>();
 		scatter.getStyleClass().add("custom-chart");
-		dataSeries.setName("Genes");
+		dataSeries.setName("XRefables");
 		int sz = Math.min(xRec.getNValues(), yRec.getNValues());
 		for (int i=0; i< sz; i++)
 		{
@@ -201,6 +234,7 @@ public class GeneListRecord extends TableRecord<Gene> {
 		return scatter;
 	}
 	public void setColumnList() {
+		if (headers == null || headers.size() == 0) return;
 		String header = headers.get(0);
 		boolean separatorSeen = false;
 		int skipColumns = 0;
@@ -223,14 +257,14 @@ public class GeneListRecord extends TableRecord<Gene> {
 	
 	private void setupTextColumn(String fld)
 	{
-		TableColumn<Gene, String> column = new TableColumn<Gene, String>(fld);
+		TableColumn<XRefable, String> column = new TableColumn<XRefable, String>(fld);
 		column.setUserData("T");
 		column.getProperties().put("Numeric", "FALSE");
 		column.setPrefWidth(200);
-		column.setCellValueFactory(new Callback<CellDataFeatures<Gene, String>, ObservableValue<String>>() {
-		     public ObservableValue<String> call(CellDataFeatures<Gene, String> p) {
-		         Gene gene = p.getValue();
-		         String str = gene.getValue(fld);
+		column.setCellValueFactory(new Callback<CellDataFeatures<XRefable, String>, ObservableValue<String>>() {
+		     public ObservableValue<String> call(CellDataFeatures<XRefable, String> p) {
+		         XRefable gene = p.getValue();
+		         String str = "" + gene.getValue();
 		         return new ReadOnlyObjectWrapper(str);
 		     }
 		  });
@@ -240,16 +274,16 @@ public class GeneListRecord extends TableRecord<Gene> {
 	private void setupNumericColumn(String fld)
 	{
 		String format =  "%4.2f";
-		TableColumn<Gene, Double> column = new TableColumn<Gene, Double>(fld);
+		TableColumn<XRefable, Double> column = new TableColumn<XRefable, Double>(fld);
 		column.setUserData("N");
 		column.getProperties().put("Numeric", "TRUE");
 		column.getProperties().put("Format", format);
-		column.setCellValueFactory(new Callback<CellDataFeatures<Gene, Double>, ObservableValue<Double>>() {
-		     public ObservableValue<Double> call(CellDataFeatures<Gene, Double> p) {
-		         Gene gene = p.getValue();
-		         double d = gene.getValueByName(fld);
+		column.setCellValueFactory(new Callback<CellDataFeatures<XRefable, Double>, ObservableValue<Double>>() {
+		     public ObservableValue<Double> call(CellDataFeatures<XRefable, Double> p) {
+		         XRefable gene = p.getValue();
+		         double d = gene.getValue();		//fld
 		         if (Double.isNaN(d))
-		        	 return new ReadOnlyObjectWrapper(gene.getValue(fld));
+		        	 return new ReadOnlyObjectWrapper(gene.getValue());		//fld
 		         return new ReadOnlyObjectWrapper(String.format(format, d));
 		     }
 		  });
@@ -274,9 +308,9 @@ public class GeneListRecord extends TableRecord<Gene> {
 		if (spec == null) 
 			spec = Species.Human;
 		StringBuilder str = new StringBuilder();
-		for (Gene g : geneList)
+		for (XRefable g : xrefSet)
 		{
-			if (StringUtil.hasText(g.getIdlist())) continue;
+//			if (StringUtil.hasText(g.getIdlist())) continue;
 			String name = g.getName();
 			MappingSource sys = MappingSource.guessSource(spec, name);
 			str.append(name + TAB + sys.system() + NL);
@@ -290,12 +324,12 @@ public class GeneListRecord extends TableRecord<Gene> {
 				String name = flds[0];
 				String allrefs = flds[2];
 				int ct = 0;
-				for (Gene g : geneList)
+				for (XRefable g : xrefSet)
 				{
 					if (!g.getName().equals(name)) continue;
 //					System.out.println(ct++ + ": setting ids for " + name );	
-					g.setIdlist(allrefs);
-					g.setEnsembl(BridgeDbIdMapper.getEnsembl(allrefs));
+//					g.setIdlist(allrefs);
+//					g.setEnsembl(BridgeDbIdMapper.getEnsembl(allrefs));
 				}
 			}
 		}
@@ -304,6 +338,28 @@ public class GeneListRecord extends TableRecord<Gene> {
 			System.err.println(ex.getMessage());	
 		}
 	}
-	public int getRowCount()	{ return geneList.size();}
+	public int getRowCount()	{ return xrefSet.size();}
+	public void addXRefable(String line)
+	{
+		String[] tokens = line.split(",");
+		int len = tokens.length;
+		if (StringUtil.isEmpty(tokens[0].trim())) return;		//error
+		if (StringUtil.isEmpty(tokens[len-1].trim())) len--;
+		if (len == 1)
+		{
+			XRefable g = new DataNode(this, null, tokens[0], "","", "");
+			xrefSet.add(g);
+			System.out.println(g.getName());
+		}
+	}
+	public void addColumns(String line)
+	{
+//		String[] tokens = line.split(",");
+		System.out.println("addColumns "+ line);
+	}
+	public void addHeader(String line)
+	{
+		System.out.println("addHeader "+ line);
+	}
 
 }

@@ -14,7 +14,7 @@ public class UndoStack
 	private ListView<Action> undostackView;			// may be null
 
 	int curStackPtr = 0; //  or number of actions available to redo
-	int verbose = 3;
+	int verbose = 0;
 
 	// -------------------------------------------------------
 	public UndoStack(IController c, ListView<Action> undoview)

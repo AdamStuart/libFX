@@ -77,6 +77,7 @@ public class Action
 		Test,
 		Add,			// Files
 		Align,
+		AddEdge,
 		Cut,
 		Delete,
 		Group,

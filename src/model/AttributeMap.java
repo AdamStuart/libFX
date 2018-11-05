@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -146,7 +148,12 @@ public class AttributeMap extends HashMap<String, String>
 		{
 			org.w3c.dom.Node a = map.item(i);
 			if (a != null)
-				put(a.getNodeName(), a.getNodeValue());
+			{
+				String name = a.getNodeName();
+				String val = a.getNodeValue();
+				put(name, val);
+								
+			}
 		}
 	}
 	
@@ -302,10 +309,21 @@ public class AttributeMap extends HashMap<String, String>
 	public String getAttributes(boolean lineBreaks)
 	{
 		StringBuilder buff = new StringBuilder();
+		
 		for (String key : keySet())
 		{
 			buff.append(key).append("=\"").append(get(key)).append("\" ");
 			if (lineBreaks) buff.append("\n");
+		}
+		return buff.toString();
+	}
+	public String getSortedAttributes()
+	{
+		StringBuilder buff = new StringBuilder();
+		SortedSet<String> keys = new TreeSet<>(keySet());
+		for (String key : keys)
+		{
+			buff.append(key).append(":\t").append(get(key)).append("\n");
 		}
 		return buff.toString();
 	}

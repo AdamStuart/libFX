@@ -562,4 +562,18 @@ public class StringUtil
 			if (isNumber(s)) return true;
 		return false;
 	}
+	public static String stripQuotes(String string)
+	{
+		return string.trim().replaceAll("\"", "");
+	}
+	//---------------
+	static public void removeEmptyLines(List<String> strs)
+	{
+		int count = strs.size();
+		for (int i=count-1; i>0; i--)
+		{
+			if (isEmpty(strs.get(i)))
+				strs.remove(i);
+		}
+	}
 }

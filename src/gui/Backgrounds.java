@@ -35,7 +35,7 @@ public class Backgrounds
 	
 	public static Paint stdBackground = Color.TAN;
 
-	public static Stop[] stops = new Stop[] { new Stop(0, Color.WHITESMOKE), new Stop(1, Color.LIGHTGRAY)};
+	public static Stop[] stops = new Stop[] { new Stop(0, Color.WHITESMOKE), new Stop(1, Color.WHITE)};
 	public static LinearGradient whiteGradient = new LinearGradient(0, 0, 225, 200, false, CycleMethod.REFLECT, stops);
 
 }

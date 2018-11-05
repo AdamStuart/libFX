@@ -299,8 +299,7 @@ public class OverlaidLineChart extends LineChart<Number,Number>
            firstControlPoints[i] = new Point2D(x[i], y[i]);
            // Second control point
            if (i < n - 1) {
-               secondControlPoints[i] = new Point2D(2 * dataPoints
-                       [i + 1].getX() - x[i + 1], 2 *
+               secondControlPoints[i] = new Point2D(2 * dataPoints[i + 1].getX() - x[i + 1], 2 *
                        dataPoints[i + 1].getY() - y[i + 1]);
            } else {
                secondControlPoints[i] = new Point2D((dataPoints
