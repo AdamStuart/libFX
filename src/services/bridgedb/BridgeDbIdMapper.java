@@ -31,7 +31,7 @@ import util.StringUtil;
 
 public class BridgeDbIdMapper implements IdMapper {
 
-    public static final String              DEFAULT_MAP_SERVICE_URL_STR = "http://webservice.bridgedb.org";
+    public static final String              DEFAULT_MAP_SERVICE_URL_STR = "http://webservice.bridgedb.org/";
 
     public static final boolean             DEBUG                       = true;
 
@@ -195,7 +195,7 @@ public class BridgeDbIdMapper implements IdMapper {
 //    	if (!"Unspecified".equals(database))
 //			link += "/" + database;
     	final URL url = new URL(link);
-        
+    	 http://webservice.bridgedb.org/       
 
 System.out.println("POSTING:  " + url.toString());
 System.out.println(query + "\n\n\n");

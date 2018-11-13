@@ -24,6 +24,7 @@ abstract public class XRefable extends AttributeMap
 		if (other != null)
 		for(String s: other.keySet())
 			put(s,other.get(s));
+
 		}
 	public void copyAttributesToProperties()
 	{

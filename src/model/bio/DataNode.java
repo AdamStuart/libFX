@@ -1,16 +1,12 @@
 package model.bio;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import model.AttributeMap;
 import model.TableType;
 import util.StringUtil;
 
