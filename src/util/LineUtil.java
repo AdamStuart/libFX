@@ -31,10 +31,8 @@ public class LineUtil
 	public static void set(Line line, Point2D p1, Point2D p2)
 	{
 		if (line == null || p1 == null || p2 == null) return;
-		if (Double.isNaN(p1.getX()) || Double.isNaN(p1.getY()))
-						System.err.println("BAD start");
-		if (Double.isNaN(p2.getX()) || Double.isNaN(p2.getY()))
-						System.err.println("BAD end");
+		if (Double.isNaN(p1.getX()) || Double.isNaN(p1.getY())) 	System.err.println("BAD start");
+		if (Double.isNaN(p2.getX()) || Double.isNaN(p2.getY())) 	System.err.println("BAD end");
 		line.setStartX(p1.getX());	line.setStartY(p1.getY());		
 		line.setEndX(p2.getX()); 	line.setEndY(p2.getY());
 	}

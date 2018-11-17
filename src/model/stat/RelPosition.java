@@ -17,7 +17,7 @@ public class RelPosition //extends Pair<Double, Double>
 	public double x()	{ return key;	}
 	public double y()	{ return value;	}
 	
-
+	public String toString()	{ return String.format("(%.02f, %.02f)" , key,value);	}
 	public static RelPosition ZERO = new RelPosition(0,0);
 	
 	// values "1" ... "9" coming from port ids
