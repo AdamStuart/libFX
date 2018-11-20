@@ -78,7 +78,6 @@ public class LineUtil
 					return 1;
 		return -1;
 	}
-
 	// **-------------------------------------------------------------------------------
 	public static double getStartAngle(Line line)
 	{
