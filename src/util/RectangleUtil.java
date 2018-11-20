@@ -172,14 +172,14 @@ public class RectangleUtil
 		double height = width / aspectRatio;  
 		return new Rectangle(x,y,width,height);
 	}
-	static public Rectangle intersect(Rectangle a, Rectangle b)
-	{
-		double x = Math.max(a.getX(), b.getX());
-		double y = Math.max(a.getY(), b.getY());
-		double width = Math.min(a.getWidth(), b.getWidth());
-		double height = Math.min(a.getHeight(), b.getHeight());
-		return new Rectangle(x,y,width,height);
-	}
+//	static public Rectangle intersect(Rectangle a, Rectangle b)  // ???? looks wrong?
+//	{
+//		double x = Math.max(a.getX(), b.getX());
+//		double y = Math.max(a.getY(), b.getY());
+//		double width = Math.min(a.getWidth(), b.getWidth());
+//		double height = Math.min(a.getHeight(), b.getHeight());
+//		return new Rectangle(x,y,width,height);
+//	}
 	static public Point2D oppositeCorner(MouseEvent ev, Rectangle r)
 	{
 		return oppositeCorner(ev.getX(), ev.getY(), r);

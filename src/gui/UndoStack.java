@@ -67,6 +67,12 @@ public class UndoStack
 	// -------------------------------------------------------
 	// key method:  grab the entire state of the drawing into the action, 
 	//	and push the action onto the top (index = 0) of the undo stack
+public ActionType peek()
+{
+	if (actions.isEmpty()) return null;
+	return actions.get(0).getType();
+}
+	
 	public void push(ActionType actionType)
 	{
 		push(actionType, "");

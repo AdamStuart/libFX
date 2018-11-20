@@ -44,7 +44,7 @@ abstract public class XRefable extends AttributeMap
 		put("Name", getName());
 		put("GraphId", getGraphId());
 		put("Database", getDatabase());
-		put("Dbid", getDbid());
+		put("ID", getDbid());
 		put("Type", getType());
 	}
 	public XRefable(String inName, String inId, String inDb, String inDbid, String inType)
@@ -68,7 +68,7 @@ abstract public class XRefable extends AttributeMap
 	{
 		String attributes = attributeList(xrefattrs);
 		if (StringUtil.hasText(attributes))
-			bldr.append( "<Xref ").append(attributes).append( " >\n");
+			bldr.append( "<Xref ").append(attributes).append( " />\n");
 	}
 	
 	protected String attributeList(String[] strs)

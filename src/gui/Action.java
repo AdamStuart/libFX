@@ -28,6 +28,7 @@ public class Action
 	public boolean isUndone()	{ return state == ActionState.Undone; }
 	
 	ActionType type = ActionType.Undefined;
+	public ActionType getType() { return type;	}
 	protected IController controller;
 	public void setController(IController c)	{		controller =c;	}
 	public IController getController()		{		return controller;	}
@@ -89,6 +90,7 @@ public class Action
 		Resize,
 		Reorder,
 		Rotate,
+		Scale,
 		Select,
 		Ungroup,
 		Zoom,
