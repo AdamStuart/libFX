@@ -25,6 +25,10 @@ public class ResultsRecord {
 		value0.set(Math.random());
 		value1.set(Math.random());
 	}
+	public ResultsRecord(String inSpecies, String orig)
+	{
+		this(Species.lookup(inSpecies), orig);
+	}
 	public ResultsRecord(Species inSpecies, String orig)
 	{
 		this();

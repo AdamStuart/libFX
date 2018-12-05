@@ -163,59 +163,59 @@ public class FileUtil
 	}
 	//-------------------------------------------------------------
 	//
-	@SuppressWarnings("unchecked") @Deprecated  // use CSVTableData.readCSVFile
-	static public CSVTableData openCSVfile(String absPath, TableView<ObservableList<StringProperty>> table)
-	{
-		if (absPath == null) return null;				// || table == null
-		CSVTableData output = new CSVTableData(absPath.substring(1+absPath.lastIndexOf(File.pathSeparator)));
-		try
-		{
-			String[] row = null;
-			CSVReader csvReader = new CSVReader(new FileReader(absPath));
-			List<String[]> content = csvReader.readAll();
-//			ObservableList<StringProperty> props = FXCollections.observableArrayList();
-			csvReader.close();
-			int nCols = -1;
-			 
-			row = (String[]) content.get(0);
-			nCols = row.length;
-			System.out.println(nCols + " columns");
-			boolean isHeader = true;
-			List<MixedDataRow> data = output.getData();
-			int idx = 0;
-			for (String fld : row)
-			{
-				StringUtil.TYPES type = StringUtil.inferType(fld);
-				isHeader &= StringUtil.isString(type) || StringUtil.isEmpty(type);  
-				output.getColumnNames().add(fld);
-				data.add(new MixedDataRow(nCols));
-				System.out.println("Column Name: " + fld);
-			    if (table != null) table.getColumns().add(TableUtil.createColumn(idx++, fld));
-			}
-			output.setTypes(StringUtil.inferTypes((isHeader) ? row : (String[]) content.get(1)));
-			
-			ObservableList<ObservableList<StringProperty>> list = FXCollections.observableArrayList();
-			for (Object object : content)
-			{
-				row = (String[]) object;
-				if (isHeader) { isHeader = false; continue;  }
-				if (row.length != nCols) throw new NumberFormatException();
-				ObservableList<StringProperty> colData = FXCollections.observableArrayList();
-				for (String s : row)
-					colData.add(new SimpleStringProperty(s));
-				list.add(colData);
-			}
-	        if (table != null) table.setItems(list);
-		} 
-		catch (NumberFormatException e)	
-		{		 
-			System.err.print("Wrong number of columns in row"); 
-			e.printStackTrace();	
-			return null;
-		}
-		catch (Exception e)		{	e.printStackTrace();	return null;	}
-		return output;
-	}
+//	@SuppressWarnings("unchecked") @Deprecated  // use CSVTableData.readCSVFile
+//	static public CSVTableData openCSVfile(String absPath, TableView<ObservableList<StringProperty>> table)
+//	{
+//		if (absPath == null) return null;				// || table == null
+//		CSVTableData output = new CSVTableData(absPath.substring(1+absPath.lastIndexOf(File.pathSeparator)));
+//		try
+//		{
+//			String[] row = null;
+//			CSVReader csvReader = new CSVReader(new FileReader(absPath));
+//			List<String[]> content = csvReader.readAll();
+////			ObservableList<StringProperty> props = FXCollections.observableArrayList();
+//			csvReader.close();
+//			int nCols = -1;
+//			 
+//			row = (String[]) content.get(0);
+//			nCols = row.length;
+//			System.out.println(nCols + " columns");
+//			boolean isHeader = true;
+//			List<MixedDataRow> data = output.getData();
+//			int idx = 0;
+//			for (String fld : row)
+//			{
+//				StringUtil.TYPES type = StringUtil.inferType(fld);
+//				isHeader &= StringUtil.isString(type) || StringUtil.isEmpty(type);  
+//				output.getColumnNames().add(fld);
+//				data.add(new MixedDataRow(nCols));
+//				System.out.println("Column Name: " + fld);
+//			    if (table != null) table.getColumns().add(TableUtil.createColumn(idx++, fld));
+//			}
+//			output.setTypes(StringUtil.inferTypes((isHeader) ? row : (String[]) content.get(1)));
+//			
+//			ObservableList<ObservableList<StringProperty>> list = FXCollections.observableArrayList();
+//			for (Object object : content)
+//			{
+//				row = (String[]) object;
+//				if (isHeader) { isHeader = false; continue;  }
+//				if (row.length != nCols) throw new NumberFormatException();
+//				ObservableList<StringProperty> colData = FXCollections.observableArrayList();
+//				for (String s : row)
+//					colData.add(new SimpleStringProperty(s));
+//				list.add(colData);
+//			}
+//	        if (table != null) table.setItems(list);
+//		} 
+//		catch (NumberFormatException e)	
+//		{		 
+//			System.err.print("Wrong number of columns in row"); 
+//			e.printStackTrace();	
+//			return null;
+//		}
+//		catch (Exception e)		{	e.printStackTrace();	return null;	}
+//		return output;
+//	}
 	
 		//--------------------------------------------------------------------------------------
 	static public File compress(File fileSrc)
@@ -341,10 +341,7 @@ public class FileUtil
             builder = factory.newDocumentBuilder();  
             Document doc = builder.parse( new InputSource( new StringReader( xmlStr ) ) ); 
             return doc;
-        } catch (Exception e) {  
-//            e.printStackTrace();  
-        	throw e;
-        } 
+        } catch (Exception e) {  	throw e;    } 
     }
 	//--------------------------------------------------------------------------------------
 	// @formatter:off

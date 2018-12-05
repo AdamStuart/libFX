@@ -21,36 +21,36 @@ public class DataNode extends XRefable implements Comparable<DataNode> {
 	private List<Double> values = new ArrayList<Double>();
 	public double getValue(int i)	{ return i >= 0 && i < size() ? values.get(i) : Double.NaN;	}
 
-	public DataNode(GeneSetRecord record, TableType type, String[] line)
-	{
-		this(record, line[0], "", null, "Human", "");
-		if (line.length > 0)
-			graphid.set(line[0]);
-		if (line.length == 10)
-		{
-			geneListRecord = (GeneSetRecord) record;
-//			adjPval.set(StringUtil.toDouble(line[1]));
-//			pval.set(StringUtil.toDouble(line[2]));
-//			foldChange.set(StringUtil.toDouble(line[3]));
-//			symbol.set(line[4]);		
-			title.set(line[5]);		
-//			entrez.set(line[6]);
-//			goFunction.set(line[7]);
-//			goProcess.set(line[8]);
-//			goComponent.set(line[9]);
-		}
-		
-	}
-
-	public DataNode(GeneSetRecord record, TableType type, String line)
-	{
-		this(record, line.split(type.getDelimiter())[0], "", null, "Unspecified", "");
-		
-	}
-	public DataNode(GeneSetRecord record, String inName, String inGraphId)
-	{
-		this(record, inName, inGraphId, null, "Unspecified", "");
-	}
+//	public DataNode(GeneSetRecord record, TableType type, String[] line)
+//	{
+//		this(record, line[0], "", null, "Human", "");
+//		if (line.length > 0)
+//			graphid.set(line[0]);
+//		if (line.length == 10)
+//		{
+//			geneListRecord = (GeneSetRecord) record;
+////			adjPval.set(StringUtil.toDouble(line[1]));
+////			pval.set(StringUtil.toDouble(line[2]));
+////			foldChange.set(StringUtil.toDouble(line[3]));
+////			symbol.set(line[4]);		
+//			title.set(line[5]);		
+////			entrez.set(line[6]);
+////			goFunction.set(line[7]);
+////			goProcess.set(line[8]);
+////			goComponent.set(line[9]);
+//		}
+//		
+//	}
+//
+//	public DataNode(GeneSetRecord record, TableType type, String line)
+//	{
+//		this(record, line.split(type.getDelimiter())[0], "", null, "Unspecified", "");
+//		
+//	}
+//	public DataNode(GeneSetRecord record, String inName, String inGraphId)
+//	{
+//		this(record, inName, inGraphId, null, "Unspecified", "");
+//	}
 	public DataNode(TableRecord record, String inName, String inGraphid, String ensm, String spec, String link)
 	{
 		geneListRecord = (GeneSetRecord) record;
