@@ -108,6 +108,7 @@ public class LineUtil
 		double y = y1 + d * dy;
 		return new Point2D(x,y);
 	}
+	// **-------------------------------------------------------------------------------
 	public static Point2D getIntersection(Line line, Node node)
 	{
 		return getIntersection(line, node, 5);
@@ -156,6 +157,7 @@ public class LineUtil
 	
     private static boolean isBetween(double x, double min, double max)	{		return x >= min && x <= max;	}
 
+	// **-------------------------------------------------------------------------------
 
 	/**
 	 * Determines angle between two vectors defined by p1 and p2
@@ -210,15 +212,9 @@ public class LineUtil
 	{
 		Point2D q2 = new Point2D (q.getX() - p.getX(), q.getY() - p.getY());
 		double vlen = dot (v, v);
-		if (vlen == 0)
-		{
-			return p;
-		}
-		else
-		{
-			double c = dot (q2, v) / dot (v, v);
-			return new Point2D (p.getX() + v.getX() * c, p.getY() + v.getY() * c);
-		}
+		if (vlen == 0) return p;
+		double c = dot (q2, v) / dot (v, v);
+		return new Point2D (p.getX() + v.getX() * c, p.getY() + v.getY() * c);
 	}
 
 	/**

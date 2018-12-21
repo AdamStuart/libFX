@@ -12,11 +12,11 @@ abstract public class XRefable extends AttributeMap
 	protected SimpleStringProperty name = new SimpleStringProperty();		// HGNC
 	public XRefable()
 	{
-		this("", "","","","");
+		this("", "","","","","");
 	}
 	public XRefable(String inName)
 	{
-		this(inName, "","","","");
+		this(inName, "","","","","");
 	}
 	public XRefable(AttributeMap other)
 	{
@@ -38,6 +38,7 @@ abstract public class XRefable extends AttributeMap
 		s = get("Database"); if (s != null) setDatabase(s);
 		s = get("ID"); if (s != null) setDbid(s);
 		s = get("Type"); if (s != null) setType(s);
+		s = get("GroupRef"); if (s != null) setGroupRef(s);
 	}
 	public void copyPropertiesToAttributes()
 	{
@@ -46,14 +47,16 @@ abstract public class XRefable extends AttributeMap
 		put("Database", getDatabase());
 		put("ID", getDbid());
 		put("Type", getType());
+		put("GroupRef", getGroupRef());
 	}
-	public XRefable(String inName, String inId, String inDb, String inDbid, String inType)
+	public XRefable(String inName, String inId, String inDb, String inDbid, String inType, String inGroupRef)
 	{
 		setName(inName);
 		setGraphId(inId);
 		setDatabase(inDb);
 		setDbid(inDbid);
 		setType(inType);
+		setGroupRef(inGroupRef);
 	}
 //	public void setProperties() {
 //		setName(get("TextLabel"));
@@ -96,6 +99,11 @@ abstract public class XRefable extends AttributeMap
 	public StringProperty  graphidProperty()  { return graphid;}
 	public String getGraphId()  { return graphid.get();}
 	public void setGraphId(String s)  { graphid.set(s);}
+
+	StringProperty groupRef = new SimpleStringProperty();
+	public StringProperty  groupRefProperty()  { return groupRef;}
+	public String getGroupRef()  { return groupRef.get();}
+	public void setGroupRef(String s)  { groupRef.set(s);}
 
 	protected SimpleStringProperty database = new SimpleStringProperty("");
 	public StringProperty  databaseProperty()  { return database;}
