@@ -9,7 +9,6 @@ import util.StringUtil;
 
 abstract public class XRefable extends AttributeMap
 {
-	protected SimpleStringProperty name = new SimpleStringProperty();		// HGNC
 	public XRefable()
 	{
 		this("", "","","","","");
@@ -86,16 +85,17 @@ abstract public class XRefable extends AttributeMap
 		return bldr.toString();
 	}
 
-	DoubleProperty valuePropety = new SimpleDoubleProperty();
+	protected DoubleProperty valuePropety = new SimpleDoubleProperty();
 	public DoubleProperty  valueProperty()  { return valuePropety;}
 	public Double getValue()  { return valuePropety.get();}
 	public void setValue(Double s)  { valuePropety.set(s);}
 	
+	protected SimpleStringProperty name = new SimpleStringProperty();		// HGNC
 	public StringProperty  nameProperty()  { return name;}
 	public String getName()  { return name.get();}
 	public void setName(String s)  { name.set(s);}
 	
-	StringProperty graphid = new SimpleStringProperty();
+	protected StringProperty graphid = new SimpleStringProperty();
 	public StringProperty  graphidProperty()  { return graphid;}
 	public String getGraphId()  { return graphid.get();}
 	public void setGraphId(String s)  { graphid.set(s);}
@@ -107,7 +107,7 @@ abstract public class XRefable extends AttributeMap
 
 	protected SimpleStringProperty database = new SimpleStringProperty("");
 	public StringProperty  databaseProperty()  { return database;}
-	public String getDatabase()  { return database.get();}
+	public String getDatabase()  { return database.get();}	
 	public void setDatabase(String s)  { database.set(s);}
 
 	protected SimpleStringProperty dbid = new SimpleStringProperty("");
