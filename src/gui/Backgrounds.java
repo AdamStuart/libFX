@@ -1,5 +1,7 @@
 package gui;
 
+import com.sun.prism.shader.FillCircle_Color_AlphaTest_Loader;
+
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.layout.Background;
@@ -10,6 +12,7 @@ import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Paint;
 import javafx.scene.paint.Stop;
+import util.ParseUtil;
 
 public class Backgrounds
 {
@@ -37,5 +40,33 @@ public class Backgrounds
 
 	public static Stop[] stops = new Stop[] { new Stop(0, Color.WHITESMOKE), new Stop(1, Color.WHITE)};
 	public static LinearGradient whiteGradient = new LinearGradient(0, 0, 225, 200, false, CycleMethod.REFLECT, stops);
+	
+	//technique from: https://stackoverflow.com/questions/28870460/how-to-create-a-background-grid
+	public static String backgroundGridTemplate =
+					"-fx-background-color: %s,\n" + 
+					"        linear-gradient(from 0.5px 0px to %d.5px 0px, repeat, black 5%%, transparent 5%%),\n" + 
+					"        linear-gradient(from 0px 0.5px to 0px %d.5px, repeat, black 5%%, transparent 5%%);";
+	
+	public static String getBackgroundGridStyle(int gridSize, Color gridColor) {
+		String style = String.format(backgroundGridTemplate, ParseUtil.colorToHex(gridColor), gridSize, gridSize);
+		
+		return style;
+	}
+	
+	/** Creates a paint which renders as vertical or horizontal lines spaced by gridSize pixels.
+	 * */
+	public static Paint getGridLinesPaint(int gridSize, Color gridColor, boolean vertical) {
+		double startX = .5;
+		double startY = .5;
+		double endX = vertical ? gridSize + .5 : .5;
+		double endY = vertical ? .5 : gridSize + .5;
+		
+		double lineWidth = 1.0 / gridSize;
+		LinearGradient paint = new LinearGradient(startX, startY, endX, endY, 
+						false, CycleMethod.REPEAT,
+						new Stop(lineWidth, gridColor), new Stop(lineWidth, Color.TRANSPARENT));
+		
+		return paint;
+	}
 
 }

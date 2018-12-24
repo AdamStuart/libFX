@@ -4,6 +4,8 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.util.HashMap;
 
+import javafx.scene.paint.Color;
+
 public class ParseUtil
 {
 	
@@ -95,6 +97,13 @@ public class ParseUtil
 	}
 	static public String dimToString(Dimension d) {
 		return "( " + d.width + ", " + d.height + " )";
+	}
+	
+	static public String colorToHex(Color c) {
+	    return String.format( "#%02X%02X%02X",
+	        (int)( c.getRed() * 255 ),
+	        (int)( c.getGreen() * 255 ),
+	        (int)( c.getBlue() * 255 ) );
 	}
 
 
