@@ -79,9 +79,12 @@ public class Action
 		Add,			// Files
 		Align,
 		AddEdge,
+		Connect,
 		Cut,
 		Delete,
+		Duplicate,
 		Group,
+		Lock,
 		Move,
 		New,
 		Opacity,
@@ -92,10 +95,9 @@ public class Action
 		Rotate,
 		Scale,
 		Select,
+		Unlock,
 		Ungroup,
 		Zoom,
-		Duplicate,
-		Connect,
 		;
 	
 	}
