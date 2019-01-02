@@ -56,8 +56,8 @@ public class Backgrounds
 	/** Creates a paint which renders as vertical or horizontal lines spaced by gridSize pixels.
 	 * */
 	public static Paint getGridLinesPaint(int gridSize, double thickness, Color gridColor, boolean vertical) {
-		double startX = .5;
-		double startY = .5;
+		double startX = 0;
+		double startY = 0;
 		double endX = vertical ? gridSize : 0;
 		double endY = vertical ? 0 : gridSize;
 		
