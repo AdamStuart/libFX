@@ -58,8 +58,8 @@ public class Backgrounds
 	public static Paint getGridLinesPaint(int gridSize, double thickness, Color gridColor, boolean vertical) {
 		double startX = .5;
 		double startY = .5;
-		double endX = vertical ? gridSize + .5 : .5;
-		double endY = vertical ? .5 : gridSize + .5;
+		double endX = vertical ? gridSize : 0;
+		double endY = vertical ? 0 : gridSize;
 		
 		double lineWidth = thickness / gridSize;
 		LinearGradient paint = new LinearGradient(startX, startY, endX, endY, 
