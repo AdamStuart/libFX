@@ -25,6 +25,7 @@ public class BorderPaneAnimator
 	    });
 		boolean isBottom = (onSide == Side.BOTTOM);
 		boolean isLeft = (onSide == Side.LEFT);
+		boolean isRight = (onSide == Side.RIGHT);
 	    Region sidebar = (Region)  ((isBottom) ? pane.getBottom() :   	(isLeft ? pane.getLeft() : pane.getRight()));
 	    if (expWidth > 0) 
 	    	expandedWidth = expWidth;
@@ -58,6 +59,7 @@ public class BorderPaneAnimator
           @Override public void handle(ActionEvent actionEvent) {
         	  if (sidebar == null) return;
         	  sidebar.setVisible(false);
+        	  if (isRight) pane.getRight().setVisible(false);
         	  if (showText) togl.setText("Show");
         	  togl.getStyleClass().remove(isBottom ? "hide-bottom" : (isLeft ? "hide-left" : "hide-right"));
         	  togl.getStyleClass().add(isBottom ? "hide-bottom" : (isLeft ? "show-right": "show-left"));
@@ -88,6 +90,7 @@ public class BorderPaneAnimator
         @Override public void handle(ActionEvent actionEvent) {
             if (isBottom)   sidebar.setTranslateY(0);
             else 			sidebar.setTranslateX(0);
+      	  if (isRight) pane.getRight().setVisible(true);
         	if (showText) togl.setText("Collapse");
         	togl.getStyleClass().add(isBottom ? "hide-bottom" : (isLeft ? "hide-left" : "hide-right"));
         	togl.getStyleClass().remove(isBottom ? "show-bottom" : (isLeft ? "show-right": "show-left"));
