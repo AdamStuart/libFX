@@ -216,6 +216,17 @@ public class AttributeMap extends HashMap<String, String>
 		put("CenterY", "" + r.getY()+ r.getHeight()/2);
 	}
 	//-------------------------------------------------------------
+	public void putRect(double x, double y, double w, double h)	
+	{
+		put("ShapeType", "Rectangle");
+		put("Width", "" + w);
+		put("Height", "" + h);
+		put("X", "" + x );
+		put("Y", "" + y );
+		put("CenterX", "" + x + w/2);
+		put("CenterY", "" + y + h/2);
+	}
+	//-------------------------------------------------------------
 	public Circle getCircle()	
 	{
 		Circle circle = new Circle();
