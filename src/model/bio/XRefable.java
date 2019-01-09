@@ -28,16 +28,12 @@ abstract public class XRefable extends AttributeMap
 	public void copyAttributesToProperties()
 	{
 		String s;
-		s = get("Name"); 
-		if (s != null) 
-			setName(s);
-		s = get("GraphId");
-		if (s != null) 
-			setGraphId(s);
-		s = get("Database"); if (s != null) setDatabase(s);
-		s = get("ID"); if (s != null) setDbid(s);
-		s = get("Type"); if (s != null) setType(s);
-		s = get("GroupRef"); if (s != null) setGroupRef(s);
+		s = get("Name"); 		if (s != null) setName(s);
+		s = get("GraphId");		if (s != null) setGraphId(s);
+		s = get("Database"); 	if (s != null) setDatabase(s);
+		s = get("ID"); 			if (s != null) setDbid(s);
+		s = get("Type"); 		if (s != null) setType(s);
+		s = get("GroupRef"); 	if (s != null) setGroupRef(s);
 	}
 	public void copyPropertiesToAttributes()
 	{

@@ -182,6 +182,7 @@ public class StringUtil
 	public static boolean isInteger (String s) 		{		return isNumber(s) && s.indexOf(".") < 0;	}
 	public static boolean isNumber (String s) 
 	{
+		if (isEmpty(s)) return false;
 		try
 		{
 			Double.parseDouble(s);
@@ -192,7 +193,7 @@ public class StringUtil
 	//-----------------------------------------------------------------------------------
 	public static double toDouble (String s) 
 	{
-		if (s == null ) return Double.NaN;
+		if (isEmpty(s)) return Double.NaN;
 		try
 		{
 			return Double.parseDouble(s);
@@ -201,13 +202,14 @@ public class StringUtil
 	}
 	public static int toInteger (String s) 
 	{
-		if (s == null ) return -1;
+		if (isEmpty(s)) return -1;
 		try
 		{
 			return Integer.parseInt(s);
 		}
 		catch(NumberFormatException e)		{			return -1;		}
 	}
+	
 	public static int toInteger (String s, int deflt) 
 	{
 		if (isEmpty(s)) return deflt;

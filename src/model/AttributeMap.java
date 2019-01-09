@@ -60,8 +60,8 @@ public class AttributeMap extends HashMap<String, String>
 		put("Height", "" + sp.getLayoutBounds().getHeight());
 		put("X", "" + sp.getLayoutX());
 		put("Y", "" + + sp.getLayoutY());
-		put("CenterX", "" + sp.getLayoutX() +  sp.getLayoutBounds().getWidth() /2);
-		put("CenterY", "" + + sp.getLayoutY() +  sp.getLayoutBounds().getHeight() /2);
+		put("CenterX", "" + (sp.getLayoutX() +  sp.getLayoutBounds().getWidth() /2));
+		put("CenterY", "" + (sp.getLayoutY() +  sp.getLayoutBounds().getHeight() /2));
 	}
 	
 	public AttributeMap(File f, double x, double y)
@@ -212,8 +212,8 @@ public class AttributeMap extends HashMap<String, String>
 		put("ShapeType", "Rectangle");
 		put("Width", "" + r.getWidth());
 		put("Height", "" + r.getHeight());
-		put("CenterX", "" + r.getX()+ r.getWidth()/2);
-		put("CenterY", "" + r.getY()+ r.getHeight()/2);
+		put("CenterX", "" + (r.getX()+ r.getWidth()/2));
+		put("CenterY", "" + (r.getY()+ r.getHeight()/2));
 	}
 	//-------------------------------------------------------------
 	public void putRect(double x, double y, double w, double h)	
@@ -223,8 +223,8 @@ public class AttributeMap extends HashMap<String, String>
 		put("Height", "" + h);
 		put("X", "" + x );
 		put("Y", "" + y );
-		put("CenterX", "" + x + w/2);
-		put("CenterY", "" + y + h/2);
+		put("CenterX", "" + (x + w/2));
+		put("CenterY", "" + (y + h/2));
 	}
 	//-------------------------------------------------------------
 	public Circle getCircle()	
@@ -328,13 +328,20 @@ public class AttributeMap extends HashMap<String, String>
 		}
 		return buff.toString();
 	}
+	
 	public String getSortedAttributes()
 	{
 		StringBuilder buff = new StringBuilder();
 		SortedSet<String> keys = new TreeSet<>(keySet());
 		for (String key : keys)
 		{
-			buff.append(key).append(":\t").append(get(key)).append("\n");
+			String s = get(key);
+			if (StringUtil.isNumber(s) && !StringUtil.isInteger(s))
+			{
+				double d = StringUtil.toDouble(s);
+				s = String.format("%4.2f", d);
+			}
+			buff.append(key).append(":\t").append(s).append("\n");
 		}
 		return buff.toString();
 	}
@@ -392,9 +399,9 @@ public class AttributeMap extends HashMap<String, String>
 			String line = nextLine.substring(7, nextLine.indexOf("/n"));		
 			//TODO
 		}
-		
 	}
 
+	
 	public void addPoint(double x, double y)
 	{
 		put("X", "" + x);
