@@ -178,7 +178,8 @@ public class AttributeMap extends HashMap<String, String>
 	}
 
 	//-------------------------------------------------------------
-	public String getId()				{		return get("GraphId");	}
+	public Integer getId()				{		return getInteger("GraphId");	}
+	public  void setId(Integer i)		{		putInteger("GraphId", i);	}
 	public double getDouble(String key)	{		return StringUtil.toDouble(get(key));	}
 	public void putDouble(String key, double d)	{		put(key, String.format("%5.3f", d));	}
 	public int getInteger(String key)	{		return StringUtil.toInteger(get(key));	}

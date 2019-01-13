@@ -46,7 +46,7 @@ public class CSVTableData
 //	private List<Histogram2D> histogram2Ds;
 	private List<OverlaidScatterChart<Number, Number>> scatters;
 	private Map<String, Image> images;
-	private Map<String, Integer> gateNames = new HashMap<String, Integer>();
+//	private Map<String, Integer> gateNames = new HashMap<String, Integer>();
 	//--------------------------------------------------------------------------------
 	
 	
@@ -141,7 +141,7 @@ public class CSVTableData
 		return -1;
 	}
 	private String getIndex(int i)			{ return columnNames.get(i); }
-	private int gateIndex(String name)			{ return name == null ? null : gateNames.get(name); }
+//	private int gateIndex(String name)			{ return name == null ? null : gateNames.get(name); }
 	public  String getName() 					{ return name; }
 	public  List<StringUtil.TYPES> getTypes() 	{ return types; }
 	public  List<Range> getRanges() 				{ return ranges; }
@@ -250,7 +250,7 @@ public class CSVTableData
 	public void generateGatedHistograms(String popName)
 	{
 		Map<String, Histogram1D> gatedHistograms = new HashMap<String, Histogram1D>();
-		int index = gateIndex(popName);
+		int index = -1; // BROKEN gateIndex(popName);
 		if (index >= 0)
 		{
 //			IntegerDataRow row0 = rows.get(0);
@@ -291,7 +291,7 @@ public class CSVTableData
 	public List<Point2D> getPointList(String popName, String xDim, String yDim)
 	{
 		List<Point2D> pointList = new ArrayList<Point2D>();
-		int index = gateIndex(popName);
+		int index = -1;  // gateIndex(popName);			// BROKEN
 		if (index >= 0)
 		{
 			int xIdx = indexOf(xDim);

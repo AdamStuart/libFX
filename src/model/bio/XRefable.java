@@ -1,7 +1,9 @@
 package model.bio;
 
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import model.AttributeMap;
@@ -11,11 +13,11 @@ abstract public class XRefable extends AttributeMap
 {
 	public XRefable()
 	{
-		this("", "","","","","");
+		this("", 0,"","","","");
 	}
 	public XRefable(String inName)
 	{
-		this(inName, "","","","","");
+		this(inName, 0,"","","","");
 	}
 	public XRefable(AttributeMap other)
 	{
@@ -29,7 +31,7 @@ abstract public class XRefable extends AttributeMap
 	{
 		String s;
 		s = get("Name"); 		if (s != null) setName(s);
-		s = get("GraphId");		if (s != null) setGraphId(s);
+		int i = getInteger("GraphId");		if (i > 0) setGraphId(i);
 		s = get("Database"); 	if (s != null) setDatabase(s);
 		s = get("ID"); 			if (s != null) setDbid(s);
 		s = get("Type"); 		if (s != null) setType(s);
@@ -38,13 +40,13 @@ abstract public class XRefable extends AttributeMap
 	public void copyPropertiesToAttributes()
 	{
 		put("Name", getName());
-		put("GraphId", getGraphId());
+		putInteger("GraphId", getGraphId());
 		put("Database", getDatabase());
 		put("ID", getDbid());
 		put("Type", getType());
 		put("GroupRef", getGroupRef());
 	}
-	public XRefable(String inName, String inId, String inDb, String inDbid, String inType, String inGroupRef)
+	public XRefable(String inName, int inId, String inDb, String inDbid, String inType, String inGroupRef)
 	{
 		setName(inName);
 		setGraphId(inId);
@@ -91,10 +93,10 @@ abstract public class XRefable extends AttributeMap
 	public String getName()  { return name.get();}
 	public void setName(String s)  { name.set(s);}
 	
-	protected StringProperty graphid = new SimpleStringProperty();
-	public StringProperty  graphidProperty()  { return graphid;}
-	public String getGraphId()  { return graphid.get();}
-	public void setGraphId(String s)  { graphid.set(s);}
+	protected IntegerProperty graphid = new SimpleIntegerProperty();
+	public IntegerProperty  graphidProperty()  { return graphid;}
+	public int getGraphId()  { return graphid.get();}
+	public void setGraphId(int s)  { graphid.set(s);}
 
 	StringProperty groupRef = new SimpleStringProperty();
 	public StringProperty  groupRefProperty()  { return groupRef;}

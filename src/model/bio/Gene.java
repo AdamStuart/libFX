@@ -27,9 +27,9 @@ public class Gene extends XRefable implements Comparable<Gene> {
 
 	public Gene(GeneSetRecord record, TableType type, String[] line)
 	{
-		this(record, line[0],"",  null, "Human", "");
+		this(record, line[0],0,  null, "Human", "");
 		if (line.length > 0)
-			graphid.set(line[0]);
+			graphid.set(Integer.parseInt(line[0]));
 		if (line.length == 10)
 		{
 			geneListRecord = (GeneSetRecord) record;
@@ -48,14 +48,14 @@ public class Gene extends XRefable implements Comparable<Gene> {
 
 	public Gene(GeneSetRecord record, TableType type, String line)
 	{
-		this(record, line.split(type.getDelimiter())[0], "", null, "Unspecified", "");
+		this(record, line.split(type.getDelimiter())[0], 0, null, "Unspecified", "");
 		
 	}
-	public Gene(GeneSetRecord record, String inName, String inId)
+	public Gene(GeneSetRecord record, String inName, int inId)
 	{
 		this(record, inName, inId, null, "Unspecified", "");
 	}
-	public Gene(TableRecord record, String inName, String inId, String ensm, String spec, String link)
+	public Gene(TableRecord record, String inName, int inId, String ensm, String spec, String link)
 	{
 		geneListRecord = (GeneSetRecord) record;
 		graphid.set(inId);
@@ -266,7 +266,7 @@ public class Gene extends XRefable implements Comparable<Gene> {
 			builder.append(term + delim);
 		setTermSummary(StringUtil.chop(builder.toString(), delim.length()));
 	}
-	public String toString() {				return getGraphId();	}   // + ": " + getTitle() + " " + getSymbol();
+	public String toString() {				return "" + getGraphId();	}   // + ": " + getTitle() + " " + getSymbol();
 	public int compareTo(Gene other)
 	{
 		return getName().compareToIgnoreCase(other.getName());

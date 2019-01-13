@@ -84,7 +84,7 @@ public class GeneSetRecord extends TableRecord<Gene> {
 			{
 				String row = lines.get(i);
 				String[] tokens = row.split(DELIM);
-				geneSet.add(new Gene(this, tokens[0], ""));
+				geneSet.add(new Gene(this, tokens[0], 0));
 			}
 		}
 	}
@@ -346,7 +346,7 @@ public class GeneSetRecord extends TableRecord<Gene> {
 		if (StringUtil.isEmpty(tokens[len-1].trim())) len--;
 		if (len == 1)
 		{
-			Gene g = new Gene(this,tokens[0], "");
+			Gene g = new Gene(this,tokens[0], 0);
 			geneSet.add(g);
 			System.out.println(g.getName());
 		}

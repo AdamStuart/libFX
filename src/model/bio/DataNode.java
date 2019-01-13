@@ -51,7 +51,11 @@ public class DataNode extends XRefable implements Comparable<DataNode> {
 //	{
 //		this(record, inName, inGraphId, null, "Unspecified", "");
 //	}
-	public DataNode(TableRecord record, String inName, String inGraphid, String ensm, String spec, String link)
+	public DataNode(TableRecord record, String inName)
+	{
+		
+	}
+	public DataNode(TableRecord record, String inName, int inGraphid, String ensm, String spec, String link)
 	{
 		geneListRecord = (GeneSetRecord) record;
 		graphid.set(inGraphid);
@@ -261,7 +265,7 @@ public class DataNode extends XRefable implements Comparable<DataNode> {
 			builder.append(term + delim);
 		setTermSummary(StringUtil.chop(builder.toString(), delim.length()));
 	}
-	public String toString() {				return getGraphId();	}   // + ": " + getTitle() + " " + getSymbol();
+	public String toString() {				return "" + getGraphId();	}   // + ": " + getTitle() + " " + getSymbol();
 	public int compareTo(DataNode other)
 	{
 		return getName().compareToIgnoreCase(other.getName());
