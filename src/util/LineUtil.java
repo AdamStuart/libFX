@@ -114,11 +114,16 @@ public class LineUtil
 		return getIntersection(line, node, 5);
 	}	
 	public static Point2D getIntersection(Line line, Node node, double padding)
-	{
-	    if (node == null) return new Point2D(line.getEndX(), line.getEndY());
-	   Bounds b = node.getBoundsInParent();
+	{Rectangle r;
 	   double halfpadding =  padding / 2;
-	   Rectangle r = new Rectangle(b.getMinX() - halfpadding, b.getMinY() - padding, b.getWidth() + padding, b.getHeight() + 2 * padding);
+	
+	    if (node == null) 
+	 	   r = new Rectangle(line.getEndX() - halfpadding, line.getEndY() - halfpadding, padding, padding);
+	    else
+	    {
+	 	   Bounds b = node.getBoundsInParent();
+		   r = new Rectangle(b.getMinX() - halfpadding, b.getMinY() - halfpadding, b.getWidth() + padding, b.getHeight() + padding);
+	    }
 	   return getIntersection(line, r);
 	}
 	   

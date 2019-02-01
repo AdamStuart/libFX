@@ -13,11 +13,11 @@ abstract public class XRefable extends AttributeMap
 {
 	public XRefable()
 	{
-		this("", 0,"","","","");
+		this("", 0,"","","",0);
 	}
 	public XRefable(String inName)
 	{
-		this(inName, 0,"","","","");
+		this(inName, 0,"","","",0);
 	}
 	public XRefable(AttributeMap other)
 	{
@@ -35,7 +35,7 @@ abstract public class XRefable extends AttributeMap
 		s = get("Database"); 	if (s != null) setDatabase(s);
 		s = get("ID"); 			if (s != null) setDbid(s);
 		s = get("Type"); 		if (s != null) setType(s);
-		s = get("GroupRef"); 	if (s != null) setGroupRef(s);
+		s = get("GroupRef"); 	if (s != null) setGroupRef(getInteger("GroupRef"));
 	}
 	public void copyPropertiesToAttributes()
 	{
@@ -44,9 +44,9 @@ abstract public class XRefable extends AttributeMap
 		put("Database", getDatabase());
 		put("ID", getDbid());
 		put("Type", getType());
-		put("GroupRef", getGroupRef());
+		putInteger("GroupRef", getGroupRef());
 	}
-	public XRefable(String inName, int inId, String inDb, String inDbid, String inType, String inGroupRef)
+	public XRefable(String inName, int inId, String inDb, String inDbid, String inType, int inGroupRef)
 	{
 		setName(inName);
 		setGraphId(inId);
@@ -97,11 +97,12 @@ abstract public class XRefable extends AttributeMap
 	public IntegerProperty  graphidProperty()  { return graphid;}
 	public int getGraphId()  { return graphid.get();}
 	public void setGraphId(int s)  { graphid.set(s);}
+	public void setId(int s)  { graphid.set(s);}
 
-	StringProperty groupRef = new SimpleStringProperty();
-	public StringProperty  groupRefProperty()  { return groupRef;}
-	public String getGroupRef()  { return groupRef.get();}
-	public void setGroupRef(String s)  { groupRef.set(s);}
+	IntegerProperty groupRef = new SimpleIntegerProperty();
+	public IntegerProperty  groupRefProperty()  { return groupRef;}
+	public int getGroupRef()  { return groupRef.get();}
+	public void setGroupRef(int s)  { groupRef.set(s);}
 
 	protected SimpleStringProperty database = new SimpleStringProperty("");
 	public StringProperty  databaseProperty()  { return database;}

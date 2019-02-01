@@ -69,5 +69,4 @@ public class Borders
 		if (validationState == ValidationState.WARNING)		return thinGold;
 		return emptyBorder;
 	}
-
 }
