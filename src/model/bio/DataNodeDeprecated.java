@@ -10,7 +10,8 @@ import javafx.scene.control.Alert.AlertType;
 import model.TableType;
 import util.StringUtil;
 
-public class DataNode extends XRefable implements Comparable<DataNode> {
+// there is now a DataNode class in pViz.model.nodes
+public class DataNodeDeprecated extends XRefable implements Comparable<DataNodeDeprecated> {
 
 	/**
 	 * 
@@ -51,11 +52,11 @@ public class DataNode extends XRefable implements Comparable<DataNode> {
 //	{
 //		this(record, inName, inGraphId, null, "Unspecified", "");
 //	}
-	public DataNode(TableRecord record, String inName)
+	public DataNodeDeprecated(TableRecord record, String inName)
 	{
 		
 	}
-	public DataNode(TableRecord record, String inName, int inGraphid, String ensm, String spec, String link)
+	public DataNodeDeprecated(TableRecord record, String inName, int inGraphid, String ensm, String spec, String link)
 	{
 		geneListRecord = (GeneSetRecord) record;
 		graphid.set(inGraphid);
@@ -266,7 +267,7 @@ public class DataNode extends XRefable implements Comparable<DataNode> {
 		setTermSummary(StringUtil.chop(builder.toString(), delim.length()));
 	}
 	public String toString() {				return "" + getGraphId();	}   // + ": " + getTitle() + " " + getSymbol();
-	public int compareTo(DataNode other)
+	public int compareTo(DataNodeDeprecated other)
 	{
 		return getName().compareToIgnoreCase(other.getName());
 	}

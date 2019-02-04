@@ -347,7 +347,7 @@ public class XRefableSetRecord extends TableRecord<XRefable> {
 		if (StringUtil.isEmpty(tokens[len-1].trim())) len--;
 		if (len == 1)
 		{
-			XRefable g = new DataNode(this, tokens[0]);
+			XRefable g = new DataNodeDeprecated(this, tokens[0]);
 			xrefSet.add(g);
 			System.out.println(g.getName());
 		}

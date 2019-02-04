@@ -40,7 +40,7 @@ public enum MIM
 		String cleaner = id.substring(4).replace("-", " ");
 		return StringUtil.capitalize(cleaner);
 	}
-	public MIM lookup(String name)
+	static public MIM lookup(String name)
 	{
 		for (MIM m : values())
 			if (m.id.equals(name)) return m;

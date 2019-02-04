@@ -409,7 +409,6 @@ public class AttributeMap extends HashMap<String, String>
 		put("Y", "" + y);
 		put("Width", "85");
 		put("Height", "65");
-		
 	}
 
 	public int incrementZOrder()
