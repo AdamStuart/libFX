@@ -95,18 +95,31 @@ public class LineUtil
 		return -1 * getStartAngle(line);
 	}
 	// **-------------------------------------------------------------------------------
-
+	// **-------------------------------------------------------------------------------
+	public static Point2D midPoint(double x1, double y1, double x2, double y2, double d)
+	{
+		double dx = x2 - x1;
+		double dy = y2 - y1;
+		double x = x1 + d * dx;
+		double y = y1 + d * dy;
+		return new Point2D(x,y);
+	}
+	public static Point2D midPoint(Point2D a, Point2D b, double d)
+	{
+		double x1 = a.getX();
+		double y1 = a.getY();
+		double x2 = b.getX();
+		double y2 = b.getY();
+		return midPoint(x1, y1, x2, y2, d);
+	}
+	
 	public static Point2D midPoint(Line line, double d)
 	{
 		double x1 = line.getStartX();
 		double y1 = line.getStartY();
 		double x2 = line.getEndX();
 		double y2 = line.getEndY();
-		double dx = x2 - x1;
-		double dy = y2 - y1;
-		double x = x1 + d * dx;
-		double y = y1 + d * dy;
-		return new Point2D(x,y);
+		return midPoint(x1, y1, x2, y2, d);
 	}
 	// **-------------------------------------------------------------------------------
 	public static Point2D getIntersection(Line line, Node node)

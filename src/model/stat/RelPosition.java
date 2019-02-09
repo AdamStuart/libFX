@@ -43,8 +43,8 @@ public class RelPosition //extends Pair<Double, Double>
 	{
 		if (StringUtil.isInteger(id))
 		{
-			int i = StringUtil.toInteger(id) - 1;
-			if (i < Pos.values().length)
+			int i = StringUtil.toInteger(id);
+			if (i >= 0 && i < Pos.values().length)
 				return Pos.values()[i];
 		}
 		return Pos.CENTER;
