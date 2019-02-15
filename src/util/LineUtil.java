@@ -306,4 +306,22 @@ public class LineUtil
         return p;
     }
 
+	public static Point2D closestPoint(Point2D edgeStart, Point2D edgeEnd, Point2D point2d)
+	{
+		return getClosestPointOnSegment(edgeStart.getX(),edgeStart.getY(),edgeEnd.getX(),edgeEnd.getY(),point2d.getX(),point2d.getY()) ;
+	}
+
+	public static Point2D getClosestPointOnSegment(double sx1, double sy1, double sx2, double sy2, double px, double py)
+	{
+		double xDelta = sx2 - sx1;
+		double yDelta = sy2 - sy1;
+		if ((xDelta == 0) && (yDelta == 0)) 	return new Point2D(sx1, sy1);
+		
+		double u = ((px - sx1) * xDelta + (py - sy1) * yDelta) / (xDelta * xDelta + yDelta * yDelta);
+		
+		if (u < 0)		return new Point2D(sx1, sy1);
+		if (u > 1) 		return new Point2D(sx2, sy2);
+		return new Point2D((int) Math.round(sx1 + u * xDelta), (int) Math.round(sy1 + u * yDelta));
+	}
+
 }

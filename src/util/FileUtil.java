@@ -102,7 +102,6 @@ public class FileUtil
 			return xmlOut.toString();
 		}
 		catch (Exception e) {	return "";	}
-		
 	}
 	
 	//-------------------------------------------------------------
@@ -362,6 +361,7 @@ static public boolean hasXMLFiles(Dragboard db)	{	return db.getFiles().stream().
 	static public boolean isZip(File f)		{ 		return fileEndsWith(f,".zip", ".gz", ".acs");	}
 	static public boolean isSVG(File f)		{ 		return fileEndsWith(f,".svg");	}
 	static public boolean isGPML(File f)	{ 		return fileEndsWith(f,".gpml");	}
+	static public boolean isCX(File f)		{ 		return fileEndsWith(f,".cx");	}
 	static public boolean isOBO(File f)		{ 		return fileEndsWith(f,".obo");	}
 	public static boolean isDataFile(File f){		return fileEndsWith(f,".data");	}
 	public static boolean isCDT(File f)		{		return fileEndsWith(f,".cdt");	}
