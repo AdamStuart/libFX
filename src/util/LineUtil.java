@@ -321,6 +321,7 @@ public class LineUtil
 		
 		if (u < 0)		return new Point2D(sx1, sy1);
 		if (u > 1) 		return new Point2D(sx2, sy2);
-		return new Point2D(sx1 + u * xDelta, sy1 + u * yDelta);
+		return new Point2D((int) Math.round(sx1 + u * xDelta), (int) Math.round(sy1 + u * yDelta));
 	}
+
 }
